@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:fdottedline/fdottedline.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,33 +7,34 @@ import 'package:my_lawyer/generic_class/generic_button.dart';
 import 'package:my_lawyer/generic_class/generic_textfield.dart';
 import 'package:my_lawyer/utils/app_colors.dart';
 import 'package:my_lawyer/utils/constant.dart';
-import 'package:my_lawyer/view/LRF/forgot_password_screen.dart';
-import 'package:my_lawyer/view/LRF/signup_screen.dart';
 
-class SignInScreen extends StatefulWidget {
+class SignUpScreen extends StatefulWidget {
   int userType;
 
-  SignInScreen(this.userType);
+  SignUpScreen(this.userType);
 
   @override
-  _SignInScreenState createState() => _SignInScreenState();
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
-  var txtEmail = TextEditingController();
-  var txtPwd = TextEditingController();
+class _SignUpScreenState extends State<SignUpScreen> {
+  var txtUserNameController = TextEditingController();
+  var txtEmailController = TextEditingController();
+  var txtPwdController = TextEditingController();
+  var txtConfirmPwdController = TextEditingController();
+  var txtAboutController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: signInView(),
+      body: signUpView(),
     );
   }
 
-  Widget signInView() {
+  Widget signUpView() {
     return Container(
       child: Column(
-        children: [logoImg(), signInContainerView()],
+        children: [logoImg(), signUpContainerView()],
       ),
     );
   }
@@ -48,39 +47,52 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget signInContainerView() {
+  Widget signUpContainerView() {
     return Expanded(
         flex: 1,
         child: Padding(
-            padding: EdgeInsets.only(left: 30, right: 30),
+            padding: EdgeInsets.only(left: 30, right: 30, top: 0),
             child: Form(
-              child: MediaQuery.removePadding(
-                context: context,
-                removeTop: true,
-                child: ListView(
-                  children: [
-                    // logoImg(),
-                    textSignIn(),
-                    txtFieldEmail(),
-                    txtFieldPwd(),
-                    forgotPwdBtn(),
-                    signInBtn(),
-                    txtOrConnectWith(),
-                    googleSignInBtn(),
-                    txtDontHaveAccount()
-                  ],
-                ),
+                child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: ListView(
+                children: [
+                  textSignUp(),
+                  txtFieldUserName(),
+                  txtFieldEmail(),
+                  txtFieldPwd(),
+                  txtFieldConfirmPwd(),
+                  if (widget.userType == UserType.Lawyer) txtViewAbout(),
+                  signInBtn(),
+                  txtOrConnectWith(),
+                  googleSignInBtn(),
+                  txtDontHaveAccount()
+                ],
               ),
-            )));
+            ))));
   }
 
-  Widget textSignIn() {
+  Widget textSignUp() {
     return Padding(
       padding: EdgeInsets.only(top: ScreenUtil().setHeight(23)),
       child: Text(
-        'Sign In',
+        'Sign Up',
         style: appThemeTextStyle(28,
             textColor: Colors.black, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+
+  Widget txtFieldUserName() {
+    return Padding(
+      padding: EdgeInsets.only(
+          top: ScreenUtil().setHeight(12), bottom: ScreenUtil().setHeight(12)),
+      child: SizedBox(
+        height: ScreenUtil().setHeight(52),
+        child: appThemeTextField(
+            'User Name', TextInputType.name, txtUserNameController,
+            prefixIcon: 'images/LRF/ic_user.svg', hasPrefixIcon: true),
       ),
     );
   }
@@ -92,7 +104,7 @@ class _SignInScreenState extends State<SignInScreen> {
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
-            'Email ID', TextInputType.emailAddress, txtEmail,
+            'Email ID', TextInputType.emailAddress, txtEmailController,
             prefixIcon: 'images/LRF/ic_email.svg', hasPrefixIcon: true),
       ),
     );
@@ -100,43 +112,57 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Widget txtFieldPwd() {
     return Padding(
-      padding: EdgeInsets.only(top: ScreenUtil().setHeight(12)),
+      padding: EdgeInsets.only(
+          top: ScreenUtil().setHeight(12), bottom: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
-        child: appThemeTextField('Password', TextInputType.emailAddress, txtPwd,
-            prefixIcon: 'images/LRF/ic_pwd.svg', obscureText: true, hasPrefixIcon: true),
+        child: appThemeTextField(
+            'Password', TextInputType.name, txtPwdController,
+            prefixIcon: 'images/LRF/ic_pwd.svg',
+            obscureText: true,
+            hasPrefixIcon: true),
       ),
     );
   }
 
-  Widget forgotPwdBtn() {
-    return SizedBox(
-      height: 40,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          TextButton(
-            onPressed: () {
-              _pressedOnForgotPassword();
-            },
-            child: Text(
-              'Forgot Password?',
-              textAlign: TextAlign.right,
-              style: appThemeTextStyle(14, textColor: AppColor.ColorGray),
-            ),
-          )
-        ],
+  Widget txtFieldConfirmPwd() {
+    return Padding(
+      padding: EdgeInsets.only(
+          top: ScreenUtil().setHeight(12), bottom: ScreenUtil().setHeight(12)),
+      child: SizedBox(
+        height: ScreenUtil().setHeight(52),
+        child: appThemeTextField(
+            'Confirm Password', TextInputType.name, txtConfirmPwdController,
+            prefixIcon: 'images/LRF/ic_pwd.svg',
+            obscureText: true,
+            hasPrefixIcon: true),
       ),
     );
+  }
+
+  Widget txtViewAbout() {
+    return Padding(
+        padding: EdgeInsets.only(
+            top: ScreenUtil().setHeight(12),
+            bottom: ScreenUtil().setHeight(12)),
+        child: appThemeTextField(
+            'About YourSelf', TextInputType.name, txtAboutController,
+            maxLines: 4,
+            prefixIcon: 'images/LRF/ic_user.svg',
+            bottomPaddingPrefixImg: 70,
+            hasPrefixIcon: true));
   }
 
   Widget signInBtn() {
-    return SizedBox(
-        width: screenWidth(context),
-        height: ScreenUtil().setHeight(52),
-        child: GenericButton().appThemeButton(
-            'Sign In', 16, Colors.white, FontWeight.w700, () {},
-            borderRadius: 8));
+    return Padding(
+      padding: EdgeInsets.only(top: ScreenUtil().setHeight(12)),
+      child: SizedBox(
+          width: screenWidth(context),
+          height: ScreenUtil().setHeight(52),
+          child: GenericButton().appThemeButton(
+              'Sign Up', 16, Colors.white, FontWeight.w700, () {},
+              borderRadius: 8)),
+    );
   }
 
   Widget txtOrConnectWith() {
@@ -220,18 +246,16 @@ class _SignInScreenState extends State<SignInScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'If you don’t have an account?',
+            'If you have an account?',
             textAlign: TextAlign.center,
             style: appThemeTextStyle(14,
                 fontWeight: FontWeight.w600,
                 textColor: Color.fromRGBO(106, 114, 147, 1)),
           ),
           TextButton(
-            onPressed: () {
-              _pressedOnSignUp();
-            },
+            onPressed: () {},
             child: Text(
-              'Sign Up',
+              'Sign In',
               textAlign: TextAlign.left,
               style: appThemeTextStyle(14,
                   fontWeight: FontWeight.w700, textColor: AppColor.ColorRed),
@@ -240,15 +264,5 @@ class _SignInScreenState extends State<SignInScreen> {
         ],
       ),
     );
-  }
-
-  _pressedOnSignUp() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => SignUpScreen(widget.userType)));
-  }
-
-  _pressedOnForgotPassword() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => ForgotPasswordScreen()));
   }
 }

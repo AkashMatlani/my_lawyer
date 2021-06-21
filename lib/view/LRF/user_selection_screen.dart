@@ -71,13 +71,13 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
           Expanded(
               child: GenericButton().appThemeButton(
                   'Find Lawyer', 16, Colors.white, FontWeight.w700, () {
-            _pressedOnFindButton(0);
+            _pressedOnFindButton(UserType.User);
           })),
           SizedBox(width: ScreenUtil().setWidth(20)),
           Expanded(
               child: GenericButton().appThemeButton(
                   'Find Work', 16, Colors.white, FontWeight.w700, () {
-            _pressedOnFindButton(1);
+            _pressedOnFindButton(UserType.Lawyer);
           }, bgColor: AppColor.ColorYellow)),
         ],
       ),

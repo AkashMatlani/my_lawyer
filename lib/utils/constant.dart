@@ -15,3 +15,9 @@ double getAspectHeight(BuildContext context, double height) {
 double getAspectWidth(BuildContext context, double width) {
   return (screenWidth(context) * width)/375;
 }
+
+
+class UserType {
+  static const User = 0;
+  static const Lawyer = 1;
+}

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:my_lawyer/utils/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -8,11 +10,18 @@ TextField appThemeTextField(
   TextEditingController controller, {
   String prefixIcon = '',
   String suffixIcon = '',
+  bool obscureText = false,
+  int maxLines = 1,
+  double bottomPaddingPrefixImg = 10,
+  bool hasPrefixIcon = false,
 }) {
   return TextField(
+      textAlignVertical: TextAlignVertical.center,
+      maxLines: maxLines,
       controller: controller,
       keyboardType: textInputType,
       cursorColor: AppColor.ColorGrayTextFieldHint,
+      obscureText: obscureText,
       decoration: InputDecoration(
           hintText: hintText,
           hintStyle: appThemeTextStyle(16),
@@ -25,13 +34,15 @@ TextField appThemeTextField(
             borderSide: BorderSide(color: AppColor.ColorGrayBoarder, width: 1),
           ),
 
-          // border: OutlineInputBorder(
-          //   borderRadius: BorderRadius.circular(8),
-          //   borderSide: BorderSide(color: AppColor.ColorGrayBoarder)
-          // ),
-          prefixIcon: Icon(Icons.email) //ImageIcon(AssetImage(prefixIcon)),
-          // suffixIcon: ImageIcon(AssetImage(suffixIcon)),
-          ));
+          prefixIcon: (hasPrefixIcon == true) ?  Container(
+            padding: EdgeInsets.fromLTRB(5, 10, 5, bottomPaddingPrefixImg),
+            child: SvgPicture.asset(prefixIcon),
+          ) : null,
+
+          suffixIcon: Container(
+            padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+            child: SvgPicture.asset(suffixIcon),
+          )));
 }
 
 TextStyle appThemeTextStyle(double fontSize,

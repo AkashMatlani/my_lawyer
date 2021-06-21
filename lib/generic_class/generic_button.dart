@@ -16,11 +16,6 @@ class GenericButton {
             borderRadius: BorderRadius.circular(borderRadius)
           )
         ),
-
-        // style: ButtonStyle(
-        //   backgroundColor: MaterialStateProperty.all<Color>(bgColor),
-        // ),
-
         child: Text(
           title,
           style: appThemeTextStyle(fontSize,

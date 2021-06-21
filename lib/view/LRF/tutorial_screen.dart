@@ -9,6 +9,7 @@ import 'package:my_lawyer/generic_class/generic_textfield.dart';
 import 'package:my_lawyer/utils/app_colors.dart';
 import 'package:my_lawyer/utils/constant.dart';
 import 'package:my_lawyer/view/LRF/signin_screen.dart';
+import 'package:my_lawyer/view/LRF/signup_screen.dart';
 import 'package:page_view_indicators/circle_page_indicator.dart';
 
 class TutorialScreen extends StatefulWidget {
@@ -21,22 +22,40 @@ class TutorialScreen extends StatefulWidget {
 }
 
 class _TutorialScreenState extends State<TutorialScreen> {
-  List<Map> tutorialList = [
+  List<Map> tutorialClientList = [
     {
-      'img': 'images/LRF/ic_tutorial1.svg',
+      'img': 'images/LRF/ic_client_tutorial1.svg',
       'title': 'A global talent network for\nlawyers hired.',
       'desc': 'Find professionals lawyers and\nfirms for any cases.'
     },
     {
-      'img': 'images/LRF/ic_tutorial2.svg',
+      'img': 'images/LRF/ic_client_tutorial2.svg',
       'title': 'Post cases and\nget proposals.',
       'desc': 'Interview your favorites\nand hire the best fit.'
     },
     {
-      'img': 'images/LRF/ic_tutorial3.svg',
+      'img': 'images/LRF/ic_client_tutorial3.svg',
       'title': 'Make payment easily.',
       'desc':
           'See your transactions, get invoices,\nand only pay for approved cases.'
+    }
+  ];
+
+  List<Map> tutorialLawyerList = [
+    {
+      'img': 'images/LRF/ic_lawyer_tutorial1.svg',
+      'title': 'Never miss an opportunity.',
+      'desc': 'Easily find work, chat, and\ncollaborate on the go.'
+    },
+    {
+      'img': 'images/LRF/ic_lawyer_tutorial2.svg',
+      'title': 'Find interesting cases\nand submit proposals.',
+      'desc': 'Easily find work, chat, and\ncollaborate on the go.'
+    },
+    {
+      'img': 'images/LRF/ic_lawyer_tutorial3.svg',
+      'title': 'Collaborate on the go.',
+      'desc': 'Chat, share files, and complete\nprojects.'
     }
   ];
 
@@ -85,9 +104,13 @@ class _TutorialScreenState extends State<TutorialScreen> {
       child: PageView.builder(
         controller: pageController,
         scrollDirection: Axis.horizontal,
-        itemCount: tutorialList.length,
+        itemCount: (widget.userType == UserType.User)
+            ? tutorialClientList.length
+            : tutorialLawyerList.length,
         itemBuilder: (context, index) {
-          return pageViewCard(tutorialList[index]);
+          return pageViewCard((widget.userType == UserType.User)
+              ? tutorialClientList[index]
+              : tutorialLawyerList[index]);
         },
         onPageChanged: (selectedIndex) {
           setState(() {
@@ -133,7 +156,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget pageIndicatorView() {
     return CirclePageIndicator(
       currentPageNotifier: currentPageNotifier,
-      itemCount: tutorialList.length,
+      itemCount: (widget.userType == UserType.User)
+          ? tutorialClientList.length
+          : tutorialLawyerList.length,
       dotColor: AppColor.ColorDarkGray,
       selectedDotColor: AppColor.ColorYellow,
       dotSpacing: 3,
@@ -169,7 +194,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
                   textColor: AppColor.ColorLightGray),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                _pressedOnSignUp();
+              },
               child: Text(
                 'Sign Up',
                 textAlign: TextAlign.center,
@@ -205,8 +232,13 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   _pressedOnSignIn() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => SignInScreen()));
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => SignInScreen(widget.userType)));
+  }
+
+  _pressedOnSignUp() {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => SignUpScreen(widget.userType)));
   }
 
   _pressedOnSkip() {
