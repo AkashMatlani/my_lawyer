@@ -6,7 +6,7 @@ import 'dart:core';
 class GenericButton {
 
   Widget appThemeButton(String title, double fontSize, Color textColor,
-      FontWeight fontWeight, Function()? function,
+      FontWeight fontWeight, Function function,
       {Color bgColor = AppColor.ColorRed, double borderRadius = 5}) {
     return Container(
       child: ElevatedButton(
