@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:my_lawyer/generic_class/generic_textfield.dart';
-import 'package:my_lawyer/utils/app_colors.dart';
+import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/utils/AppColors.dart';
 
 class LoadingView extends StatelessWidget {
   final String loadingMessage;

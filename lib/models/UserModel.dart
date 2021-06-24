@@ -1,41 +1,78 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class UserInfoModel {
   int userId;
   String userName;
   String email;
   int userType;
-  int signInTye;
+  int signInType;
   String userProfile;
+  String about;
 
-  UserInfoModel(this.userId, this.userName, this.userProfile, this.userType,
-      this.signInTye, this.email);
+  UserInfoModel(
+      {this.userId,
+      this.userName,
+      this.userProfile,
+      this.userType,
+      this.signInType,
+      this.email, this.about});
 
   factory UserInfoModel.fromJson(Map<String, dynamic> data) {
-    return UserInfoModel(data['userId'], data['userName'], data['userProfile'],
-        data['userType'], data['signInType'], data['email']);
+    return UserInfoModel(
+        userId: data['userId'],
+        userName: data['userName'],
+        userProfile: data['userProfile'],
+        userType: data['userType'],
+        signInType: data['signInType'],
+        email: data['email'],
+    about: data['about']);
   }
+
+  Map<String, dynamic> defaultUserData = {
+    'userId': 0,
+    'userName': '',
+    'email': '',
+    'userType': 0,
+    'signInType': 0,
+    'userProfile': '',
+    'about': ''
+  };
 }
 
 class UserMetaModel {
   String token;
   int status;
+  String message;
 
-  UserMetaModel(this.token, this.status);
+  UserMetaModel({this.token, this.status, this.message});
 
   factory UserMetaModel.fromJson(Map<String, dynamic> meta) {
-    return UserMetaModel(meta['token'], meta['status']);
+    return UserMetaModel(
+        token: meta['token'], status: meta['status'], message: meta['message']);
   }
 }
 
 class UserModel {
-  UserInfoModel data;
-  UserMetaModel meta;
+  dynamic data;
+  dynamic meta;
 
-  UserModel(this.data, this.meta);
+  UserModel({this.data, this.meta});
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(json['data'], json['meta']);
+    return UserModel(
+        data: (json['data'] == null)
+            ? UserInfoModel().defaultUserData
+            : UserInfoModel.fromJson(json['data']),
+        meta: UserMetaModel.fromJson(json['meta']));
   }
+}
+
+storeUserInfo(String token, Map<String, dynamic> userInfo) async {
+  final SharedPreferences sharedPreferences =
+  await SharedPreferences.getInstance();
+  sharedPreferences.setString('UserToken', token);
+  sharedPreferences.setString('UserInfo', json.encode(userInfo));
 }

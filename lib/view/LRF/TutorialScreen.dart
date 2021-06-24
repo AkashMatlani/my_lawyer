@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:my_lawyer/generic_class/generic_button.dart';
+import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'dart:core';
-import 'package:my_lawyer/generic_class/generic_textfield.dart';
-import 'package:my_lawyer/utils/app_colors.dart';
-import 'package:my_lawyer/utils/constant.dart';
-import 'package:my_lawyer/view/LRF/signin_screen.dart';
-import 'package:my_lawyer/view/LRF/signup_screen.dart';
+import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/view/LRF/SigninScreen.dart';
+import 'package:my_lawyer/view/LRF/SignupScreen.dart';
 import 'package:page_view_indicators/circle_page_indicator.dart';
 
 class TutorialScreen extends StatefulWidget {

@@ -1,16 +1,32 @@
+import 'dart:io';
 import 'dart:ui';
-
 import 'package:fdottedline/fdottedline.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_lawyer/generic_class/generic_button.dart';
-import 'package:my_lawyer/generic_class/generic_textfield.dart';
-import 'package:my_lawyer/utils/app_colors.dart';
-import 'package:my_lawyer/utils/constant.dart';
-import 'package:my_lawyer/view/LRF/forgot_password_screen.dart';
-import 'package:my_lawyer/view/LRF/signup_screen.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:my_lawyer/bloc/SigninBloc.dart';
+import 'package:my_lawyer/generic_class/GenericButton.dart';
+import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/UserModel.dart';
+import 'package:my_lawyer/networking/APIResponse.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
+import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/AppMessages.dart';
+import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/utils/SocialLogin.dart';
+import 'package:my_lawyer/utils/LoadingView.dart';
+import 'package:my_lawyer/view/LRF/ForgotPasswordScreen.dart';
+import 'package:my_lawyer/view/LRF/SignupScreen.dart';
+import 'package:my_lawyer/utils/StringExtension.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
+// GoogleSignIn _googleSignIn = GoogleSignIn(
+//   scopes: <String>[
+//     'email',
+//   ],
+// );
 
 class SignInScreen extends StatefulWidget {
   int userType;
@@ -22,8 +38,20 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  var txtEmail = TextEditingController();
-  var txtPwd = TextEditingController();
+  var txtEmailController = TextEditingController();
+  var txtPwdController = TextEditingController();
+
+  SignInBloc signInBloc;
+  GoogleSignInAccount _currentUser;
+  bool isUserSignedIn = false;
+  GoogleSignInClass googleSignInClass = GoogleSignInClass();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    signInBloc = SignInBloc();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +72,6 @@ class _SignInScreenState extends State<SignInScreen> {
     return Image(
       image: AssetImage('images/LRF/ic_login_logo.png'),
       fit: BoxFit.fill,
-      // )
     );
   }
 
@@ -59,7 +86,6 @@ class _SignInScreenState extends State<SignInScreen> {
                 removeTop: true,
                 child: ListView(
                   children: [
-                    // logoImg(),
                     textSignIn(),
                     txtFieldEmail(),
                     txtFieldPwd(),
@@ -67,6 +93,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     signInBtn(),
                     txtOrConnectWith(),
                     googleSignInBtn(),
+                    if (Platform.isIOS) appleSignInBtn(),
                     txtDontHaveAccount()
                   ],
                 ),
@@ -92,7 +119,7 @@ class _SignInScreenState extends State<SignInScreen> {
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
-            'Email ID', TextInputType.emailAddress, txtEmail,
+            'Email ID', TextInputType.emailAddress, txtEmailController,
             prefixIcon: 'images/LRF/ic_email.svg', hasPrefixIcon: true),
       ),
     );
@@ -103,8 +130,11 @@ class _SignInScreenState extends State<SignInScreen> {
       padding: EdgeInsets.only(top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
-        child: appThemeTextField('Password', TextInputType.emailAddress, txtPwd,
-            prefixIcon: 'images/LRF/ic_pwd.svg', obscureText: true, hasPrefixIcon: true),
+        child: appThemeTextField(
+            'Password', TextInputType.emailAddress, txtPwdController,
+            prefixIcon: 'images/LRF/ic_pwd.svg',
+            obscureText: true,
+            hasPrefixIcon: true),
       ),
     );
   }
@@ -134,9 +164,10 @@ class _SignInScreenState extends State<SignInScreen> {
     return SizedBox(
         width: screenWidth(context),
         height: ScreenUtil().setHeight(52),
-        child: GenericButton().appThemeButton(
-            'Sign In', 16, Colors.white, FontWeight.w700, () {},
-            borderRadius: 8));
+        child: GenericButton()
+            .appThemeButton('Sign In', 16, Colors.white, FontWeight.w700, () {
+          _pressedOnSignIn();
+        }, borderRadius: 8));
   }
 
   Widget txtOrConnectWith() {
@@ -208,8 +239,21 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
           ],
         ),
-        onPressed: () {},
+        onPressed: () {
+          _pressedOngoogleSignIn();
+        },
       ),
+    );
+  }
+
+  Widget appleSignInBtn() {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: ScreenUtil().setHeight(20),
+      ),
+      child: SignInWithAppleButton(onPressed: () {
+        _pressedOnAppleSignIn();
+      }),
     );
   }
 
@@ -242,6 +286,18 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  _pressedOnSignIn() {
+    if (txtEmailController.text.isEmpty) {
+      showAlert(Messages.CBlankEmail);
+    } else if (txtEmailController.text.isValidEmail() == false) {
+      showAlert(Messages.CInvalidEmail);
+    } else if (txtPwdController.text.isEmpty) {
+      showAlert(Messages.CBlankPassword);
+    } else {
+      signInUser(SignInType.Normal, txtEmailController.text);
+    }
+  }
+
   _pressedOnSignUp() {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => SignUpScreen(widget.userType)));
@@ -250,5 +306,79 @@ class _SignInScreenState extends State<SignInScreen> {
   _pressedOnForgotPassword() {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => ForgotPasswordScreen()));
+  }
+
+  signInUser(int signInType, String email) {
+    Map<String, dynamic> params = {
+      'email': email,
+      'signInType': signInType.toString()
+    };
+
+    if (signInType == SignInType.Normal) {
+      params['password'] = txtPwdController.text;
+    }
+
+    if (signInType == SignInType.Normal) {
+      LoadingView().showLoaderWithTitle(true, context);
+    }
+    signInBloc.signInUser(params);
+
+    signInBloc.signInStream.listen((snapshot) {
+      switch (snapshot.status) {
+        case Status.Loading:
+          return LoadingView(loadingMessage: snapshot.message);
+
+        case Status.Done:
+          LoadingView().showLoaderWithTitle(false, context);
+          if ((snapshot.data.meta as UserMetaModel).status == 1) {
+            //...Redirect on Home Screen
+            UserInfoModel userInfo = snapshot.data.data;
+            storeUserInfo((snapshot.data.meta as UserMetaModel).token, {
+              'userName': userInfo.userName,
+              'userType': userInfo.userType,
+              'userId': userInfo.userId,
+              'userProfile': userInfo.userProfile,
+              'signInType': userInfo.signInType,
+              'email': userInfo.email,
+              'about': userInfo.about
+            });
+          } else {
+            AlertView().showAlertView(
+                context,
+                (snapshot.data.meta as UserMetaModel).message,
+                () => {Navigator.of(context).pop()});
+          }
+          break;
+
+        case Status.Error:
+          LoadingView().showLoaderWithTitle(false, context);
+          AlertView().showAlertView(
+              context, snapshot.message, () => {Navigator.of(context).pop()});
+          break;
+      }
+    });
+  }
+
+  _pressedOngoogleSignIn() {
+    googleSignIn();
+  }
+
+  Future<void> googleSignIn() async {
+    googleSignInClass.googleSignIn().then((currentUser) {
+      LoadingView().showLoaderWithTitle(true, context);
+      signInUser(SignInType.Google, _currentUser.email);
+    });
+  }
+
+  _pressedOnAppleSignIn() async {
+    AppleSignInClass().appleSignIn().then((authDetail) {
+      LoadingView().showLoaderWithTitle(true, context);
+      signInUser(SignInType.Apple, authDetail.email);
+    });
+  }
+
+  showAlert(String message) {
+    AlertView()
+        .showAlertView(context, message, () => {Navigator.of(context).pop()});
   }
 }

@@ -1,5 +1,5 @@
 import 'package:my_lawyer/models/UserModel.dart';
-import 'package:my_lawyer/networking/api_request_helper.dart';
+import 'package:my_lawyer/networking/APIRequest.dart';
 
 class SignUpRespository {
 

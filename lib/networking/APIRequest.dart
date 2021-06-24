@@ -7,10 +7,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class APITag {
   static const signUp = 'signup';
+  static const signIn = 'signin';
 }
 
 class APIRequestHelper {
-  final String baseURL = 'https://mylawyer.xja.website/';
+  final String baseURL = 'https://lawyer.xja.website/';
 
   Map<String, String> header = {
     'Accept': 'application/json',
@@ -53,7 +54,7 @@ class APIRequestHelper {
     var responseJson;
     try {
       final response = await http.post(Uri.parse(baseURL + apiTag),
-          body: parameters, headers: (token != null) ? headerAuth : header);
+          body: parameters);//, headers: (token != null) ? headerAuth : header
       responseJson = jsonDecode(response.body.toString());
     } on SocketException {
       throw Exception('Something is wrong');

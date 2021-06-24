@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_lawyer/generic_class/generic_button.dart';
-import 'package:my_lawyer/generic_class/generic_textfield.dart';
-import 'package:my_lawyer/utils/constant.dart';
+import 'package:my_lawyer/generic_class/GenericButton.dart';
+import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/utils/Constant.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   @override

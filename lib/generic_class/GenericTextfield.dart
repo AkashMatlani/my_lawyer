@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:my_lawyer/utils/app_colors.dart';
+import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 TextField appThemeTextField(
@@ -14,6 +14,7 @@ TextField appThemeTextField(
   int maxLines = 1,
   double bottomPaddingPrefixImg = 10,
   bool hasPrefixIcon = false,
+      bool hasSuffixIcon = false,
 }) {
   return TextField(
       textAlignVertical: TextAlignVertical.center,
@@ -23,6 +24,7 @@ TextField appThemeTextField(
       cursorColor: AppColor.ColorGrayTextFieldHint,
       obscureText: obscureText,
       decoration: InputDecoration(
+          contentPadding: const EdgeInsets.all(0.0),
           hintText: hintText,
           hintStyle: appThemeTextStyle(16),
           enabledBorder: OutlineInputBorder(
@@ -39,10 +41,12 @@ TextField appThemeTextField(
             child: SvgPicture.asset(prefixIcon),
           ) : null,
 
-          suffixIcon: Container(
+          suffixIcon: (hasSuffixIcon == true) ? Container(
             padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
             child: SvgPicture.asset(suffixIcon),
-          )));
+          ) : null
+      )
+  );
 }
 
 TextStyle appThemeTextStyle(double fontSize,

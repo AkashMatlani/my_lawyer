@@ -1,26 +1,26 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:fdottedline/fdottedline.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_lawyer/generic_class/generic_button.dart';
-import 'package:my_lawyer/generic_class/generic_textfield.dart';
-import 'package:my_lawyer/networking/api_response.dart';
-import 'package:my_lawyer/utils/alertview.dart';
-import 'package:my_lawyer/utils/app_colors.dart';
-import 'package:my_lawyer/utils/app_messages.dart';
-import 'package:my_lawyer/utils/constant.dart';
+import 'package:my_lawyer/generic_class/GenericButton.dart';
+import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/UserModel.dart';
+import 'package:my_lawyer/networking/APIResponse.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
+import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/AppMessages.dart';
+import 'package:my_lawyer/utils/Constant.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:my_lawyer/bloc/signup_bloc.dart';
-import 'package:my_lawyer/utils/loading_view.dart';
-import 'package:my_lawyer/utils/string_extension.dart';
-
-GoogleSignIn _googleSignIn = GoogleSignIn(
-  scopes: <String>[
-    'email',
-    'https://www.googleapis.com/auth/contacts.readonly',
-  ],
-);
+import 'package:my_lawyer/bloc/SignupBloc.dart';
+import 'package:my_lawyer/utils/LoadingView.dart';
+import 'package:my_lawyer/utils/StringExtension.dart';
+import 'package:my_lawyer/utils/SocialLogin.dart';
+import 'package:my_lawyer/view/LRF/SigninScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class SignUpScreen extends StatefulWidget {
   int userType;
@@ -38,8 +38,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   var txtConfirmPwdController = TextEditingController();
   var txtAboutController = TextEditingController();
 
-  GoogleSignInAccount _currentUser;
   SignUpBloc signUpBloc = SignUpBloc();
+  GoogleSignInClass googleSignInClass = GoogleSignInClass();
 
   @override
   void initState() {
@@ -89,6 +89,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   signUpBtn(),
                   txtOrConnectWith(),
                   googleSignInBtn(),
+                  if (Platform.isIOS) appleSignInBtn(),
                   txtDontHaveAccount()
                 ],
               ),
@@ -153,8 +154,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           top: ScreenUtil().setHeight(12), bottom: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
-        child: appThemeTextField(
-            'Confirm Password', TextInputType.visiblePassword, txtConfirmPwdController,
+        child: appThemeTextField('Confirm Password',
+            TextInputType.visiblePassword, txtConfirmPwdController,
             prefixIcon: 'images/LRF/ic_pwd.svg',
             obscureText: true,
             hasPrefixIcon: true),
@@ -258,9 +259,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ],
         ),
         onPressed: () {
-          googleSignIn();
+          pressedOngoogleSignIn();
         },
       ),
+    );
+  }
+
+  Widget appleSignInBtn() {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: ScreenUtil().setHeight(20),
+      ),
+      child: SignInWithAppleButton(onPressed: () {
+        _pressedOnAppleSignIn();
+      }),
     );
   }
 
@@ -278,7 +290,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 textColor: Color.fromRGBO(106, 114, 147, 1)),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              _pressedOnSignIn();
+            },
             child: Text(
               'Sign In',
               textAlign: TextAlign.left,
@@ -315,12 +329,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  showAlert(String message) {
-    AlertView().showAlertView(
-        context, message, () => {Navigator.of(context).pop()},
-        title: 'Sign Up');
-  }
-
   signUpUser(Map<String, dynamic> params) {
     Map<String, dynamic> signUpInfo = params;
 
@@ -332,6 +340,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     if (params['signInType'] == SignInType.Normal) {
       params['password'] = txtPwdController.text;
+      LoadingView().showLoaderWithTitle(true, context);
     }
 
     signUpBloc.signUpUser(params);
@@ -339,44 +348,70 @@ class _SignUpScreenState extends State<SignUpScreen> {
     signUpBloc.signUpStream.listen((snapshot) {
       switch (snapshot.status) {
         case Status.Loading:
-          LoadingView(loadingMessage: snapshot.message);
-          break;
+          return LoadingView(loadingMessage: snapshot.message);
 
         case Status.Done:
           LoadingView().showLoaderWithTitle(false, context);
-          if (snapshot.data.meta.status == 1) {
+          if ((snapshot.data.meta as UserMetaModel).status == 1) {
+            //...Redirect on Home Screen
+
+            UserInfoModel userInfo = snapshot.data.data;
+            storeUserInfo((snapshot.data.meta as UserMetaModel).token, {
+              'userName': userInfo.userName,
+              'userType': userInfo.userType,
+              'userId': userInfo.userId,
+              'userProfile': userInfo.userProfile,
+              'signInType': userInfo.signInType,
+              'email': userInfo.email,
+              'about': userInfo.about
+            });
           } else {
-            AlertView().showAlertView(context, snapshot.message, () => {});
+            AlertView().showAlertView(
+                context,
+                (snapshot.data.meta as UserMetaModel).message,
+                () => {Navigator.of(context).pop()});
           }
           break;
 
         case Status.Error:
           LoadingView().showLoaderWithTitle(false, context);
-          AlertView().showAlertView(context, snapshot.message, () => {});
+          AlertView().showAlertView(
+              context, snapshot.message, () => {Navigator.of(context).pop()});
           break;
       }
     });
   }
 
-  Future<void> googleSignIn() async {
-    try {
-      await _googleSignIn.signIn();
+  _pressedOnSignIn() {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => SignInScreen(widget.userType)));
+  }
 
-      _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount account) {
-        setState(() {
-          _currentUser = account;
-        });
-        if (_currentUser != null) {
-          signUpUser({
-            'userName': _currentUser.displayName,
-            'email': _currentUser.email,
-            'signInType': SignInType.Google.toString()
-          });
-          // _handleGetContact(_currentUser!);
-        }
+  Future<void> pressedOngoogleSignIn() async {
+    googleSignInClass.googleSignIn().then((currentUser) {
+      LoadingView().showLoaderWithTitle(true, context);
+
+      signUpUser({
+        'userName': currentUser.displayName,
+        'email': currentUser.email,
+        'signInType': SignInType.Google.toString()
       });
-    } catch (error) {
-      print(error);
-    }
+    });
+  }
+
+  _pressedOnAppleSignIn() async {
+    AppleSignInClass().appleSignIn().then((authDetail) {
+      LoadingView().showLoaderWithTitle(true, context);
+      signUpUser({
+        'userName': '${authDetail.givenName} ${authDetail.familyName}',
+        'email': authDetail.email,
+        'signInType': SignInType.Apple.toString()
+      });
+    });
+  }
+
+  showAlert(String message) {
+    AlertView()
+        .showAlertView(context, message, () => {Navigator.of(context).pop()});
   }
 }
