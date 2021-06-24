@@ -54,4 +54,9 @@ class AlertView {
 
     showDialog(context: context, builder: (_) => alertDialog);
   }
+
+  showAlert(String message, BuildContext context) {
+    AlertView()
+        .showAlertView(context, message, () => {Navigator.of(context).pop()});
+  }
 }

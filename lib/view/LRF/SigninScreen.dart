@@ -288,11 +288,11 @@ class _SignInScreenState extends State<SignInScreen> {
 
   _pressedOnSignIn() {
     if (txtEmailController.text.isEmpty) {
-      showAlert(Messages.CBlankEmail);
+      AlertView().showAlert(Messages.CBlankEmail, context);
     } else if (txtEmailController.text.isValidEmail() == false) {
-      showAlert(Messages.CInvalidEmail);
+      AlertView().showAlert(Messages.CInvalidEmail, context);
     } else if (txtPwdController.text.isEmpty) {
-      showAlert(Messages.CBlankPassword);
+      AlertView().showAlert(Messages.CBlankPassword, context);
     } else {
       signInUser(SignInType.Normal, txtEmailController.text);
     }
@@ -377,8 +377,5 @@ class _SignInScreenState extends State<SignInScreen> {
     });
   }
 
-  showAlert(String message) {
-    AlertView()
-        .showAlertView(context, message, () => {Navigator.of(context).pop()});
-  }
+
 }

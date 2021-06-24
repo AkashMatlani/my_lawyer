@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class APITag {
   static const signUp = 'signup';
   static const signIn = 'signin';
+  static const forgotPwd = 'forgotpasswordapp';
 }
 
 class APIRequestHelper {

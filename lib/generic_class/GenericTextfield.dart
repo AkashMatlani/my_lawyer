@@ -23,6 +23,9 @@ TextField appThemeTextField(
       keyboardType: textInputType,
       cursorColor: AppColor.ColorGrayTextFieldHint,
       obscureText: obscureText,
+      autocorrect: false,
+      enableSuggestions: false,
+      // autofocus: true,
       decoration: InputDecoration(
           contentPadding: const EdgeInsets.all(0.0),
           hintText: hintText,

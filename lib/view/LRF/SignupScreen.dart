@@ -307,19 +307,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   _pressOnSignUp() {
     if (txtUserNameController.text.isEmpty) {
-      showAlert(Messages.CBlankUserName);
+      AlertView().showAlert(Messages.CBlankUserName, context);
     } else if (txtEmailController.text.isEmpty) {
-      showAlert(Messages.CBlankEmail);
+      AlertView().showAlert(Messages.CBlankEmail, context);
     } else if (txtEmailController.text.isValidEmail() == false) {
-      showAlert(Messages.CInvalidEmail);
+      AlertView().showAlert(Messages.CInvalidEmail, context);
     } else if (txtPwdController.text.isEmpty) {
-      showAlert(Messages.CBlankPassword);
+      AlertView().showAlert(Messages.CBlankPassword, context);
     } else if (txtPwdController.text.isValidPassword() == false) {
-      showAlert(Messages.CInvalidPassword);
+      AlertView().showAlert(Messages.CInvalidPassword, context);
     } else if (txtConfirmPwdController.text.isEmpty) {
-      showAlert(Messages.CBlankConfirmPassword);
+      AlertView().showAlert(Messages.CBlankConfirmPassword, context);
     } else if (txtConfirmPwdController.text != txtPwdController.text) {
-      showAlert(Messages.CPasswordDoesNotMatch);
+      AlertView().showAlert(Messages.CPasswordDoesNotMatch, context);
     } else {
       signUpUser({
         'userName': txtUserNameController.text,
@@ -410,8 +410,4 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
   }
 
-  showAlert(String message) {
-    AlertView()
-        .showAlertView(context, message, () => {Navigator.of(context).pop()});
-  }
 }
