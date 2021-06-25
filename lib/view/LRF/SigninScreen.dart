@@ -20,6 +20,8 @@ import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/view/LRF/ForgotPasswordScreen.dart';
 import 'package:my_lawyer/view/LRF/SignupScreen.dart';
 import 'package:my_lawyer/utils/StringExtension.dart';
+import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
+import 'package:my_lawyer/view/Lawyer/SearchCaseScreen.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 // GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -115,7 +117,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget txtFieldEmail() {
     return Padding(
       padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(12), bottom: ScreenUtil().setHeight(12)),
+          top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
@@ -341,7 +343,14 @@ class _SignInScreenState extends State<SignInScreen> {
               'signInType': userInfo.signInType,
               'email': userInfo.email,
               'about': userInfo.about
+            }).then((value){
+              if (widget.userType == UserType.User) {
+                _navigateToLawyerHomeScreen();
+              } else {
+                _navigateToClientHomeScreen();
+              }
             });
+
           } else {
             AlertView().showAlertView(
                 context,
@@ -366,7 +375,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> googleSignIn() async {
     googleSignInClass.googleSignIn().then((currentUser) {
       LoadingView().showLoaderWithTitle(true, context);
-      signInUser(SignInType.Google, _currentUser.email);
+      signInUser(SignInType.Google, currentUser.email);
     });
   }
 
@@ -377,5 +386,11 @@ class _SignInScreenState extends State<SignInScreen> {
     });
   }
 
+  _navigateToLawyerHomeScreen() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => LawyerListScreen()));
+  }
 
+  _navigateToClientHomeScreen() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SearchCasesScreen()));
+  }
 }

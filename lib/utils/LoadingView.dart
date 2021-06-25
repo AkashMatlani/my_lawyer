@@ -64,7 +64,7 @@ class LoadingView extends StatelessWidget {
           context: context,
           builder: (_) => LoadingView(loadingMessage: message));
     } else {
-      Navigator.of(context, rootNavigator: true).pop("");
+      Navigator.of(context).pop();
     }
   }
 
@@ -75,7 +75,7 @@ class LoadingView extends StatelessWidget {
           context: context,
           builder: (_) => loader());
     } else {
-      Navigator.of(context, rootNavigator: true).pop("");
+      Navigator.of(context).pop();
     }
   }
 }

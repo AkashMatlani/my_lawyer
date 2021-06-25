@@ -26,3 +26,20 @@ class SignInType {
   static const Google = 1;
   static const Apple = 2;
 }
+
+class UserPrefernces {
+  static const UserToken = 'UserToken';
+  static const UserInfo = 'UserInfo';
+  static const DoneSetup = 'DoneSetup';
+}
+
+class SideMenuOption {
+  static const HireLawyer = 'Hire Lawyer';
+  static const SavedCases = 'Saved Cases';
+  static const ViewBids = 'View Bids';
+  static const CreateNewCase = 'Create New Case';
+  static const SearchCases = 'Search Cases';
+  static const EditProfile = 'Edit Profile';
+  static const ChangePassword = 'Change Password';
+
+}

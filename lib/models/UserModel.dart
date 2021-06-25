@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:my_lawyer/utils/Constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserInfoModel {
@@ -70,9 +71,11 @@ class UserModel {
   }
 }
 
-storeUserInfo(String token, Map<String, dynamic> userInfo) async {
+Future<void> storeUserInfo(String token, Map<String, dynamic> userInfo) async {
   final SharedPreferences sharedPreferences =
   await SharedPreferences.getInstance();
-  sharedPreferences.setString('UserToken', token);
-  sharedPreferences.setString('UserInfo', json.encode(userInfo));
+  sharedPreferences.setString(UserPrefernces.UserToken, token);
+  sharedPreferences.setString(UserPrefernces.UserInfo, json.encode(userInfo));
+  sharedPreferences.setBool(UserPrefernces.DoneSetup, true);
+
 }

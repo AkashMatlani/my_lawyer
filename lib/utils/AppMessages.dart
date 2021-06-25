@@ -11,4 +11,8 @@ class Messages {
   static const CPasswordDoesNotMatch =
       'Password and confirm password does not match.';
   static const CBlankAbout = 'Please enter about';
+  static const CBlankOldPwd = 'Please enter old password.';
+  static const CBlankNewPwd = 'Please enter new password.';
+  static const CNewPasswordDoesNotMatch = 'New password and confirm password does not match.';
+
 }

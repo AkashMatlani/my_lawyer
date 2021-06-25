@@ -19,6 +19,8 @@ import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/utils/StringExtension.dart';
 import 'package:my_lawyer/utils/SocialLogin.dart';
 import 'package:my_lawyer/view/LRF/SigninScreen.dart';
+import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
+import 'package:my_lawyer/view/Lawyer/SearchCaseScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -110,7 +112,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget txtFieldUserName() {
     return Padding(
       padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(12), bottom: ScreenUtil().setHeight(12)),
+          top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
@@ -123,7 +125,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget txtFieldEmail() {
     return Padding(
       padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(12), bottom: ScreenUtil().setHeight(12)),
+          top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
@@ -136,7 +138,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget txtFieldPwd() {
     return Padding(
       padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(12), bottom: ScreenUtil().setHeight(12)),
+          top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
@@ -151,7 +153,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget txtFieldConfirmPwd() {
     return Padding(
       padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(12), bottom: ScreenUtil().setHeight(12)),
+          top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField('Confirm Password',
@@ -340,8 +342,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     if (params['signInType'] == SignInType.Normal) {
       params['password'] = txtPwdController.text;
-      LoadingView().showLoaderWithTitle(true, context);
     }
+
+    LoadingView().showLoaderWithTitle(true, context);
 
     signUpBloc.signUpUser(params);
 
@@ -365,11 +368,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
               'email': userInfo.email,
               'about': userInfo.about
             });
+
+            if (widget.userType == UserType.User) {
+              _navigateToLawyerHomeScreen();
+            } else {
+              _navigateToClientHomeScreen();
+            }
           } else {
             AlertView().showAlertView(
                 context,
                 (snapshot.data.meta as UserMetaModel).message,
-                () => {Navigator.of(context).pop()});
+                    () => {Navigator.of(context).pop()});
           }
           break;
 
@@ -410,4 +419,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
   }
 
+  _navigateToLawyerHomeScreen() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => LawyerListScreen()));
+  }
+
+  _navigateToClientHomeScreen() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SearchCasesScreen()));
+  }
 }

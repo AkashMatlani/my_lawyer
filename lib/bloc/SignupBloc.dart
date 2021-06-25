@@ -12,7 +12,7 @@ class SignUpBloc {
 
   SignUpBloc() {
     signUpRespository = SignUpRespository();
-    signUpController = StreamController<APIResponse<UserModel>>();
+    signUpController = StreamController<APIResponse<UserModel>>.broadcast();
   }
 
   signUpUser(Map<String, dynamic> params) async {

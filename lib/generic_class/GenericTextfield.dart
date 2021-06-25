@@ -14,7 +14,8 @@ TextField appThemeTextField(
   int maxLines = 1,
   double bottomPaddingPrefixImg = 10,
   bool hasPrefixIcon = false,
-      bool hasSuffixIcon = false,
+  bool hasSuffixIcon = false,
+      bool readOnly = false,
 }) {
   return TextField(
       textAlignVertical: TextAlignVertical.center,
@@ -24,10 +25,11 @@ TextField appThemeTextField(
       cursorColor: AppColor.ColorGrayTextFieldHint,
       obscureText: obscureText,
       autocorrect: false,
-      enableSuggestions: false,
-      // autofocus: true,
+      // enabled: enabled,
+      readOnly: readOnly,
       decoration: InputDecoration(
-          contentPadding: const EdgeInsets.all(0.0),
+          contentPadding:
+              const EdgeInsets.only(left: 10, right: 0, bottom: 0, top: 0),
           hintText: hintText,
           hintStyle: appThemeTextStyle(16),
           enabledBorder: OutlineInputBorder(
@@ -38,18 +40,19 @@ TextField appThemeTextField(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(color: AppColor.ColorGrayBoarder, width: 1),
           ),
-
-          prefixIcon: (hasPrefixIcon == true) ?  Container(
-            padding: EdgeInsets.fromLTRB(5, 10, 5, bottomPaddingPrefixImg),
-            child: SvgPicture.asset(prefixIcon),
-          ) : null,
-
-          suffixIcon: (hasSuffixIcon == true) ? Container(
-            padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-            child: SvgPicture.asset(suffixIcon),
-          ) : null
-      )
-  );
+          prefixIcon: (hasPrefixIcon == true)
+              ? Container(
+                  padding:
+                      EdgeInsets.fromLTRB(5, 10, 5, bottomPaddingPrefixImg),
+                  child: SvgPicture.asset(prefixIcon),
+                )
+              : null,
+          suffixIcon: (hasSuffixIcon == true)
+              ? Container(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                  child: SvgPicture.asset(suffixIcon),
+                )
+              : null));
 }
 
 TextStyle appThemeTextStyle(double fontSize,

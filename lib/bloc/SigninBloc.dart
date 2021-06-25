@@ -14,7 +14,7 @@ class SignInBloc {
 
   SignInBloc() {
     signInRepository = SignInRepository();
-    signInController = StreamController<APIResponse<UserModel>>();
+    signInController = StreamController<APIResponse<UserModel>>.broadcast();
   }
 
   signInUser(Map<String, dynamic> params) async {

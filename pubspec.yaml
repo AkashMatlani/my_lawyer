@@ -36,7 +36,7 @@ dependencies:
   http: ^0.13.3
   shared_preferences: ^0.5.1+2
   sign_in_with_apple: ^3.0.0
-
+  image_picker: ^0.8.0+3
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +69,16 @@ flutter:
     - images/LRF/ic_lawyer_tutorial2.svg
     - images/LRF/ic_lawyer_tutorial3.svg
     - images/LRF/ic_back.svg
+    - images/Sidebar/ic_dotted_oval.svg
+    - images/Sidebar/ic_save.svg
+    - images/Sidebar/ic_create_case.svg
+    - images/Sidebar/ic_view_bid.svg
+    - images/Sidebar/ic_close.svg
+    - images/Sidebar/ic_oval.png
+    - images/Sidebar/ic_hire_lawyer.svg
+    - images/Sidebar/ic_logout.svg
+    - images/Client/ic_profile.jpeg
+    - images/Sidebar/ic_burger.svg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
