@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_lawyer/bloc/ForgotPwdBloc.dart';
+import 'package:my_lawyer/bloc/LRF/ForgotPwdBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';

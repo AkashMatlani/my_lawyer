@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:my_lawyer/networking/APIResponse.dart';
-import 'package:my_lawyer/repository/SignupRepository.dart';
+import 'package:my_lawyer/repository/LRF/SignupRepository.dart';
 import 'package:my_lawyer/models/UserModel.dart';
 
 class SignUpBloc {

@@ -14,7 +14,7 @@ import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/AppMessages.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:my_lawyer/bloc/SignupBloc.dart';
+import 'package:my_lawyer/bloc/LRF/SignupBloc.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/utils/StringExtension.dart';
 import 'package:my_lawyer/utils/SocialLogin.dart';

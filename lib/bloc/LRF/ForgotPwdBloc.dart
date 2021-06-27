@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:my_lawyer/networking/APIResponse.dart';
-import 'package:my_lawyer/repository/ForgotPwdRepository.dart';
+import 'package:my_lawyer/repository/LRF/ForgotPwdRepository.dart';
 
 class ForgotPwdBloc {
 
@@ -27,5 +27,9 @@ class ForgotPwdBloc {
     } catch (error) {
       forgotPwdSink.add(APIResponse.error(error.toString()));
     }
+  }
+
+  dispose() {
+    forgotPwdController.close();
   }
 }

@@ -10,6 +10,7 @@ import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/CommonStuff.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/view/Client/ChangePwdScreen.dart';
+import 'package:my_lawyer/view/Client/Create%20Case/CreateCaseScreen.dart';
 import 'package:my_lawyer/view/Client/EditProfileScreen.dart';
 import 'package:my_lawyer/view/LRF/SigninScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -155,6 +156,11 @@ class _SideBarViewState extends State<SideBarView> {
                   break;
 
                 case SideMenuOption.CreateNewCase:
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CreateCaseScreen()));
+
                   break;
 
                 case SideMenuOption.ViewBids:

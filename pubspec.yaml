@@ -37,6 +37,8 @@ dependencies:
   shared_preferences: ^0.5.1+2
   sign_in_with_apple: ^3.0.0
   image_picker: ^0.8.0+3
+  intl: ^0.17.0
+  file_picker: ^3.0.3
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +81,9 @@ flutter:
     - images/Sidebar/ic_logout.svg
     - images/Client/ic_profile.jpeg
     - images/Sidebar/ic_burger.svg
+    - images/Client/ic_attachment.svg
+    - images/Client/ic_calendar.svg
+    - images/Client/ic_clock.svg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

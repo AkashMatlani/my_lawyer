@@ -9,6 +9,8 @@ class APITag {
   static const signUp = 'signup';
   static const signIn = 'signin';
   static const forgotPwd = 'forgotpasswordapp';
+  static const changePassword = 'changepassword';
+  static const editprofile = 'editprofile';
 }
 
 class APIRequestHelper {
@@ -23,8 +25,9 @@ class APIRequestHelper {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
 
-    var headerAuth = header;
-    headerAuth['Authorization'] = 'Bearer $token';
+    // var headerAuth = header;
+    // headerAuth['Authorization'] = '$token';
+    var headerAuth = {'Authorization': token};
 
     print('============ Token: $token');
     var responseJson;
@@ -49,13 +52,14 @@ class APIRequestHelper {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
 
-    var headerAuth = header;
-    headerAuth['Authorization'] = 'Bearer $token';
+    // var headerAuth = header;
+    // headerAuth['Authorization'] = '$token';
+    var headerAuth = {'Authorization': token};
 
     var responseJson;
     try {
       final response = await http.post(Uri.parse(baseURL + apiTag),
-          body: parameters);//, headers: (token != null) ? headerAuth : header
+          body: parameters, headers: (token != null) ? headerAuth : header);//, headers: (token != null) ? headerAuth : header
       responseJson = jsonDecode(response.body.toString());
     } on SocketException {
       throw Exception('Something is wrong');
@@ -64,7 +68,7 @@ class APIRequestHelper {
     return responseJson;
   }
 
-  Future<dynamic> pushMultiFormData(
+  Future<dynamic> postMultiFormData(
       String apiTag, Map<String, dynamic> parameters) async {
     Map<String, String> stringQueryParameters =
         parameters.map((key, value) => MapEntry(key, value.toString()));
@@ -72,8 +76,9 @@ class APIRequestHelper {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
 
-    var headerAuth = header;
-    headerAuth['Authorization'] = 'Bearer $token';
+// var headerAuth = header;
+    // headerAuth['Authorization'] = '$token';
+    var headerAuth = {'Authorization': token};
 
     var responseJson;
     try {

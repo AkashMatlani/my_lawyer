@@ -1,13 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:my_lawyer/bloc/ChangePwdBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppMessages.dart';
+import 'package:my_lawyer/utils/CommonStuff.dart';
 import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/utils/StringExtension.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChangePwdScreen extends StatefulWidget {
   @override
@@ -18,6 +25,23 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
   var txtOldPwdController = TextEditingController();
   var txtNewPwdController = TextEditingController();
   var txtConfirmPwdController = TextEditingController();
+
+  ChangePasswordBloc changePasswordBloc;
+  var userType;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    changePasswordBloc = ChangePasswordBloc();
+
+    SharedPreferences.getInstance().then((prefs) {
+      var userInfoStr = prefs.getString(UserPrefernces.UserInfo);
+      var userInfo = json.decode(userInfoStr);
+      userType = userInfo['userType'];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +115,48 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
       AlertView().showAlert(Messages.CBlankConfirmPassword, context);
     } else if (txtConfirmPwdController.text != txtNewPwdController.text) {
       AlertView().showAlert(Messages.CNewPasswordDoesNotMatch, context);
-    } else {}
+    } else {
+      changePwdAPI();
+    }
+  }
+
+  changePwdAPI() {
+    var params = {
+      'oldPwd': txtOldPwdController.text,
+      'newPwd': txtNewPwdController.text,
+      'userType': userType.toString()
+    };
+
+    LoadingView().showLoaderWithTitle(true, context);
+    changePasswordBloc.changePassword(params);
+
+    changePasswordBloc.changePwdStream.listen((snapshot) {
+      switch (snapshot.status) {
+        case Status.Loading:
+          return LoadingView(loadingMessage: snapshot.message);
+
+        case Status.Done:
+          LoadingView().showLoaderWithTitle(false, context);
+
+          if (snapshot.data['meta']['status'] == 1) {
+            AlertView().showAlertView(
+                context,
+                snapshot.data['meta']['message'],
+                    () => {Navigator.of(context).pop()});
+          } else {
+            AlertView().showAlertView(
+                context,
+                snapshot.data['meta']['message'],
+                    () => {Navigator.of(context).pop()});
+          }
+          break;
+
+        case Status.Error:
+          LoadingView().showLoaderWithTitle(false, context);
+          AlertView().showAlertView(
+              context, snapshot.message, () => {Navigator.of(context).pop()});
+          break;
+      }
+    });
   }
 }

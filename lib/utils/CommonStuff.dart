@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/SocialLogin.dart';
@@ -13,5 +15,13 @@ logOut() {
   GoogleSignIn _googleSignIn = GoogleSignIn();
   _googleSignIn.isSignedIn().then((isSignedIn) {
     if (isSignedIn) _googleSignIn.signOut();
+  });
+}
+
+dynamic getUserInfo() async {
+  SharedPreferences.getInstance().then((prefs) {
+    var userInfoStr = prefs.getString(UserPrefernces.UserInfo);
+    var userInfo = json.decode(userInfoStr);
+    return userInfo;
   });
 }

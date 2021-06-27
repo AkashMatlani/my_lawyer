@@ -4,19 +4,21 @@ import 'package:flutter_svg/svg.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-TextField appThemeTextField(
-  String hintText,
-  TextInputType textInputType,
-  TextEditingController controller, {
-  String prefixIcon = '',
-  String suffixIcon = '',
-  bool obscureText = false,
-  int maxLines = 1,
-  double bottomPaddingPrefixImg = 10,
-  bool hasPrefixIcon = false,
-  bool hasSuffixIcon = false,
-      bool readOnly = false,
-}) {
+TextField appThemeTextField(String hintText, TextInputType textInputType,
+    TextEditingController controller,
+    {String prefixIcon = '',
+    String suffixIcon = '',
+    bool obscureText = false,
+    int maxLines = 1,
+    double bottomPaddingPrefixImg = 10,
+    bool hasPrefixIcon = false,
+    bool hasSuffixIcon = false,
+    bool readOnly = false,
+    Color borderColor = AppColor.ColorGrayBoarder,
+    double fontSize = 16,
+    double topPadding = 0,
+    Color fillColor = Colors.transparent,
+    bool filled = false}) {
   return TextField(
       textAlignVertical: TextAlignVertical.center,
       maxLines: maxLines,
@@ -25,20 +27,21 @@ TextField appThemeTextField(
       cursorColor: AppColor.ColorGrayTextFieldHint,
       obscureText: obscureText,
       autocorrect: false,
-      // enabled: enabled,
       readOnly: readOnly,
       decoration: InputDecoration(
           contentPadding:
-              const EdgeInsets.only(left: 10, right: 0, bottom: 0, top: 0),
+              EdgeInsets.only(left: 10, right: 0, bottom: 0, top: topPadding),
           hintText: hintText,
-          hintStyle: appThemeTextStyle(16),
+          hintStyle: appThemeTextStyle(fontSize),
+          fillColor: fillColor,
+          filled: filled,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColor.ColorGrayBoarder, width: 1),
+            borderSide: BorderSide(color: borderColor, width: 1),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColor.ColorGrayBoarder, width: 1),
+            borderSide: BorderSide(color: borderColor, width: 1),
           ),
           prefixIcon: (hasPrefixIcon == true)
               ? Container(

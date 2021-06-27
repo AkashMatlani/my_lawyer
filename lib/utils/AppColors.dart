@@ -13,5 +13,7 @@ class AppColor {
   static const ColorGrayBoarder = Color.fromRGBO(120, 120, 120, 1);
   static const ColorGrayDottedLine = Color.fromRGBO(207, 207, 207, 1);
   static const ColorYellowSideMenu = Color.fromRGBO(244, 191, 71, 1);
+  static const ColorBorder = Color.fromRGBO(230, 230, 230, 1);
+  static const ColorArrow = Color.fromRGBO(125, 132, 161, 1);
 
 }

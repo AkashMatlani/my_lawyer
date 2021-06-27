@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:my_lawyer/networking/APIResponse.dart';
-import 'package:my_lawyer/repository/SigninRepository.dart';
+import 'package:my_lawyer/repository/LRF/SigninRepository.dart';
 import 'package:my_lawyer/models/UserModel.dart';
 
 class SignInBloc {
