@@ -7,9 +7,14 @@ import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/view/LRF/SigninScreen.dart';
 import 'package:my_lawyer/view/LRF/TutorialScreen.dart';
 
 class UserSelectionScreen extends StatefulWidget {
+  var isDoneSetup = false;
+
+  UserSelectionScreen(this.isDoneSetup);
+
   @override
   _UserSelectionScreenState createState() => _UserSelectionScreenState();
 }
@@ -86,6 +91,6 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
 
   _pressedOnFindButton(int userType) {
     Navigator.push(context,
-        MaterialPageRoute(builder: (context) => TutorialScreen(userType)));
+        MaterialPageRoute(builder: (context) => (widget.isDoneSetup) ? SignInScreen(userType) : TutorialScreen(userType)));
   }
 }

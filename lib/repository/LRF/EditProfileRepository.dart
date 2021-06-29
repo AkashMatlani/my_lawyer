@@ -5,9 +5,9 @@ class EditProfileRepository {
 
   APIRequestHelper helper = APIRequestHelper();
 
-  Future<UserModel> editProfile() async {
+  Future<UserModel> editProfile(Map<String,dynamic> params, String file) async {
 
-    var response = await helper.postMultiFormData(APITag.editprofile, {});
+    var response = await helper.postMultiFormData(APITag.editprofile, params,file);
     return UserModel.fromJson(response);
   }
 }

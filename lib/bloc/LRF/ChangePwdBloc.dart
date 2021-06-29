@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:my_lawyer/networking/APIResponse.dart';
-import 'package:my_lawyer/repository/ChangePwdRepository.dart';
+import 'package:my_lawyer/repository/LRF/ChangePwdRepository.dart';
 
 class ChangePasswordBloc {
 

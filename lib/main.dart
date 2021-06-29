@@ -10,6 +10,8 @@ import 'package:my_lawyer/view/LRF/UserSelectionScreen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_lawyer/view/Lawyer/SearchCaseScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +24,12 @@ Future<void> main() async {
     var userInfo = prefs.getString(UserPrefernces.UserInfo);
     userType = json.decode(userInfo)['userType'];
   }
+
+  if (isDoneSetup == null) {
+    isDoneSetup = false;
+  }
+
+  await Firebase.initializeApp();
 
   print('======= $token');
   runApp(MyApp(
@@ -46,7 +54,7 @@ class MyApp extends StatelessWidget {
         builder: () => MaterialApp(
               title: 'Flutter Demo',
               home: (token == null)
-                  ? (isDoneSetup == true) ? SignInScreen(0) : UserSelectionScreen()
+                  ? UserSelectionScreen(isDoneSetup)
                   : (userType == UserType.Lawyer)
                       ? SearchCasesScreen()
                       : LawyerListScreen(),
@@ -57,3 +65,10 @@ class MyApp extends StatelessWidget {
             ));
   }
 }
+
+
+// (token == null)
+// ? (isDoneSetup == true) ? SignInScreen(0) : UserSelectionScreen()
+//     : (userType == UserType.Lawyer)
+// ? SearchCasesScreen()
+//     : LawyerListScreen(),

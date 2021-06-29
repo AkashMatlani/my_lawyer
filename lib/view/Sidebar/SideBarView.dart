@@ -13,6 +13,7 @@ import 'package:my_lawyer/view/Client/ChangePwdScreen.dart';
 import 'package:my_lawyer/view/Client/Create%20Case/CreateCaseScreen.dart';
 import 'package:my_lawyer/view/Client/EditProfileScreen.dart';
 import 'package:my_lawyer/view/LRF/SigninScreen.dart';
+import 'package:my_lawyer/view/LRF/UserSelectionScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SideBarView extends StatefulWidget {
@@ -31,73 +32,75 @@ class _SideBarViewState extends State<SideBarView> {
 
       var menuListClient = [
         {
-          'img': 'images/Sidebar/ic_hire_lawyer.svg',
+          'img': 'images/Sidebar/ic_hire_lawyer.png',
           'name': SideMenuOption.HireLawyer
         },
         {
-          'img': 'images/Sidebar/ic_save.svg',
+          'img': 'images/Sidebar/ic_saved_case.png',
           'name': SideMenuOption.SavedCases
         },
         {
-          'img': 'images/Sidebar/ic_view_bid.svg',
+          'img': 'images/Sidebar/ic_view_bid.png',
           'name': SideMenuOption.ViewBids
         },
         {
-          'img': 'images/Sidebar/ic_create_case.svg',
+          'img': 'images/Sidebar/ic_create_case.png',
           'name': SideMenuOption.CreateNewCase
         },
         {
-          'img': 'images/Sidebar/ic_create_case.svg',
+          'img': 'images/Sidebar/ic_edit_profile.png',
           'name': SideMenuOption.EditProfile
         },
         {
-          'img': 'images/Sidebar/ic_create_case.svg',
+          'img': 'images/Sidebar/ic_change_pwd.png',
           'name': SideMenuOption.ChangePassword
         }
       ];
 
       var menuListCSocialLogin = [
         {
-          'img': 'images/Sidebar/ic_hire_lawyer.svg',
+          'img': 'images/Sidebar/ic_hire_lawyer.png',
           'name': SideMenuOption.HireLawyer
         },
         {
-          'img': 'images/Sidebar/ic_save.svg',
+          'img': 'images/Sidebar/ic_saved_case.png',
           'name': SideMenuOption.SavedCases
         },
-        {'img': 'images/Sidebar/ic_view_bid', 'name': SideMenuOption.ViewBids},
+        {'img': 'images/Sidebar/ic_view_bid.png',
+          'name': SideMenuOption.ViewBids
+        },
         {
-          'img': 'images/Sidebar/ic_create_case.svg',
+          'img': 'images/Sidebar/ic_edit_profile.png',
           'name': SideMenuOption.CreateNewCase
         },
         {
-          'img': 'images/Sidebar/ic_create_case.svg',
+          'img': 'images/Sidebar/ic_change_pwd.png',
           'name': SideMenuOption.EditProfile
         },
       ];
 
       var menuListLawyer = [
         {
-          'img': 'images/Sidebar/ic_create_case.svg',
+          'img': 'images/Sidebar/ic_create_case.png',
           'name': SideMenuOption.SearchCases
         },
         {
-          'img': 'images/Sidebar/ic_create_case.svg',
+          'img': 'images/Sidebar/ic_edit_profile.png',
           'name': SideMenuOption.EditProfile
         },
         {
-          'img': 'images/Sidebar/ic_create_case.svg',
+          'img': 'images/Sidebar/ic_change_pwd.png',
           'name': SideMenuOption.ChangePassword
         }
       ];
 
       var menuListLSocialLogin = [
         {
-          'img': 'images/Sidebar/ic_create_case.svg',
+          'img': 'images/Sidebar/ic_create_case.png',
           'name': SideMenuOption.SearchCases
         },
         {
-          'img': 'images/Sidebar/ic_create_case.svg',
+          'img': 'images/Sidebar/ic_edit_profile.png',
           'name': SideMenuOption.EditProfile
         },
       ];
@@ -140,7 +143,10 @@ class _SideBarViewState extends State<SideBarView> {
                   padding: EdgeInsets.only(
                       left: ScreenUtil().setWidth(15),
                       right: ScreenUtil().setWidth(15)),
-                  child: SvgPicture.asset(menuInfo['img']),
+                  child: ImageIcon(
+                    AssetImage(menuInfo['img']),
+                    color: Color.fromRGBO(137, 143, 170, 1),
+                  ), //SvgPicture.asset(menuInfo['img']),
                 ),
                 Text(
                   menuInfo['name'],
@@ -278,7 +284,7 @@ class _SideBarViewState extends State<SideBarView> {
         onTap: () {
           logOut();
           Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => SignInScreen(0)));
+              MaterialPageRoute(builder: (context) => UserSelectionScreen(true)));
         },
       ),
     );

@@ -28,7 +28,9 @@ TextField appThemeTextField(String hintText, TextInputType textInputType,
       obscureText: obscureText,
       autocorrect: false,
       readOnly: readOnly,
+      textInputAction: TextInputAction.next,
       decoration: InputDecoration(
+
           contentPadding:
               EdgeInsets.only(left: 10, right: 0, bottom: 0, top: topPadding),
           hintText: hintText,

@@ -14,5 +14,7 @@ class Messages {
   static const CBlankOldPwd = 'Please enter old password.';
   static const CBlankNewPwd = 'Please enter new password.';
   static const CNewPasswordDoesNotMatch = 'New password and confirm password does not match.';
+  static const CUploadImage = 'Please upload image.';
+
 
 }

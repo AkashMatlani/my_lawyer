@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:my_lawyer/models/UserModel.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
-import 'package:my_lawyer/repository/EditProfileRepository.dart';
+import 'package:my_lawyer/repository/LRF/EditProfileRepository.dart';
 
 class EditProfileBloc {
 
@@ -20,11 +20,11 @@ class EditProfileBloc {
     StreamController<APIResponse<UserModel>>.broadcast();
   }
 
-  editProfile(Map<String, dynamic> params) async {
+  editProfile(Map<String, dynamic> params, String file) async {
     editProfileSink.add(APIResponse.loading('processing...'));
 
     try {
-      UserModel response = await editProfileRepository.editProfile();
+      UserModel response = await editProfileRepository.editProfile(params, file);
       editProfileSink.add(APIResponse.done(response));
     } catch (error) {
       editProfileSink.add(APIResponse.error(error.toString()));

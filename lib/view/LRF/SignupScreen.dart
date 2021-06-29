@@ -344,7 +344,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       params['password'] = txtPwdController.text;
     }
 
-    LoadingView().showLoaderWithTitle(true, context);
+    if (params['signInType'] == SignInType.Normal) {
+      LoadingView().showLoaderWithTitle(true, context);
+    }
 
     signUpBloc.signUpUser(params);
 
@@ -358,6 +360,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           if ((snapshot.data.meta as UserMetaModel).status == 1) {
             //...Redirect on Home Screen
 
+            print('SuccessFull');
             UserInfoModel userInfo = snapshot.data.data;
             storeUserInfo((snapshot.data.meta as UserMetaModel).token, {
               'userName': userInfo.userName,
@@ -409,11 +412,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   _pressedOnAppleSignIn() async {
-    AppleSignInClass().appleSignIn().then((authDetail) {
+    AppleSignInClass().appleSignIn().then((userDetail) {
       LoadingView().showLoaderWithTitle(true, context);
       signUpUser({
-        'userName': '${authDetail.givenName} ${authDetail.familyName}',
-        'email': authDetail.email,
+        'userName': userDetail['name'],
+        'email': userDetail['email'],
         'signInType': SignInType.Apple.toString()
       });
     });

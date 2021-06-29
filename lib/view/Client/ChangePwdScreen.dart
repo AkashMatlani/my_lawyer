@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:my_lawyer/bloc/ChangePwdBloc.dart';
+import 'package:my_lawyer/bloc/LRF/ChangePwdBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
@@ -47,7 +47,9 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Change Password'),
+        title: Text('Change Password',
+            style: appThemeTextStyle(20,
+                fontWeight: FontWeight.w600, textColor: Colors.black)),
         leading: Builder(
           builder: (context) => IconButton(
               onPressed: () => Scaffold.of(context).openDrawer(),
@@ -140,14 +142,10 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
 
           if (snapshot.data['meta']['status'] == 1) {
             AlertView().showAlertView(
-                context,
-                snapshot.data['meta']['message'],
-                    () => {Navigator.of(context).pop()});
+                context, snapshot.data['meta']['message'], () => {logOut()});
           } else {
-            AlertView().showAlertView(
-                context,
-                snapshot.data['meta']['message'],
-                    () => {Navigator.of(context).pop()});
+            AlertView().showAlertView(context, snapshot.data['meta']['message'],
+                () => {Navigator.of(context).pop()});
           }
           break;
 

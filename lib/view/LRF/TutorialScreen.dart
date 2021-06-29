@@ -174,7 +174,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
               left: 20,
               right: 20,
               top: ScreenUtil().setHeight(38),
-              bottom: ScreenUtil().setHeight(10)),
+              // bottom: ScreenUtil().setHeight(10)
+          ),
           child: SizedBox(
               width: screenWidth(context),
               height: ScreenUtil().setHeight(49),

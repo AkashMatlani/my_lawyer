@@ -5,6 +5,7 @@ import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/SocialLogin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 logOut() {
   SharedPreferences.getInstance().then((preference) {
@@ -16,6 +17,8 @@ logOut() {
   _googleSignIn.isSignedIn().then((isSignedIn) {
     if (isSignedIn) _googleSignIn.signOut();
   });
+
+   FirebaseAuth.instance.signOut();
 }
 
 dynamic getUserInfo() async {

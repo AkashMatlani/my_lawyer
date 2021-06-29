@@ -10,7 +10,9 @@ class APITag {
   static const signIn = 'signin';
   static const forgotPwd = 'forgotpasswordapp';
   static const changePassword = 'changepassword';
-  static const editprofile = 'editprofile';
+  static const editprofile = 'editProfile';
+  static const stateList = 'stateList';
+  static const countyList = 'countyList';
 }
 
 class APIRequestHelper {
@@ -52,6 +54,7 @@ class APIRequestHelper {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
 
+    print('API $apiTag - $parameters');
     // var headerAuth = header;
     // headerAuth['Authorization'] = '$token';
     var headerAuth = {'Authorization': token};
@@ -59,7 +62,10 @@ class APIRequestHelper {
     var responseJson;
     try {
       final response = await http.post(Uri.parse(baseURL + apiTag),
-          body: parameters, headers: (token != null) ? headerAuth : header);//, headers: (token != null) ? headerAuth : header
+          body: parameters,
+          headers: (token != null)
+              ? headerAuth
+              : header); //, headers: (token != null) ? headerAuth : header
       responseJson = jsonDecode(response.body.toString());
     } on SocketException {
       throw Exception('Something is wrong');
@@ -69,9 +75,7 @@ class APIRequestHelper {
   }
 
   Future<dynamic> postMultiFormData(
-      String apiTag, Map<String, dynamic> parameters) async {
-    Map<String, String> stringQueryParameters =
-        parameters.map((key, value) => MapEntry(key, value.toString()));
+      String apiTag, Map<String, dynamic> parameters, String file) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
@@ -82,16 +86,24 @@ class APIRequestHelper {
 
     var responseJson;
     try {
-      var request = http.MultipartRequest('POST', Uri.parse(baseURL + apiTag))
-        ..fields.addAll(stringQueryParameters)
-        ..headers.addAll((token != null) ? headerAuth : header);
+      var request = http.MultipartRequest('POST', Uri.parse(baseURL + apiTag));
+
+      if (file != "") {
+        var multiPart = await http.MultipartFile.fromPath('userProfile', file);
+        request.files.add(multiPart);
+      }
+
+      if (parameters != null) {
+        request.fields.addAll(parameters);
+      }
+
+      request.headers.addAll((token != null) ? headerAuth : header);
       var response = await request.send();
       final responseToString = await response.stream.bytesToString();
       responseJson = jsonDecode(responseToString);
     } on SocketException {
       throw Exception('Something is wrong');
     }
-
     return responseJson;
   }
 

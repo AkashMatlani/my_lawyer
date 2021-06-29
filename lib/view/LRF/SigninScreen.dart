@@ -382,7 +382,7 @@ class _SignInScreenState extends State<SignInScreen> {
   _pressedOnAppleSignIn() async {
     AppleSignInClass().appleSignIn().then((authDetail) {
       LoadingView().showLoaderWithTitle(true, context);
-      signInUser(SignInType.Apple, authDetail.email);
+      signInUser(SignInType.Apple, authDetail['email']);
     });
   }
 

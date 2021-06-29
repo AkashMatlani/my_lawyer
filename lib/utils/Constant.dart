@@ -22,9 +22,9 @@ class UserType {
 }
 
 class SignInType {
-  static const Normal = 0;
-  static const Google = 1;
-  static const Apple = 2;
+  static const Normal = 2;
+  static const Google = 3;
+  static const Apple = 4;
 }
 
 class UserPrefernces {

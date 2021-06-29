@@ -39,6 +39,7 @@ dependencies:
   image_picker: ^0.8.0+3
   intl: ^0.17.0
   file_picker: ^3.0.3
+  firebase_auth: ^1.4.1
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +85,21 @@ flutter:
     - images/Client/ic_attachment.svg
     - images/Client/ic_calendar.svg
     - images/Client/ic_clock.svg
+    - images/Sidebar/ic_create_case.png
+    - images/Sidebar/ic_view_bid.png
+    - images/Sidebar/ic_saved_case.png
+    - images/Sidebar/ic_hire_lawyer.png
+    - images/Sidebar/ic_change_pwd.png
+    - images/Sidebar/ic_edit_profile.png
+    - images/Client/ic_select_circle.png
+    - images/Client/ic_unselect_circle.png
+    - images/Client/ic_like.svg
+    - images/Client/ic_fav.svg
+    - images/Client/ic_like.png
+    - images/Client/temp_ad4.jpeg
+    - images/Client/temp_ad1.jpeg
+    - images/Client/temp_ad2.jpeg
+    - images/Client/temp_ad3.jpeg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

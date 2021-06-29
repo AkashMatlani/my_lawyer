@@ -19,7 +19,8 @@ class UserInfoModel {
       this.userProfile,
       this.userType,
       this.signInType,
-      this.email, this.about});
+      this.email,
+      this.about});
 
   factory UserInfoModel.fromJson(Map<String, dynamic> data) {
     return UserInfoModel(
@@ -29,7 +30,7 @@ class UserInfoModel {
         userType: data['userType'],
         signInType: data['signInType'],
         email: data['email'],
-    about: data['about']);
+        about: data['about']);
   }
 
   Map<String, dynamic> defaultUserData = {
@@ -73,9 +74,8 @@ class UserModel {
 
 Future<void> storeUserInfo(String token, Map<String, dynamic> userInfo) async {
   final SharedPreferences sharedPreferences =
-  await SharedPreferences.getInstance();
+      await SharedPreferences.getInstance();
   sharedPreferences.setString(UserPrefernces.UserToken, token);
   sharedPreferences.setString(UserPrefernces.UserInfo, json.encode(userInfo));
   sharedPreferences.setBool(UserPrefernces.DoneSetup, true);
-
 }

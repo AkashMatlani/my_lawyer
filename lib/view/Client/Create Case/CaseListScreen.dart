@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,6 +30,7 @@ class _CaseListScreenState extends State<CaseListScreen> {
   ];
 
   var selectedCase = [];
+  var isSelectedAll = false;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +59,7 @@ class _CaseListScreenState extends State<CaseListScreen> {
             ),
             child: Column(
               children: [
+                selectAllCaseView(),
                 Flexible(
                   flex: 1,
                   child: ListView.builder(
@@ -68,6 +71,35 @@ class _CaseListScreenState extends State<CaseListScreen> {
                 submitBtn()
               ],
             )));
+  }
+
+  Widget selectAllCaseView() {
+    return Padding(
+      padding: EdgeInsets.only(left: ScreenUtil().setWidth(20)),
+      child: Container(
+        height: 40,
+        child: InkWell(
+          child: Row(
+            children: [
+              Image(
+                  image: AssetImage(isSelectedAll
+                      ? 'images/Client/ic_select_circle.png'
+                      : 'images/Client/ic_unselect_circle.png')),
+              Padding(
+                padding: EdgeInsets.only(left: 7),
+                child: Text(
+                  'Select All',
+                  style: appThemeTextStyle(15, textColor: AppColor.ColorBlack, fontWeight: FontWeight.w700),
+                ),
+              )
+            ],
+          ),
+          onTap: () {
+            _pressedOnSelectAll();
+          },
+        ),
+      ),
+    );
   }
 
   Widget caseSelectionView(Map<String, dynamic> caseInfo) {
@@ -119,5 +151,13 @@ class _CaseListScreenState extends State<CaseListScreen> {
 
   _pressedOnSubmit() {
     Navigator.pop(context, selectedCase);
+  }
+
+  _pressedOnSelectAll() {
+    isSelectedAll = !isSelectedAll;
+    selectedCase = [];
+    setState(() {
+      if (isSelectedAll) selectedCase = caseList;
+    });
   }
 }

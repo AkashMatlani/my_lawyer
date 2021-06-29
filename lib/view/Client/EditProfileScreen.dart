@@ -1,18 +1,24 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/UserModel.dart';
+import 'package:my_lawyer/networking/APIResponse.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
+import 'package:my_lawyer/utils/AppMessages.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_lawyer/utils/ImagePickerView.dart';
+import 'package:my_lawyer/utils/LoadingView.dart';
+import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
+import 'package:my_lawyer/view/Lawyer/SearchCaseScreen.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
 import 'dart:io';
 import 'dart:core';
-
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:my_lawyer/bloc/LRF/EditProfileBloc.dart';
 
 class EditProfileScreen extends StatefulWidget {
   @override
@@ -24,11 +30,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   var txtEmailController = TextEditingController();
   var txtAboutController = TextEditingController();
 
+  EditProfileBloc editProfileBloc;
   File pickedImgFile;
   var userInfo;
 
   @override
   initState() {
+    editProfileBloc = EditProfileBloc();
+
     SharedPreferences.getInstance().then((prefs) {
       var userInfoStr = prefs.getString(UserPrefernces.UserInfo);
 
@@ -48,7 +57,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Profile'),
+        title: Text('Edit Profile',
+            style: appThemeTextStyle(20,
+                fontWeight: FontWeight.w600, textColor: Colors.black)),
         leading: Builder(
           builder: (context) => IconButton(
               onPressed: () => Scaffold.of(context).openDrawer(),
@@ -164,10 +175,72 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: SizedBox(
           width: screenWidth(context),
           height: ScreenUtil().setHeight(52),
-          child: GenericButton().appThemeButton(
-              'Submit', 16, Colors.white, FontWeight.w700, () {},
-              borderRadius: 8)),
+          child: GenericButton()
+              .appThemeButton('Submit', 16, Colors.white, FontWeight.w700, () {
+            _pressedOnSubmit();
+          }, borderRadius: 8)),
     );
+  }
+
+  _pressedOnSubmit() {
+    if (pickedImgFile == null) {
+      AlertView().showAlert(Messages.CUploadImage, context);
+      return;
+    }
+
+    Map<String, dynamic> params = {'userType': userInfo['userType'].toString()};
+
+    if (userInfo['userType'] == UserType.Lawyer)
+      params['about'] = txtAboutController.text;
+
+    LoadingView().showLoaderWithTitle(true, context);
+    editProfileBloc.editProfile(params, pickedImgFile.path);
+
+    editProfileBloc.editProfileStream.listen((snapshot) {
+      switch (snapshot.status) {
+        case Status.Loading:
+          return LoadingView(loadingMessage: snapshot.message);
+
+        case Status.Done:
+          LoadingView().showLoaderWithTitle(false, context);
+
+          if ((snapshot.data.meta as UserMetaModel).status == 1) {
+            //...Redirect on Home Screen
+
+            print('SuccessFull');
+            UserInfoModel userInfo = snapshot.data.data;
+            storeUserInfo((snapshot.data.meta as UserMetaModel).token, {
+              'userName': userInfo.userName,
+              'userType': userInfo.userType,
+              'userId': userInfo.userId,
+              'userProfile': userInfo.userProfile,
+              'signInType': userInfo.signInType,
+              'email': userInfo.email,
+              'about': userInfo.about
+            });
+
+            if (userInfo.userType == UserType.User) {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => LawyerListScreen()));
+            } else {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SearchCasesScreen()));
+            }
+          } else {
+            AlertView().showAlertView(
+                context,
+                (snapshot.data.meta as UserMetaModel).message,
+                () => {Navigator.of(context).pop()});
+          }
+          break;
+
+        case Status.Error:
+          LoadingView().showLoaderWithTitle(false, context);
+          AlertView().showAlertView(
+              context, snapshot.message, () => {Navigator.of(context).pop()});
+          break;
+      }
+    });
   }
 
   Function onTap(ImageSource source) {
