@@ -41,6 +41,8 @@ class APIRequestHelper {
       } else {
         response = await http.get(Uri.parse(baseURL + apiTag));
       }
+
+      print('Response - ${jsonDecode(response.body.toString())}');
       // final response = await http.get(Uri.parse(baseURL + apiTag), headers: (getToken() != null) ? headerAuth : {}));
       responseJson = getResponse(response);
     } on SocketException {

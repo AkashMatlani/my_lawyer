@@ -8,8 +8,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/CountyModel.dart';
+import 'package:my_lawyer/models/StateModel.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/utils/DatabaseHelper.dart';
 import 'package:my_lawyer/utils/FilePickerView.dart';
 import 'package:my_lawyer/utils/DatePicker.dart';
 import 'package:my_lawyer/view/Client/Create%20Case/CaseListScreen.dart';
@@ -25,8 +28,8 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
   var txtCasePortionController = TextEditingController();
   var txtRegistrationNoteController = TextEditingController();
 
-  var selectedState;
-  var selectedCounty;
+  StateModel selectedState;
+  CountyModel selectedCounty;
   var selectedCaseType;
   var caseDate;
   var caseTime;
@@ -42,29 +45,33 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
   List<Map<String, dynamic>> selectedCriminalCase = [];
   List<Map<String, dynamic>> selectedCivilCase = [];
 
-  var stateList = [
-    {'id': 1, 'name': 'Gujarat'},
-    {'id': 1, 'name': 'Rajsthan'},
-    {'id': 1, 'name': 'Gujarat'},
-    {'id': 1, 'name': 'Panjab'},
-    {'id': 1, 'name': 'Oddisha'},
-    {'id': 1, 'name': 'MP'},
-    {'id': 1, 'name': 'Mumbai'},
-    {'id': 1, 'name': 'Gujarat'}
-  ];
+  DatabaseHelper helper = DatabaseHelper();
 
-  var countyList = [
-    {'id': 1, 'name': 'Gujarat'},
-    {'id': 1, 'name': 'Rajsthan'},
-    {'id': 1, 'name': 'Gujarat'},
-    {'id': 1, 'name': 'Panjab'},
-    {'id': 1, 'name': 'Oddisha'},
-    {'id': 1, 'name': 'MP'},
-    {'id': 1, 'name': 'Mumbai'},
-    {'id': 1, 'name': 'Gujarat'}
-  ];
+  List<StateModel> stateList = [];
+  List<CountyModel> countyList = [];
+
+  // var countyList = [
+  //   {'id': 1, 'name': 'Gujarat'},
+  //   {'id': 1, 'name': 'Rajsthan'},
+  //   {'id': 1, 'name': 'Gujarat'},
+  //   {'id': 1, 'name': 'Panjab'},
+  //   {'id': 1, 'name': 'Oddisha'},
+  //   {'id': 1, 'name': 'MP'},
+  //   {'id': 1, 'name': 'Mumbai'},
+  //   {'id': 1, 'name': 'Gujarat'}
+  // ];
 
   var caseTypeList = ['Criminal Case', 'Civil Case', 'Custom Case'];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    helper.getStateList().then((value) => setState(() {
+          stateList = value;
+        }));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,20 +101,20 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
               children: [
                 Padding(
                   padding: EdgeInsets.only(top: ScreenUtil().setHeight(34)),
-                  child: dropDownTextField(
+                  child: dropDownTextField<StateModel>(
                       (selectedState == null)
                           ? 'Select state'
-                          : selectedState['name'],
+                          : selectedState.name,
                       'State',
                       stateList,
                       true),
                 ),
                 Padding(
                     padding: EdgeInsets.only(top: ScreenUtil().setHeight(14)),
-                    child: dropDownTextField(
+                    child: dropDownTextField<CountyModel>(
                         (selectedCounty == null)
                             ? 'Select county'
-                            : selectedCounty['name'],
+                            : selectedCounty.name,
                         'County',
                         countyList,
                         false)),
@@ -125,8 +132,8 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
         ));
   }
 
-  Widget dropDownTextField(String placeholder, String title,
-      List<Map<String, dynamic>> arrList, bool isState) {
+  Widget dropDownTextField<T>(
+      String placeholder, String title, List<T> arrList, bool isState) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -140,9 +147,17 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
               color: Colors.white),
           child: TextButton(
             onPressed: () {
-              showBottomPicker(arrList, isState);
+              showBottomPicker<T>(arrList, isState);
             },
-            child: dropDownTextFieldAndArrow(placeholder),
+            child: dropDownTextFieldAndArrow(
+                placeholder,
+                (isState)
+                    ? (selectedState != null)
+                        ? true
+                        : false
+                    : (selectedCounty != null)
+                        ? true
+                        : false),
           ),
         )
       ],
@@ -486,14 +501,15 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
     );
   }
 
-  Widget dropDownTextFieldAndArrow(String title) {
+  Widget dropDownTextFieldAndArrow(String title, bool isSelected) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: appThemeTextStyle(14),
-        ),
+        Text(title,
+            style: appThemeTextStyle(14,
+                textColor: isSelected
+                    ? Colors.black
+                    : AppColor.ColorGrayTextFieldHint)),
         Icon(
           Icons.keyboard_arrow_down_rounded,
           color: AppColor.ColorArrow,
@@ -538,7 +554,7 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
     ).then((value) => customCase = value);
   }
 
-  showBottomPicker(List<Map<String, dynamic>> arrData, bool isState) {
+  showBottomPicker<T>(List<T> arrList, bool isState) {
     showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -546,7 +562,7 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
             child: Container(
               height: ScreenUtil().setHeight(175),
               child: ListView.builder(
-                  itemCount: arrData.length,
+                  itemCount: arrList.length,
                   itemBuilder: (context, index) {
                     return InkWell(
                       child: Column(
@@ -556,7 +572,9 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                             height: 35,
                             alignment: Alignment.center,
                             child: Text(
-                              arrData[index]['name'],
+                              (T == StateModel)
+                                  ? (arrList[index] as StateModel).name
+                                  : (arrList[index] as CountyModel).name,
                               style: appThemeTextStyle(16,
                                   textColor: Colors.black),
                               textAlign: TextAlign.center,
@@ -571,9 +589,14 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                       onTap: () {
                         setState(() {
                           if (isState) {
-                            selectedState = arrData[index];
+                            selectedState = arrList[index] as StateModel;
+                            helper
+                                .getCountyList(selectedState.id)
+                                .then((value) => setState(() {
+                                      countyList = value;
+                                    }));
                           } else {
-                            selectedCounty = arrData[index];
+                            selectedCounty = arrList[index] as CountyModel;
                           }
 
                           Navigator.pop(context);

@@ -15,6 +15,7 @@ import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/AppMessages.dart';
 import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/utils/DatabaseHelper.dart';
 import 'package:my_lawyer/utils/SocialLogin.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/view/LRF/ForgotPasswordScreen.dart';
@@ -48,6 +49,7 @@ class _SignInScreenState extends State<SignInScreen> {
   bool isUserSignedIn = false;
   GoogleSignInClass googleSignInClass = GoogleSignInClass();
 
+  DatabaseHelper helper = DatabaseHelper();
   @override
   void initState() {
     // TODO: implement initState

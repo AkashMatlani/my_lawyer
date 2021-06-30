@@ -3,6 +3,8 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_lawyer/repository/Client/CountyRepository.dart';
+import 'package:my_lawyer/repository/Client/StateRepository.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
 import 'package:my_lawyer/view/LRF/SigninScreen.dart';
@@ -15,6 +17,10 @@ import 'package:firebase_core/firebase_core.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // StateRepository().stateList();
+  // CountyRepository().countyList();
+
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var token = prefs.getString(UserPrefernces.UserToken);
   var isDoneSetup = prefs.getBool(UserPrefernces.DoneSetup);
