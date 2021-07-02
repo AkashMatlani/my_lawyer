@@ -10,12 +10,13 @@ TextField appThemeTextField(String hintText, TextInputType textInputType,
     String suffixIcon = '',
     bool obscureText = false,
     int maxLines = 1,
-    double bottomPaddingPrefixImg = 10,
+    double bottomPaddingPrefixImg = 15,
     bool hasPrefixIcon = false,
     bool hasSuffixIcon = false,
     bool readOnly = false,
     Color borderColor = AppColor.ColorGrayBoarder,
     double fontSize = 16,
+    Color textColor = Colors.black,
     double topPadding = 0,
     Color fillColor = Colors.transparent,
     bool filled = false}) {
@@ -29,8 +30,8 @@ TextField appThemeTextField(String hintText, TextInputType textInputType,
       autocorrect: false,
       readOnly: readOnly,
       textInputAction: TextInputAction.next,
+      style: appThemeTextStyle(fontSize, textColor: textColor),
       decoration: InputDecoration(
-
           contentPadding:
               EdgeInsets.only(left: 10, right: 0, bottom: 0, top: topPadding),
           hintText: hintText,
@@ -48,7 +49,7 @@ TextField appThemeTextField(String hintText, TextInputType textInputType,
           prefixIcon: (hasPrefixIcon == true)
               ? Container(
                   padding:
-                      EdgeInsets.fromLTRB(5, 10, 5, bottomPaddingPrefixImg),
+                      EdgeInsets.fromLTRB(5, 15, 5, bottomPaddingPrefixImg),
                   child: SvgPicture.asset(prefixIcon),
                 )
               : null,

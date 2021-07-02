@@ -13,6 +13,9 @@ class APITag {
   static const editprofile = 'editProfile';
   static const stateList = 'stateList';
   static const countyList = 'countyList';
+  static const criminalList = 'criminalList';
+  static const civilList = 'civilList';
+  static const createCase = 'createCase';
 }
 
 class APIRequestHelper {
@@ -76,9 +79,8 @@ class APIRequestHelper {
     return responseJson;
   }
 
-  Future<dynamic> postMultiFormData(
-      String apiTag, Map<String, dynamic> parameters, String file) async {
-
+  Future<dynamic> postMultiFormData(String apiTag,
+      Map<String, dynamic> parameters, List<dynamic> files, String fileParamName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
 
@@ -90,9 +92,23 @@ class APIRequestHelper {
     try {
       var request = http.MultipartRequest('POST', Uri.parse(baseURL + apiTag));
 
-      if (file != "") {
-        var multiPart = await http.MultipartFile.fromPath('userProfile', file);
-        request.files.add(multiPart);
+      if (files.length > 0) {
+
+        if (files.length == 1) {
+          var multiPart =
+              await http.MultipartFile.fromPath(fileParamName, files.first);
+          request.files.add(multiPart);
+        } else {
+          List<http.MultipartFile> multiPartFiles = [];
+
+          for (String file in files) {
+            var multiPart =
+                await http.MultipartFile.fromPath(fileParamName, file);
+            multiPartFiles.add(multiPart);
+          }
+
+          request.files.addAll(multiPartFiles);
+        }
       }
 
       if (parameters != null) {
@@ -101,6 +117,7 @@ class APIRequestHelper {
 
       request.headers.addAll((token != null) ? headerAuth : header);
       var response = await request.send();
+
       final responseToString = await response.stream.bytesToString();
       responseJson = jsonDecode(responseToString);
     } on SocketException {

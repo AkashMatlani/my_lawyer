@@ -18,6 +18,7 @@ import 'package:my_lawyer/bloc/LRF/SignupBloc.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/utils/StringExtension.dart';
 import 'package:my_lawyer/utils/SocialLogin.dart';
+import 'package:my_lawyer/view/Client/Create%20Case/CreateCaseScreen.dart';
 import 'package:my_lawyer/view/LRF/SigninScreen.dart';
 import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
 import 'package:my_lawyer/view/Lawyer/SearchCaseScreen.dart';
@@ -91,7 +92,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   signUpBtn(),
                   txtOrConnectWith(),
                   googleSignInBtn(),
-                  if (Platform.isIOS) appleSignInBtn(),
+                  // if (Platform.isIOS) appleSignInBtn(),
                   txtDontHaveAccount()
                 ],
               ),
@@ -111,8 +112,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget txtFieldUserName() {
     return Padding(
-      padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(12)),
+      padding: EdgeInsets.only(top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
@@ -124,8 +124,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget txtFieldEmail() {
     return Padding(
-      padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(12)),
+      padding: EdgeInsets.only(top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
@@ -137,8 +136,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget txtFieldPwd() {
     return Padding(
-      padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(12)),
+      padding: EdgeInsets.only(top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
@@ -152,8 +150,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget txtFieldConfirmPwd() {
     return Padding(
-      padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(12)),
+      padding: EdgeInsets.only(top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField('Confirm Password',
@@ -340,11 +337,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       params['about'] = txtAboutController.text;
     }
 
-    if (params['signInType'] == SignInType.Normal) {
+    if (int.parse(params['signInType']) == SignInType.Normal) {
       params['password'] = txtPwdController.text;
-    }
-
-    if (params['signInType'] == SignInType.Normal) {
       LoadingView().showLoaderWithTitle(true, context);
     }
 
@@ -373,7 +367,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             });
 
             if (widget.userType == UserType.User) {
-              _navigateToLawyerHomeScreen();
+              _navigateToCreateCaseScreen();
             } else {
               _navigateToClientHomeScreen();
             }
@@ -381,7 +375,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             AlertView().showAlertView(
                 context,
                 (snapshot.data.meta as UserMetaModel).message,
-                    () => {Navigator.of(context).pop()});
+                () => {Navigator.of(context).pop()});
           }
           break;
 
@@ -422,11 +416,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
   }
 
-  _navigateToLawyerHomeScreen() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => LawyerListScreen()));
+  _navigateToCreateCaseScreen() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => CreateCaseScreen()));
   }
 
   _navigateToClientHomeScreen() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => SearchCasesScreen()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SearchCasesScreen()));
   }
 }

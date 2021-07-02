@@ -26,7 +26,7 @@ class UserInfoModel {
     return UserInfoModel(
         userId: data['userId'],
         userName: data['userName'],
-        userProfile: data['userProfile'],
+        userProfile: (data['userProfile'] == null) ? "" : data['userProfile'],
         userType: data['userType'],
         signInType: data['signInType'],
         email: data['email'],
@@ -75,7 +75,10 @@ class UserModel {
 Future<void> storeUserInfo(String token, Map<String, dynamic> userInfo) async {
   final SharedPreferences sharedPreferences =
       await SharedPreferences.getInstance();
-  sharedPreferences.setString(UserPrefernces.UserToken, token);
+
+  if (token != null)
+    sharedPreferences.setString(UserPrefernces.UserToken, token);
+
   sharedPreferences.setString(UserPrefernces.UserInfo, json.encode(userInfo));
   sharedPreferences.setBool(UserPrefernces.DoneSetup, true);
 }

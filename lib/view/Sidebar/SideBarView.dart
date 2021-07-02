@@ -9,9 +9,12 @@ import 'package:my_lawyer/main.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/CommonStuff.dart';
 import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/utils/NetworkImage.dart';
 import 'package:my_lawyer/view/Client/ChangePwdScreen.dart';
 import 'package:my_lawyer/view/Client/Create%20Case/CreateCaseScreen.dart';
 import 'package:my_lawyer/view/Client/EditProfileScreen.dart';
+import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
+import 'package:my_lawyer/view/Client/ViewBidScreen.dart';
 import 'package:my_lawyer/view/LRF/SigninScreen.dart';
 import 'package:my_lawyer/view/LRF/UserSelectionScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,7 +69,8 @@ class _SideBarViewState extends State<SideBarView> {
           'img': 'images/Sidebar/ic_saved_case.png',
           'name': SideMenuOption.SavedCases
         },
-        {'img': 'images/Sidebar/ic_view_bid.png',
+        {
+          'img': 'images/Sidebar/ic_view_bid.png',
           'name': SideMenuOption.ViewBids
         },
         {
@@ -157,8 +161,18 @@ class _SideBarViewState extends State<SideBarView> {
             onTap: () {
               switch (menuInfo['name']) {
                 case SideMenuOption.HireLawyer:
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              LawyerListScreen(LawyerListType.Hire)));
                   break;
                 case SideMenuOption.SavedCases:
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              LawyerListScreen(LawyerListType.Save)));
                   break;
 
                 case SideMenuOption.CreateNewCase:
@@ -166,10 +180,11 @@ class _SideBarViewState extends State<SideBarView> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => CreateCaseScreen()));
-
                   break;
 
                 case SideMenuOption.ViewBids:
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => ViewBidScreen()));
                   break;
 
                 case SideMenuOption.EditProfile:
@@ -221,7 +236,7 @@ class _SideBarViewState extends State<SideBarView> {
     return Padding(
         padding: EdgeInsets.only(left: ScreenUtil().setWidth(30)),
         child: Container(
-            width: ScreenUtil().setWidth(72),
+            width: ScreenUtil().setHeight(72),
             height: ScreenUtil().setHeight(72),
             decoration: BoxDecoration(
               image: DecorationImage(
@@ -231,12 +246,16 @@ class _SideBarViewState extends State<SideBarView> {
                 padding: EdgeInsets.all(5),
                 child: ClipRRect(
                     borderRadius:
-                        BorderRadius.circular(ScreenUtil().setWidth(72) / 2),
-                    child: (userInfo['userProfile'] == null)
+                        BorderRadius.circular(ScreenUtil().setHeight(72) / 2),
+                    child: (userInfo == null)
                         ? Image(
-                            image: AssetImage('images/Client/ic_profile.jpeg'),
-                          )
-                        : Image.network(userInfo['userProfile'])))));
+                            image: AssetImage('images/Client/ic_profile.jpeg'))
+                        : (userInfo['userProfile'] != '')
+                            ? ImageNetwork()
+                                .loadNetworkImage(userInfo['userProfile'])
+                            : Image(
+                                image: AssetImage(
+                                    'images/Client/ic_profile.jpeg'))))));
   }
 
   Widget userName() {
@@ -283,8 +302,10 @@ class _SideBarViewState extends State<SideBarView> {
         ),
         onTap: () {
           logOut();
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => UserSelectionScreen(true)));
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => UserSelectionScreen(true)));
         },
       ),
     );

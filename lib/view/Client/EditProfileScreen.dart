@@ -7,11 +7,13 @@ import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/UserModel.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
+import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/AppMessages.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_lawyer/utils/ImagePickerView.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
+import 'package:my_lawyer/utils/NetworkImage.dart';
 import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
 import 'package:my_lawyer/view/Lawyer/SearchCaseScreen.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
@@ -94,23 +96,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: InkWell(
         child: Column(
           children: [
-            if (pickedImgFile == null)
-              Image(
-                image: AssetImage('images/Client/ic_profile.jpeg'),
-                width: ScreenUtil().setWidth(100),
-                height: ScreenUtil().setHeight(100),
-              )
-            else
-              ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(ScreenUtil().setWidth(100) / 2),
-                child: Image.file(
-                  pickedImgFile,
-                  width: ScreenUtil().setWidth(100),
-                  height: ScreenUtil().setHeight(100),
-                  fit: BoxFit.fill,
-                ),
-              ),
+            Container(
+              width: ScreenUtil().setHeight(100),
+              height: ScreenUtil().setHeight(100),
+              child: ClipRRect(
+                  borderRadius:
+                      BorderRadius.circular(ScreenUtil().setHeight(100) / 2),
+                  child: (pickedImgFile != null)
+                      ? Image.file(
+                          pickedImgFile,
+                          fit: BoxFit.fill,
+                        )
+                      : (userInfo['userProfile'] != "")
+                          ? ImageNetwork()
+                              .loadNetworkImage(userInfo['userProfile'])
+                          : Image(
+                              image:
+                                  AssetImage('images/Client/ic_profile.jpeg'))),
+            ),
             Padding(
               padding: EdgeInsets.only(top: 7, bottom: 10),
               child: Text(
@@ -137,7 +140,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             'User Name', TextInputType.name, txtUserNameController,
             prefixIcon: 'images/LRF/ic_user.svg',
             hasPrefixIcon: true,
-            readOnly: true),
+            readOnly: true,
+            textColor: AppColor.ColorGrayBoarder),
       ),
     );
   }
@@ -151,7 +155,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             'Email ID', TextInputType.emailAddress, txtEmailController,
             prefixIcon: 'images/LRF/ic_email.svg',
             hasPrefixIcon: true,
-            readOnly: true),
+            readOnly: true,
+            textColor: AppColor.ColorGrayBoarder),
       ),
     );
   }
@@ -183,7 +188,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   _pressedOnSubmit() {
-    if (pickedImgFile == null) {
+    if (userInfo['userProfile'] == "" && pickedImgFile == null) {
       AlertView().showAlert(Messages.CUploadImage, context);
       return;
     }
@@ -194,7 +199,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       params['about'] = txtAboutController.text;
 
     LoadingView().showLoaderWithTitle(true, context);
-    editProfileBloc.editProfile(params, pickedImgFile.path);
+    editProfileBloc.editProfile(
+        params, (pickedImgFile == null) ? '' : pickedImgFile.path);
 
     editProfileBloc.editProfileStream.listen((snapshot) {
       switch (snapshot.status) {
@@ -220,8 +226,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             });
 
             if (userInfo.userType == UserType.User) {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => LawyerListScreen()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          LawyerListScreen(LawyerListType.Hire)));
             } else {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => SearchCasesScreen()));

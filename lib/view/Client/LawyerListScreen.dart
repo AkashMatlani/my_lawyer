@@ -7,9 +7,14 @@ import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/view/Client/LawyerDetailScreen.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
 
 class LawyerListScreen extends StatefulWidget {
+  int selectedSegmentOption = 0;
+
+  LawyerListScreen(this.selectedSegmentOption);
+
   @override
   _LawyerListScreenState createState() => _LawyerListScreenState();
 }
@@ -21,8 +26,6 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
     'images/Client/temp_ad3.jpeg',
     'images/Client/temp_ad4.jpeg'
   ];
-
-  int selectedSegmentOption = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -63,26 +66,26 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
       child: CupertinoSlidingSegmentedControl(
         backgroundColor: Colors.white,
         thumbColor: AppColor.ColorYellowSegment,
-        groupValue: selectedSegmentOption,
+        groupValue: widget.selectedSegmentOption,
         children: <int, Widget>{
           0: Text(
             'Hire',
             style: appThemeTextStyle(16,
                 fontWeight: FontWeight.w700,
-                textColor: (selectedSegmentOption == 0)
+                textColor: (widget.selectedSegmentOption == 0)
                     ? Colors.white
                     : Color.fromRGBO(137, 143, 170, 1)),
           ),
           1: Text('Save',
               style: appThemeTextStyle(16,
                   fontWeight: FontWeight.w700,
-                  textColor: (selectedSegmentOption == 1)
+                  textColor: (widget.selectedSegmentOption == 1)
                       ? Colors.white
                       : Color.fromRGBO(137, 143, 170, 1)))
         },
         onValueChanged: (selectedValue) {
           setState(() {
-            selectedSegmentOption = selectedValue as int;
+            widget.selectedSegmentOption = selectedValue as int;
           });
         },
       ),
@@ -132,7 +135,6 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
         ),
         child: Container(
           width: screenWidth(context),
-          height: ScreenUtil().setHeight(214),
           decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(color: AppColor.ColorBorder, width: 0.5),
@@ -145,7 +147,12 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Row(
-                children: [lawyerProfilePicView(), lawyerNameAndFavoriteBtn()],
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  lawyerProfilePicView(),
+                  lawyerNameAndAbout(),
+                  favoriteBtn(),
+                ],
               ),
               bidRateAndLike(),
               viewDetailBtn()
@@ -159,41 +166,48 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
       padding: EdgeInsets.only(
           top: ScreenUtil().setHeight(10), left: ScreenUtil().setHeight(10)),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(ScreenUtil().setWidth(60) / 2),
+        borderRadius: BorderRadius.circular(ScreenUtil().setHeight(60) / 2),
         child: Image(
           image: AssetImage('images/Client/temp_ad1.jpeg'),
           fit: BoxFit.fill,
-          width: ScreenUtil().setWidth(60),
+          width: ScreenUtil().setHeight(60),
           height: ScreenUtil().setHeight(60),
         ),
       ),
     );
   }
 
-  Widget lawyerNameAndFavoriteBtn() {
+  Widget lawyerNameAndAbout() {
     return Expanded(
-        child: Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-            flex: 1,
-            child: Padding(
-              padding: EdgeInsets.only(left: ScreenUtil().setWidth(13)),
-              child: Text(
-                'Karen A Klein',
-                style: appThemeTextStyle(16,
-                    fontWeight: FontWeight.w700, textColor: Colors.black),
-              ),
-            )),
-        InkWell(
-          child: SvgPicture.asset('images/Client/ic_fav.svg'),
-          onTap: () {
-            _pressedOnFavourite();
-          },
-        ),
-      ],
+        child: Padding(
+      padding: EdgeInsets.only(
+          left: ScreenUtil().setWidth(13),
+          top: ScreenUtil().setHeight(13),
+          right: ScreenUtil().setWidth(13)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Karen A Klein',
+            style: appThemeTextStyle(16,
+                fontWeight: FontWeight.w700, textColor: Colors.black),
+          ),
+          Text(
+            'Outstanding attorney handling discrimination & business disputes.',
+            style: TextStyle(),
+          ),
+        ],
+      ),
     ));
+  }
+
+  Widget favoriteBtn() {
+    return InkWell(
+      child: SvgPicture.asset('images/Client/ic_fav.svg'),
+      onTap: () {
+        _pressedOnFavourite();
+      },
+    );
   }
 
   Widget lawyerAboutView() {
@@ -289,13 +303,16 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
       padding: EdgeInsets.only(
           top: ScreenUtil().setHeight(24),
           left: ScreenUtil().setWidth(16),
-          right: ScreenUtil().setWidth(16)),
+          right: ScreenUtil().setWidth(16),
+          bottom: ScreenUtil().setHeight(16)),
       child: SizedBox(
           width: screenWidth(context),
           height: ScreenUtil().setHeight(38),
           child: GenericButton().appThemeButton(
-              'View Detail', 16, Colors.white, FontWeight.w700, () {},
-              borderRadius: 6)),
+              'View Detail', 16, Colors.white, FontWeight.w700, () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => LawyerDetailScreen()));
+          }, borderRadius: 6)),
     );
   }
 

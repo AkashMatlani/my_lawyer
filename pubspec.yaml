@@ -102,6 +102,8 @@ flutter:
     - images/Client/temp_ad1.jpeg
     - images/Client/temp_ad2.jpeg
     - images/Client/temp_ad3.jpeg
+    - images/Lawyer/ic_pdf.svg
+    - images/Lawyer/ic_mail.svg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

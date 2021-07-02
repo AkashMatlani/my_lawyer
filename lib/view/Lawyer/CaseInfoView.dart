@@ -1,0 +1,135 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_lawyer/generic_class/GenericButton.dart';
+import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/view/Lawyer/CaseDetailScreen.dart';
+
+class CaseInfoView extends StatefulWidget {
+  @override
+  _CaseInfoViewState createState() => _CaseInfoViewState();
+}
+
+class _CaseInfoViewState extends State<CaseInfoView> {
+  @override
+  Widget build(BuildContext context) {
+    return caseInfoView();
+  }
+
+  Widget caseInfoView() {
+    return Padding(
+        padding: EdgeInsets.only(
+            top: ScreenUtil().setHeight(10),
+            bottom: ScreenUtil().setHeight(10),
+            left: ScreenUtil().setWidth(20),
+            right: ScreenUtil().setWidth(20)),
+        child: Container(
+          width: screenWidth(context),
+          // height: ScreenUtil().setHeight(214),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppColor.ColorBorder, width: 0.5),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.11), blurRadius: 2)
+              ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                  padding: EdgeInsets.all(ScreenUtil().setWidth(15)),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [lawyerProfilePicView(''), caseInfo()],
+                  )),
+              viewDetailBtn()
+            ],
+          ),
+        ));
+  }
+
+  Widget lawyerProfilePicView(String userProfile) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(ScreenUtil().setHeight(65) / 2),
+      child: Image(
+        image: AssetImage('images/Client/temp_ad1.jpeg'),
+        fit: BoxFit.fill,
+        width: ScreenUtil().setHeight(65),
+        height: ScreenUtil().setHeight(65),
+      ),
+    );
+  }
+
+  Widget caseInfo() {
+    return Padding(
+      padding: EdgeInsets.only(left: ScreenUtil().setWidth(13)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            'Miranda Gomes',
+            style: appThemeTextStyle(16, fontWeight: FontWeight.w700, textColor: Colors.black),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 5, bottom: 5),
+            child: Container(
+                decoration: BoxDecoration(
+                    color: Color.fromRGBO(211, 255, 211, 1),
+                    borderRadius: BorderRadius.circular(5)),
+                child: Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Text(
+                    'Criminal',
+                    textAlign: TextAlign.center,
+                    style: appThemeTextStyle(13,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color.fromRGBO(2, 165, 64, 1)),
+                  ),
+                )),
+          ),
+          Row(children: [
+            Text(
+              'Amount:',
+              style: appThemeTextStyle(14,
+                  textColor: Color.fromRGBO(98, 106, 142, 1)),
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 5),
+              child: Text(
+                'Not Bid Yet',
+                style: appThemeTextStyle(14, textColor: Colors.black),
+              ),
+            )
+          ])
+        ],
+      ),
+    );
+  }
+
+  Widget viewDetailBtn() {
+    return Padding(
+      padding: EdgeInsets.only(
+          top: ScreenUtil().setHeight(5),
+          left: ScreenUtil().setWidth(15),
+          right: ScreenUtil().setWidth(15),
+          bottom: ScreenUtil().setHeight(15)),
+      child: SizedBox(
+          width: screenWidth(context),
+          height: ScreenUtil().setHeight(38),
+          child: GenericButton().appThemeButton(
+              'View Detail', 16, Colors.white, FontWeight.w700, () {
+            _pressedOnViewDetail();
+          }, borderRadius: 6)),
+    );
+  }
+
+  _pressedOnViewDetail() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => CaseDetailScreen()));
+  }
+}

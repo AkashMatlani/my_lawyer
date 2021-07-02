@@ -52,7 +52,8 @@ class AppleSignInClass {
         print('Apple givenname - ${credential.givenName}');
 
         return {
-          'name': '${credential.givenName} ${credential.familyName}',
+          'familyName': credential.familyName,
+          'givenname': credential.givenName,
           'email': userCredential.user.email
         };
       } else {

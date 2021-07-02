@@ -33,6 +33,11 @@ class UserPrefernces {
   static const DoneSetup = 'DoneSetup';
 }
 
+class LawyerListType {
+  static const Hire = 0;
+  static const Save = 1;
+}
+
 class SideMenuOption {
   static const HireLawyer = 'Hire Lawyer';
   static const SavedCases = 'Saved Cases';
@@ -41,5 +46,4 @@ class SideMenuOption {
   static const SearchCases = 'Search Cases';
   static const EditProfile = 'Edit Profile';
   static const ChangePassword = 'Change Password';
-
 }

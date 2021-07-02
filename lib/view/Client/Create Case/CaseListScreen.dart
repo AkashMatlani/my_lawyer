@@ -2,10 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:my_lawyer/bloc/Client/CivilBloc.dart';
+import 'package:my_lawyer/bloc/Client/CriminalBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/CaseListModel.dart';
+import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/utils/LoadingView.dart';
 
 class CaseListScreen extends StatefulWidget {
   String appBarTitle;
@@ -19,18 +24,26 @@ class CaseListScreen extends StatefulWidget {
 }
 
 class _CaseListScreenState extends State<CaseListScreen> {
-  var caseList = [
-    {'id': 1, 'name': 'Assignment Case'},
-    {'id': 2, 'name': 'Review Hearing'},
-    {'id': 3, 'name': 'Show Case Hearing'},
-    {'id': 4, 'name': 'Bond Hearing'},
-    {'id': 5, 'name': 'Final Free Trial Hearing'},
-    {'id': 6, 'name': 'Trial'},
-    {'id': 7, 'name': 'Jurry Trial'},
-  ];
+  List<CaseModel> caseList;
+  CivilBloc civilBloc;
+  CriminalBloc criminalBloc;
 
   var selectedCase = [];
   var isSelectedAll = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    caseList = [];
+    civilBloc = CivilBloc();
+    criminalBloc = CriminalBloc();
+
+    if (widget.caseType == 0)
+      criminalBloc.getCriminalList();
+    else
+      civilBloc.getCivilList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,33 +57,59 @@ class _CaseListScreenState extends State<CaseListScreen> {
               color: Colors.black,
             ),
           )),
-      body: caseListView(),
+      body: buildStream(),
     );
   }
 
-  Widget caseListView() {
+  Widget buildStream() {
     return Container(
         decoration: BoxDecoration(
           color: Color.fromRGBO(247, 247, 247, 1),
         ),
         child: Padding(
-            padding: EdgeInsets.only(
-              top: ScreenUtil().setHeight(15),
-            ),
-            child: Column(
-              children: [
-                selectAllCaseView(),
-                Flexible(
-                  flex: 1,
-                  child: ListView.builder(
-                      itemCount: caseList.length,
-                      itemBuilder: (context, index) {
-                        return caseSelectionView(caseList[index]);
-                      }),
-                ),
-                submitBtn()
-              ],
-            )));
+          padding: EdgeInsets.only(
+            top: ScreenUtil().setHeight(15),
+          ),
+          child: StreamBuilder<APIResponse<CaseListModel>>(
+              stream: (widget.caseType == 0)
+                  ? criminalBloc.criminalStream
+                  : civilBloc.civilStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  switch (snapshot.data.status) {
+                    case Status.Loading:
+                      return LoadingView().loader();
+                      break;
+
+                    case Status.Done:
+                      caseList = snapshot.data.data.caseList;
+                      return caseListView();
+
+                    case Status.Error:
+                      break;
+                  }
+                } else {
+                  return LoadingView().loader();
+                }
+              }),
+        ));
+  }
+
+  Widget caseListView() {
+    return Column(
+      children: [
+        selectAllCaseView(),
+        Flexible(
+          flex: 1,
+          child: ListView.builder(
+              itemCount: caseList.length,
+              itemBuilder: (context, index) {
+                return caseSelectionView(caseList[index]);
+              }),
+        ),
+        submitBtn()
+      ],
+    );
   }
 
   Widget selectAllCaseView() {
@@ -89,7 +128,9 @@ class _CaseListScreenState extends State<CaseListScreen> {
                 padding: EdgeInsets.only(left: 7),
                 child: Text(
                   'Select All',
-                  style: appThemeTextStyle(15, textColor: AppColor.ColorBlack, fontWeight: FontWeight.w700),
+                  style: appThemeTextStyle(15,
+                      textColor: AppColor.ColorBlack,
+                      fontWeight: FontWeight.w700),
                 ),
               )
             ],
@@ -102,7 +143,7 @@ class _CaseListScreenState extends State<CaseListScreen> {
     );
   }
 
-  Widget caseSelectionView(Map<String, dynamic> caseInfo) {
+  Widget caseSelectionView(CaseModel caseInfo) {
     return Padding(
         padding:
             EdgeInsets.only(left: ScreenUtil().setWidth(5), top: 0, bottom: 0),
@@ -125,7 +166,7 @@ class _CaseListScreenState extends State<CaseListScreen> {
                         });
                       })),
               Text(
-                caseInfo['name'],
+                caseInfo.name,
                 style: appThemeTextStyle(14, textColor: AppColor.ColorBlack),
               ),
             ],

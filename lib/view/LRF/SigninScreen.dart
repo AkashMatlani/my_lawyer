@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:my_lawyer/bloc/LRF/SigninBloc.dart';
+import 'package:my_lawyer/bloc/LRF/SignupBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/UserModel.dart';
@@ -18,18 +19,13 @@ import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/DatabaseHelper.dart';
 import 'package:my_lawyer/utils/SocialLogin.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
+import 'package:my_lawyer/view/Client/Create%20Case/CreateCaseScreen.dart';
 import 'package:my_lawyer/view/LRF/ForgotPasswordScreen.dart';
 import 'package:my_lawyer/view/LRF/SignupScreen.dart';
 import 'package:my_lawyer/utils/StringExtension.dart';
 import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
 import 'package:my_lawyer/view/Lawyer/SearchCaseScreen.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-
-// GoogleSignIn _googleSignIn = GoogleSignIn(
-//   scopes: <String>[
-//     'email',
-//   ],
-// );
 
 class SignInScreen extends StatefulWidget {
   int userType;
@@ -45,16 +41,20 @@ class _SignInScreenState extends State<SignInScreen> {
   var txtPwdController = TextEditingController();
 
   SignInBloc signInBloc;
+  SignUpBloc signUpBloc;
+
   GoogleSignInAccount _currentUser;
   bool isUserSignedIn = false;
   GoogleSignInClass googleSignInClass = GoogleSignInClass();
 
   DatabaseHelper helper = DatabaseHelper();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     signInBloc = SignInBloc();
+    signUpBloc = SignUpBloc();
   }
 
   @override
@@ -118,8 +118,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Widget txtFieldEmail() {
     return Padding(
-      padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(12)),
+      padding: EdgeInsets.only(top: ScreenUtil().setHeight(12)),
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
@@ -345,14 +344,68 @@ class _SignInScreenState extends State<SignInScreen> {
               'signInType': userInfo.signInType,
               'email': userInfo.email,
               'about': userInfo.about
-            }).then((value){
+            }).then((value) {
               if (widget.userType == UserType.User) {
                 _navigateToLawyerHomeScreen();
               } else {
                 _navigateToClientHomeScreen();
               }
             });
+          } else {
+            AlertView().showAlertView(
+                context,
+                (snapshot.data.meta as UserMetaModel).message,
+                () => {Navigator.of(context).pop()});
+          }
+          break;
 
+        case Status.Error:
+          LoadingView().showLoaderWithTitle(false, context);
+          AlertView().showAlertView(
+              context, snapshot.message, () => {Navigator.of(context).pop()});
+          break;
+      }
+    });
+  }
+
+  signUpUser(Map<String, dynamic> params) {
+    Map<String, dynamic> signUpInfo = params;
+
+    signUpInfo['userType'] = widget.userType.toString();
+
+    if (widget.userType == UserType.Lawyer) {
+      params['about'] = "";
+    }
+
+    signUpBloc.signUpUser(params);
+
+    signUpBloc.signUpStream.listen((snapshot) {
+      switch (snapshot.status) {
+        case Status.Loading:
+          return LoadingView(loadingMessage: snapshot.message);
+
+        case Status.Done:
+          LoadingView().showLoaderWithTitle(false, context);
+          if ((snapshot.data.meta as UserMetaModel).status == 1) {
+            //...Redirect on Home Screen
+
+            print('SuccessFull');
+            UserInfoModel userInfo = snapshot.data.data;
+            storeUserInfo((snapshot.data.meta as UserMetaModel).token, {
+              'userName': userInfo.userName,
+              'userType': userInfo.userType,
+              'userId': userInfo.userId,
+              'userProfile': userInfo.userProfile,
+              'signInType': userInfo.signInType,
+              'email': userInfo.email,
+              'about': userInfo.about
+            });
+
+            if (widget.userType == UserType.User) {
+              _navigateToCreateCaseScreen();
+            } else {
+              _navigateToClientHomeScreen();
+            }
           } else {
             AlertView().showAlertView(
                 context,
@@ -384,15 +437,31 @@ class _SignInScreenState extends State<SignInScreen> {
   _pressedOnAppleSignIn() async {
     AppleSignInClass().appleSignIn().then((authDetail) {
       LoadingView().showLoaderWithTitle(true, context);
-      signInUser(SignInType.Apple, authDetail['email']);
+
+      if (authDetail['familyName'] == null) {
+        signInUser(SignInType.Apple, authDetail['email']);
+      } else {
+        signUpUser({
+          'userName': '${authDetail['givenname']} ${authDetail['familyName']}',
+          'email': authDetail['email'],
+          'signInType': SignInType.Apple.toString()
+        });
+      }
     });
   }
 
   _navigateToLawyerHomeScreen() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => LawyerListScreen()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => LawyerListScreen(0)));
   }
 
   _navigateToClientHomeScreen() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => SearchCasesScreen()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SearchCasesScreen()));
+  }
+
+  _navigateToCreateCaseScreen() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => CreateCaseScreen()));
   }
 }

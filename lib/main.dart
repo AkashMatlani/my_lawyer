@@ -18,12 +18,15 @@ import 'package:firebase_core/firebase_core.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // StateRepository().stateList();
-  // CountyRepository().countyList();
-
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var token = prefs.getString(UserPrefernces.UserToken);
   var isDoneSetup = prefs.getBool(UserPrefernces.DoneSetup);
+
+  if (isDoneSetup == null) {
+    isDoneSetup = false;
+    StateRepository().stateList();
+    CountyRepository().countyList();
+  }
 
   var userType = 0;
   if (token != null) {
@@ -31,18 +34,10 @@ Future<void> main() async {
     userType = json.decode(userInfo)['userType'];
   }
 
-  if (isDoneSetup == null) {
-    isDoneSetup = false;
-  }
-
   await Firebase.initializeApp();
 
   print('======= $token');
-  runApp(MyApp(
-    token: token,
-    userType: userType,
-      isDoneSetup: isDoneSetup
-  ));
+  runApp(MyApp(token: token, userType: userType, isDoneSetup: isDoneSetup));
 }
 
 class MyApp extends StatelessWidget {
@@ -63,7 +58,7 @@ class MyApp extends StatelessWidget {
                   ? UserSelectionScreen(isDoneSetup)
                   : (userType == UserType.Lawyer)
                       ? SearchCasesScreen()
-                      : LawyerListScreen(),
+                      : LawyerListScreen(LawyerListType.Hire),
               debugShowCheckedModeBanner: false,
               theme: ThemeData(
                   primaryColor: Colors.white,
@@ -71,10 +66,3 @@ class MyApp extends StatelessWidget {
             ));
   }
 }
-
-
-// (token == null)
-// ? (isDoneSetup == true) ? SignInScreen(0) : UserSelectionScreen()
-//     : (userType == UserType.Lawyer)
-// ? SearchCasesScreen()
-//     : LawyerListScreen(),

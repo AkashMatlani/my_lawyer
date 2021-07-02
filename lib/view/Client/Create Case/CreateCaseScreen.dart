@@ -1,23 +1,35 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+import 'package:my_lawyer/bloc/Client/CreateCaseBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/CaseListModel.dart';
 import 'package:my_lawyer/models/CountyModel.dart';
 import 'package:my_lawyer/models/StateModel.dart';
+import 'package:my_lawyer/networking/APIResponse.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/AppMessages.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/DatabaseHelper.dart';
 import 'package:my_lawyer/utils/FilePickerView.dart';
 import 'package:my_lawyer/utils/DatePicker.dart';
+import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/view/Client/Create%20Case/CaseListScreen.dart';
 import 'package:my_lawyer/view/Client/Create%20Case/CustomCaseScreen.dart';
+import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
+import 'dart:ui' as ui;
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateCaseScreen extends StatefulWidget {
   @override
@@ -36,41 +48,39 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
   var caseHiringDate;
   var isSelectedTermsCondition = false;
   var customCase = '';
+  var userInfo;
+  int caseType;
 
   DateTime selectedCaseDate = DateTime.now();
   DateTime selectedHearingDate = DateTime.now();
   TimeOfDay selectedCaseTime = TimeOfDay(hour: 00, minute: 00);
 
-  List<Map<String, dynamic>> selectedFilesList = [];
-  List<Map<String, dynamic>> selectedCriminalCase = [];
-  List<Map<String, dynamic>> selectedCivilCase = [];
-
-  DatabaseHelper helper = DatabaseHelper();
-
+  List<dynamic> selectedFilesList = [];
+  List<dynamic> selectedCaseList = [];
   List<StateModel> stateList = [];
   List<CountyModel> countyList = [];
-
-  // var countyList = [
-  //   {'id': 1, 'name': 'Gujarat'},
-  //   {'id': 1, 'name': 'Rajsthan'},
-  //   {'id': 1, 'name': 'Gujarat'},
-  //   {'id': 1, 'name': 'Panjab'},
-  //   {'id': 1, 'name': 'Oddisha'},
-  //   {'id': 1, 'name': 'MP'},
-  //   {'id': 1, 'name': 'Mumbai'},
-  //   {'id': 1, 'name': 'Gujarat'}
-  // ];
-
   var caseTypeList = ['Criminal Case', 'Civil Case', 'Custom Case'];
+
+  DatabaseHelper helper = DatabaseHelper();
+  CreateCaseBloc createCaseBloc;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
+    createCaseBloc = CreateCaseBloc();
     helper.getStateList().then((value) => setState(() {
           stateList = value;
         }));
+
+    SharedPreferences.getInstance().then((prefs) {
+      var userInfoStr = prefs.getString(UserPrefernces.UserInfo);
+
+      setState(() {
+        userInfo = json.decode(userInfoStr);
+      });
+    });
   }
 
   @override
@@ -119,11 +129,13 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                         countyList,
                         false)),
                 txtFieldCaseType(),
+                if (selectedCaseList.length > 0) selectedTabView(true),
                 txtFieldCasePortion(),
                 txtViewRegitrationNote(),
                 txtFieldCaseDateAndTime(),
                 caseHearingDateView(),
                 attachmentView(),
+                if (selectedFilesList.length > 0) selectedTabView(false),
                 termsConditionView(),
                 submitBtn()
               ],
@@ -200,14 +212,17 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
 
                   switch (selectedCaseType) {
                     case 'Criminal Case':
+                      caseType = 0;
                       navigateToCaseList(true);
                       break;
 
                     case 'Civil Case':
+                      caseType = 1;
                       navigateToCaseList(false);
                       break;
 
                     case 'Custom Case':
+                      caseType = 2;
                       navigateToCustomCaseScreen();
                       break;
                   }
@@ -280,38 +295,45 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                     Flexible(
                         flex: 1,
                         child: Padding(
-                          padding:
-                              EdgeInsets.only(right: ScreenUtil().setWidth(15)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton(
-                                  style: ButtonStyle(
-                                    overlayColor:
-                                        MaterialStateColor.resolveWith(
-                                            (states) => Colors.transparent),
-                                  ),
-                                  onPressed: () {
-                                    DatePicker()
-                                        .selectDate('yyyy/MM/dd',
-                                            selectedCaseDate, context)
-                                        .then((selectedDate) => setState(() {
-                                              caseDate =
-                                                  selectedDate['selectedDate'];
-                                              selectedCaseDate =
-                                                  selectedDate['date'];
-                                            }));
-                                  },
-                                  child: Text(
-                                    (caseDate == null)
-                                        ? 'YYYY/MM/DD'
-                                        : caseDate,
-                                    style: appThemeTextStyle(14),
-                                  )),
-                              SvgPicture.asset('images/Client/ic_calendar.svg')
-                            ],
-                          ),
-                        )),
+                            padding: EdgeInsets.only(
+                                right: ScreenUtil().setWidth(15)),
+                            child: InkWell(
+                              onTap: () {
+                                DatePicker()
+                                    .selectDate(
+                                        'yyyy/MM/dd', selectedCaseDate, context)
+                                    .then((selectedDate) => setState(() {
+                                          caseDate =
+                                              selectedDate['selectedDate'];
+                                          selectedCaseDate =
+                                              selectedDate['date'];
+                                        }));
+                              },
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  TextButton(
+                                      style: ButtonStyle(
+                                        overlayColor:
+                                            MaterialStateColor.resolveWith(
+                                                (states) => Colors.transparent),
+                                      ),
+                                      child: Text(
+                                        (caseDate == null)
+                                            ? 'YYYY/MM/DD'
+                                            : caseDate,
+                                        style: appThemeTextStyle(14,
+                                            textColor: (caseDate != null)
+                                                ? Colors.black
+                                                : AppColor
+                                                    .ColorGrayTextFieldHint),
+                                      )),
+                                  SvgPicture.asset(
+                                      'images/Client/ic_calendar.svg')
+                                ],
+                              ),
+                            ))),
                     Container(
                       width: 1,
                       height: ScreenUtil().setHeight(28),
@@ -320,36 +342,42 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                     SizedBox(
                         width: ScreenUtil().setWidth(130),
                         child: Padding(
-                          padding: EdgeInsets.only(
-                              left: ScreenUtil().setWidth(15),
-                              right: ScreenUtil().setWidth(20)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton(
-                                  style: ButtonStyle(
-                                    overlayColor:
-                                        MaterialStateColor.resolveWith(
-                                            (states) => Colors.transparent),
-                                  ),
-                                  onPressed: () {
-                                    DatePicker()
-                                        .selectTime(context, selectedCaseTime)
-                                        .then((selectedTime) => setState(() {
-                                              caseTime =
-                                                  selectedTime['selectedTime'];
-                                              selectedCaseTime =
-                                                  selectedTime['time'];
-                                            }));
-                                  },
-                                  child: Text(
-                                    (caseTime == null) ? 'HH:MM' : caseTime,
-                                    style: appThemeTextStyle(14),
-                                  )),
-                              SvgPicture.asset('images/Client/ic_clock.svg')
-                            ],
-                          ),
-                        ))
+                            padding: EdgeInsets.only(
+                                left: ScreenUtil().setWidth(15),
+                                right: ScreenUtil().setWidth(20)),
+                            child: InkWell(
+                              onTap: () {
+                                DatePicker()
+                                    .selectTime(context, selectedCaseTime)
+                                    .then((selectedTime) => setState(() {
+                                          caseTime =
+                                              selectedTime['selectedTime'];
+                                          selectedCaseTime =
+                                              selectedTime['time'];
+                                        }));
+                              },
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  TextButton(
+                                      style: ButtonStyle(
+                                        overlayColor:
+                                            MaterialStateColor.resolveWith(
+                                                (states) => Colors.transparent),
+                                      ),
+                                      child: Text(
+                                        (caseTime == null) ? 'HH:MM' : caseTime,
+                                        style: appThemeTextStyle(14,
+                                            textColor: (caseTime != null)
+                                                ? Colors.black
+                                                : AppColor
+                                                    .ColorGrayTextFieldHint),
+                                      )),
+                                  SvgPicture.asset('images/Client/ic_clock.svg')
+                                ],
+                              ),
+                            )))
                   ],
                 ))
           ],
@@ -364,39 +392,45 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         placeHolderText('Hearing Date'),
         Container(
-          width: screenWidth(context),
-          height: ScreenUtil().setHeight(46),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColor.ColorBorder),
-              color: Colors.white),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                  style: ButtonStyle(
-                    overlayColor: MaterialStateColor.resolveWith(
-                        (states) => Colors.transparent),
-                  ),
-                  onPressed: () {
-                    DatePicker()
-                        .selectDate('yyyy/MM/dd', selectedHearingDate, context)
-                        .then((selectedDate) => setState(() {
-                              caseHiringDate = selectedDate['selectedDate'];
-                              selectedHearingDate = selectedDate['date'];
-                            }));
-                  },
-                  child: Text(
-                    (caseHiringDate == null) ? 'YYYY/MM/DD' : caseHiringDate,
-                    style: appThemeTextStyle(14),
-                  )),
-              Padding(
-                padding: EdgeInsets.only(right: ScreenUtil().setWidth(20)),
-                child: SvgPicture.asset('images/Client/ic_calendar.svg'),
-              )
-            ],
-          ),
-        ),
+            width: screenWidth(context),
+            height: ScreenUtil().setHeight(46),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColor.ColorBorder),
+                color: Colors.white),
+            child: InkWell(
+              onTap: () {
+                DatePicker()
+                    .selectDate('yyyy/MM/dd', selectedHearingDate, context)
+                    .then((selectedDate) => setState(() {
+                          caseHiringDate = selectedDate['selectedDate'];
+                          selectedHearingDate = selectedDate['date'];
+                        }));
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                      style: ButtonStyle(
+                        overlayColor: MaterialStateColor.resolveWith(
+                            (states) => Colors.transparent),
+                      ),
+                      child: Text(
+                        (caseHiringDate == null)
+                            ? 'YYYY/MM/DD'
+                            : caseHiringDate,
+                        style: appThemeTextStyle(14,
+                            textColor: (caseHiringDate != null)
+                                ? Colors.black
+                                : AppColor.ColorGrayTextFieldHint),
+                      )),
+                  Padding(
+                    padding: EdgeInsets.only(right: ScreenUtil().setWidth(20)),
+                    child: SvgPicture.asset('images/Client/ic_calendar.svg'),
+                  )
+                ],
+              ),
+            )),
       ]),
     );
   }
@@ -425,7 +459,7 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                     Padding(
                       padding: EdgeInsets.only(left: 10),
                       child: Text(
-                        'John Smith Case pdf, JPEG, PNG…',
+                        '${userInfo['userName']} Case pdf, JPEG, PNG…',
                         style: appThemeTextStyle(14),
                       ),
                     ),
@@ -438,11 +472,11 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                 ),
               ),
               Container(
-                width: ScreenUtil().setWidth(46),
+                width: ScreenUtil().setHeight(46),
                 height: ScreenUtil().setHeight(46),
                 decoration: BoxDecoration(
                     borderRadius:
-                        BorderRadius.circular(ScreenUtil().setWidth(46) / 2),
+                        BorderRadius.circular(ScreenUtil().setHeight(46) / 2),
                     border: Border.all(color: AppColor.ColorBorder),
                     color: Colors.white),
                 child: IconButton(
@@ -518,32 +552,112 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
     );
   }
 
+  Widget selectedTabView(bool isCaseList) {
+    return ListView.builder(
+        itemCount:
+            (isCaseList) ? selectedCaseList.length : selectedFilesList.length,
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          return Container(
+            width: screenWidth(context),
+            child: Card(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.all(5),
+                      child: Text(
+                        (isCaseList)
+                            ? selectedCaseList[index].name
+                            : selectedFilesList[index]['name'],
+                        style: appThemeTextStyle(13,
+                            textColor: AppColor.ColorDarkGray),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(right: 10),
+                    child: InkWell(
+                      child: Icon(
+                        Icons.cancel_rounded,
+                        color: AppColor.ColorDarkGray,
+                      ),
+                      onTap: () {
+                        setState(() {
+                          if (isCaseList)
+                            selectedCaseList.removeAt(index);
+                          else
+                            selectedFilesList.removeAt(index);
+                        });
+                      },
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   _pressedOnAddFile() {
     FilePickerView().openFilePicker().then((selectedFile) {
       setState(() {
-        List<Map<String, dynamic>> files = selectedFile;
+        List<dynamic> files = selectedFile;
         selectedFilesList.add(files.first);
       });
     });
   }
 
-  _pressedOnSubmit() {}
+  _pressedOnSubmit() {
+    if (selectedState == null) {
+      AlertView().showAlert(Messages.CBlankState, context);
+    } else if (selectedCounty == null) {
+      AlertView().showAlert(Messages.CBlankCounty, context);
+    } else if (selectedCaseList.length == 0) {
+      AlertView().showAlert(Messages.CBlankCase, context);
+    } else if (txtCasePortionController.text.isEmpty) {
+      AlertView().showAlert(Messages.CBlankCasePortion, context);
+    } else if (txtRegistrationNoteController.text.isEmpty) {
+      AlertView().showAlert(Messages.CBlankRegistrationNote, context);
+    } else if (caseDate == null) {
+      AlertView().showAlert(Messages.CBlankCaseDate, context);
+    } else if (caseTime == null) {
+      AlertView().showAlert(Messages.CBlankCaseTime, context);
+    } else if (caseHiringDate == null) {
+      AlertView().showAlert(Messages.CBlankHearingDate, context);
+    } else if (selectedFilesList.length == 0) {
+      AlertView().showAlert(Messages.CBlankAttachment, context);
+    } else if (!isSelectedTermsCondition) {
+      AlertView().showAlert(Messages.CAcceptTermsCondition, context);
+    } else {
+      createCase();
+    }
+  }
 
   navigateToCaseList(bool isCriminal) async {
-    if (isCriminal)
-      Navigator.push(
+    if (isCriminal) {
+      final criminalData = await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => CaseListScreen('Criminal Cases', 0),
             fullscreenDialog: true),
-      ).then((value) => selectedCriminalCase = value);
-    else
-      Navigator.push(
+      );
+
+      setState(() {
+        if (criminalData != null) selectedCaseList = criminalData;
+      });
+    } else {
+      final civilData = await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => CaseListScreen('Civil Cases', 1),
             fullscreenDialog: true),
-      ).then((value) => selectedCriminalCase = value);
+      );
+
+      setState(() {
+        if (civilData != null) selectedCaseList = civilData;
+      });
+    }
   }
 
   navigateToCustomCaseScreen() async {
@@ -607,5 +721,67 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
             ),
           );
         });
+  }
+
+  createCase() {
+    String date = DateFormat('yyyy-MM-dd').format(selectedCaseDate);
+    String hearingDate = DateFormat('yyyy-MM-dd').format(selectedHearingDate);
+
+    List<dynamic> caseList = [];
+
+    for (dynamic item in selectedCaseList) {
+      print('Param - $item');
+      caseList.add({'id': item.id, 'name': item.name});
+    }
+
+    Map<String, dynamic> params = {
+      'stateId': selectedState.id.toString(),
+      'countyId': selectedCounty.countyId.toString(),
+      'caseTypeId': caseType.toString(),
+      'caseType': (caseType == 2) ? customCase : caseList.toString(),
+      'casePortion': txtCasePortionController.text,
+      'registrationNote': txtRegistrationNoteController.text,
+      'caseDateTime': '$date $caseTime',
+      'hearingDate': hearingDate,
+    };
+
+    List<dynamic> attachmentList =
+        selectedFilesList.map((file) => file['path']).toList();
+
+    LoadingView().showLoaderWithTitle(true, context);
+    createCaseBloc.createCase(params, attachmentList);
+
+    createCaseBloc.createCaseStream.listen((snapshot) {
+      switch (snapshot.status) {
+        case Status.Loading:
+          return LoadingView(loadingMessage: snapshot.message);
+
+        case Status.Done:
+          LoadingView().showLoaderWithTitle(false, context);
+
+          if (snapshot.data['meta']['status'] == 1) {
+            AlertView().showAlertView(
+                context,
+                snapshot.data['meta']['message'],
+                () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  LawyerListScreen(LawyerListType.Hire)))
+                    });
+          } else {
+            AlertView().showAlertView(context, snapshot.data['meta']['message'],
+                () => {Navigator.of(context).pop()});
+          }
+          break;
+
+        case Status.Error:
+          LoadingView().showLoaderWithTitle(false, context);
+          AlertView().showAlertView(
+              context, snapshot.message, () => {Navigator.of(context).pop()});
+          break;
+      }
+    });
   }
 }

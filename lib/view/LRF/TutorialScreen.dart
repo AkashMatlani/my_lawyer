@@ -243,14 +243,18 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   _pressedOnSkip() {
-    if (currentPageNotifier.value == 2) {
-      return;
-    }
 
-    setState(() {
-      currentPageNotifier.value += 1;
-      pageController.animateToPage(currentPageNotifier.value,
-          duration: Duration(milliseconds: 100), curve: Curves.easeIn);
-    });
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => SignInScreen(widget.userType)));
+
+    // if (currentPageNotifier.value == 2) {
+    //   return;
+    // }
+    //
+    // setState(() {
+    //   currentPageNotifier.value += 1;
+    //   pageController.animateToPage(currentPageNotifier.value,
+    //       duration: Duration(milliseconds: 100), curve: Curves.easeIn);
+    // });
   }
 }

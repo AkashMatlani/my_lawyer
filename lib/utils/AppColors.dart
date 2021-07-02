@@ -16,5 +16,7 @@ class AppColor {
   static const ColorBorder = Color.fromRGBO(230, 230, 230, 1);
   static const ColorArrow = Color.fromRGBO(125, 132, 161, 1);
   static const ColorYellowSegment = Color.fromRGBO(244, 197, 69, 1);
+  static const ColorAttachmentGray = Color.fromRGBO(247, 247, 247, 1);
+
 
 }

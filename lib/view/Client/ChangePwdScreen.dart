@@ -13,6 +13,7 @@ import 'package:my_lawyer/utils/CommonStuff.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/utils/StringExtension.dart';
+import 'package:my_lawyer/view/LRF/UserSelectionScreen.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -51,9 +52,10 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
             style: appThemeTextStyle(20,
                 fontWeight: FontWeight.w600, textColor: Colors.black)),
         leading: Builder(
-          builder: (context) => IconButton(
-              onPressed: () => Scaffold.of(context).openDrawer(),
-              icon: SvgPicture.asset('images/Sidebar/ic_burger.svg')),
+          builder: (context) =>
+              IconButton(
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                  icon: SvgPicture.asset('images/Sidebar/ic_burger.svg')),
         ),
       ),
       drawer: SideBarView(),
@@ -66,15 +68,15 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
       padding: EdgeInsets.only(left: 30, right: 30, top: 12),
       child: Form(
           child: MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        child: ListView(children: [
-          txtFieldPwd('Old Password', txtOldPwdController),
-          txtFieldPwd('New Password', txtNewPwdController),
-          txtFieldPwd('Confirm Password', txtConfirmPwdController),
-          submitBtn()
-        ]),
-      )),
+            context: context,
+            removeTop: true,
+            child: ListView(children: [
+              txtFieldPwd('Old Password', txtOldPwdController),
+              txtFieldPwd('New Password', txtNewPwdController),
+              txtFieldPwd('Confirm Password', txtConfirmPwdController),
+              submitBtn()
+            ]),
+          )),
     );
   }
 
@@ -142,19 +144,25 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
 
           if (snapshot.data['meta']['status'] == 1) {
             AlertView().showAlertView(
-                context, snapshot.data['meta']['message'], () => {logOut()});
-          } else {
-            AlertView().showAlertView(context, snapshot.data['meta']['message'],
-                () => {Navigator.of(context).pop()});
-          }
-          break;
-
-        case Status.Error:
-          LoadingView().showLoaderWithTitle(false, context);
-          AlertView().showAlertView(
-              context, snapshot.message, () => {Navigator.of(context).pop()});
-          break;
+                context, snapshot.data['meta']['message'], () => {
+            logOut(),
+                Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => UserSelectionScreen(true)))
+          });
+      } else {
+      AlertView().showAlertView(context, snapshot.data['meta']['message'],
+      () => {Navigator.of(context).pop()});
       }
+      break;
+
+      case Status.Error:
+      LoadingView().showLoaderWithTitle(false, context);
+      AlertView().showAlertView(
+      context, snapshot.message, () => {Navigator.of(context).pop()});
+      break;
+    }
     });
   }
 }
