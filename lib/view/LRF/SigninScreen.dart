@@ -345,7 +345,7 @@ class _SignInScreenState extends State<SignInScreen> {
               'email': userInfo.email,
               'about': userInfo.about
             }).then((value) {
-              if (widget.userType == UserType.User) {
+              if (userInfo.userType == UserType.User) {
                 _navigateToLawyerHomeScreen();
               } else {
                 _navigateToClientHomeScreen();

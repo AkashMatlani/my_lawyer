@@ -28,4 +28,11 @@ class Messages {
   static const CBlankAttachment = 'Please upload attachment.';
   static const CAcceptTermsCondition = 'Please accept terms & condition.';
 
+  static const CBlankAmount = 'Please enter amount.';
+  static const CBlankStartDate = 'Please select start date to show your bid.';
+  static const CBlankStartTime = 'Please select start time to show your bid.';
+  static const CBlankEndDate = 'Please select end date to show your bid.';
+  static const CBlankEndTime = 'Please select end time to show your bid.';
+
+  static const CSentProposal = 'Sent proposal successfully.';
 }

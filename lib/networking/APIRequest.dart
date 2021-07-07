@@ -16,6 +16,9 @@ class APITag {
   static const criminalList = 'criminalList';
   static const civilList = 'civilList';
   static const createCase = 'createCase';
+  static const caseList = 'caseList';
+  static const sendProposal = 'sendProposal';
+  static const lawyerList = 'lawyerList';
 }
 
 class APIRequestHelper {
@@ -79,8 +82,11 @@ class APIRequestHelper {
     return responseJson;
   }
 
-  Future<dynamic> postMultiFormData(String apiTag,
-      Map<String, dynamic> parameters, List<dynamic> files, String fileParamName) async {
+  Future<dynamic> postMultiFormData(
+      String apiTag,
+      Map<String, dynamic> parameters,
+      List<dynamic> files,
+      String fileParamName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
 
@@ -93,7 +99,6 @@ class APIRequestHelper {
       var request = http.MultipartRequest('POST', Uri.parse(baseURL + apiTag));
 
       if (files.length > 0) {
-
         if (files.length == 1) {
           var multiPart =
               await http.MultipartFile.fromPath(fileParamName, files.first);

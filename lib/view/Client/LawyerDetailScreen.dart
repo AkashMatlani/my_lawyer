@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/view/Client/PaymentScreen.dart';
 
 class LawyerDetailScreen extends StatefulWidget {
   @override
@@ -172,8 +173,9 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
                   // width: screenWidth(context),
                   height: ScreenUtil().setHeight(52),
                   child: GenericButton().appThemeButton(
-                      'Accept', 16, Colors.white, FontWeight.w700, () {},
-                      borderRadius: 6)),
+                      'Accept', 16, Colors.white, FontWeight.w700, () {
+                    _pressedOnAccept();
+                  }, borderRadius: 6)),
             ),
             SizedBox(
               width: 10,
@@ -183,10 +185,21 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
                   // width: screenWidth(context),
                   height: ScreenUtil().setHeight(52),
                   child: GenericButton().appThemeButton(
-                      'Cancel', 16, Colors.black, FontWeight.w700, () {},
-                      borderRadius: 6, bgColor: AppColor.ColorGrayDottedLine)),
+                      'Cancel', 16, Colors.black, FontWeight.w700, () {
+                    _pressedOnCancel();
+                  }, borderRadius: 6, bgColor: AppColor.ColorGrayDottedLine)),
             )
           ],
         ));
+  }
+
+  _pressedOnAccept() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => PaymentScreen()));
+  }
+
+  _pressedOnCancel() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => PaymentScreen()));
   }
 }

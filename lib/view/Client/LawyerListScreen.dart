@@ -3,15 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:my_lawyer/bloc/Client/LawyerListBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/LawyerListModel.dart';
+import 'package:my_lawyer/networking/APIResponse.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/CommonWidgets.dart';
 import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/utils/LoadingView.dart';
+import 'package:my_lawyer/utils/NetworkImage.dart';
 import 'package:my_lawyer/view/Client/LawyerDetailScreen.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
 
 class LawyerListScreen extends StatefulWidget {
-  int selectedSegmentOption = 0;
+  int selectedSegmentOption = LawyerListType.Hire;
 
   LawyerListScreen(this.selectedSegmentOption);
 
@@ -26,6 +33,28 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
     'images/Client/temp_ad3.jpeg',
     'images/Client/temp_ad4.jpeg'
   ];
+
+  int currentPage = 1;
+  int totalCount = 0;
+  List<LawyerDataModel> lawyerList = [];
+
+  ScrollController scrollController = ScrollController();
+  LawyerListBloc lawyerListBloc = LawyerListBloc();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    pullToRefresh();
+
+    scrollController.addListener(() {
+      if (scrollController.offset ==
+          scrollController.position.maxScrollExtent) {
+        loadMore();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +81,11 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
           right: ScreenUtil().setWidth(20),
           top: 20),
       child: Column(
-        children: [sliderSegementView(), advertisementView(), lawyerList()],
+        children: [
+          sliderSegementView(),
+          advertisementView(),
+          Expanded(child: lawyerListStreamBuilder())
+        ],
       ),
     );
   }
@@ -68,24 +101,26 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
         thumbColor: AppColor.ColorYellowSegment,
         groupValue: widget.selectedSegmentOption,
         children: <int, Widget>{
-          0: Text(
+          LawyerListType.Hire: Text(
             'Hire',
             style: appThemeTextStyle(16,
                 fontWeight: FontWeight.w700,
-                textColor: (widget.selectedSegmentOption == 0)
+                textColor: (widget.selectedSegmentOption == LawyerListType.Hire)
                     ? Colors.white
                     : Color.fromRGBO(137, 143, 170, 1)),
           ),
-          1: Text('Save',
+          LawyerListType.Save: Text('Save',
               style: appThemeTextStyle(16,
                   fontWeight: FontWeight.w700,
-                  textColor: (widget.selectedSegmentOption == 1)
-                      ? Colors.white
-                      : Color.fromRGBO(137, 143, 170, 1)))
+                  textColor:
+                      (widget.selectedSegmentOption == LawyerListType.Save)
+                          ? Colors.white
+                          : Color.fromRGBO(137, 143, 170, 1)))
         },
         onValueChanged: (selectedValue) {
           setState(() {
             widget.selectedSegmentOption = selectedValue as int;
+            pullToRefresh();
           });
         },
       ),
@@ -115,19 +150,79 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
     );
   }
 
-  Widget lawyerList() {
-    return Flexible(
-      flex: 1,
-      child: Padding(
-        padding: EdgeInsets.only(top: ScreenUtil().setHeight(10)),
-        child: ListView.builder(itemBuilder: (context, index) {
-          return lawyerInfoView();
-        }),
-      ),
+  Widget lawyerListStreamBuilder() {
+    return RefreshIndicator(
+        backgroundColor: AppColor.ColorRed,
+        color: Colors.white,
+        child: StreamBuilder<APIResponse<LawyerListModel>>(
+            stream: lawyerListBloc.lawyerListStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                switch (snapshot.data.status) {
+                  case Status.Loading:
+                    {
+                      if (currentPage == 1) {
+                        return Center(
+                          child: LoadingView().loader(),
+                        );
+                      } else {
+                        if (lawyerList.length > 0) {
+                          return lawyerListing();
+                        }
+                      }
+                    }
+                    break;
+
+                  case Status.Done:
+                    {
+                      if (currentPage == 1) {
+                        lawyerList.clear();
+                      }
+
+                      if (lawyerList.length <= totalCount) {
+                        currentPage = currentPage + 1;
+                      }
+
+                      if (snapshot.data.data.data.length > 0) {
+                        lawyerList = lawyerList + snapshot.data.data.data;
+                        totalCount = snapshot.data.data.meta.count;
+                      }
+
+                      if (lawyerList.length > 0) {
+                        return lawyerListing();
+                      } else {
+                        return widgetNotAvailableData(
+                            'Case not found for selected type.');
+                      }
+                      break;
+                    }
+
+                  case Status.Error:
+                    AlertView()
+                        .showAlertView(context, snapshot.data.message, () {});
+                }
+              } else {
+                return showLoaderInList();
+              }
+            }),
+        onRefresh: () async {
+          pullToRefresh();
+        });
+  }
+
+  Widget lawyerListing() {
+    return Padding(
+      padding: EdgeInsets.only(top: ScreenUtil().setHeight(10)),
+      child: ListView.builder(
+          controller: scrollController,
+          itemCount: lawyerList.length,
+          itemBuilder: (context, index) {
+            return lawyerInfoView(lawyerList[index]);
+          }),
     );
   }
 
-  Widget lawyerInfoView() {
+  Widget lawyerInfoView(LawyerDataModel lawyerInfo) {
     return Padding(
         padding: EdgeInsets.only(
           top: ScreenUtil().setHeight(10),
@@ -149,35 +244,38 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  lawyerProfilePicView(),
-                  lawyerNameAndAbout(),
-                  favoriteBtn(),
+                  lawyerProfilePicView(lawyerInfo.userProfile),
+                  lawyerNameAndAbout(lawyerInfo.about, lawyerInfo.lawyerName),
+                  favoriteBtn(lawyerInfo.isFav),
                 ],
               ),
-              bidRateAndLike(),
+              bidRateAndLike(lawyerInfo.bidAmount, lawyerInfo.isLike,
+                  lawyerInfo.likeCount),
               viewDetailBtn()
             ],
           ),
         ));
   }
 
-  Widget lawyerProfilePicView() {
+  Widget lawyerProfilePicView(String userProfile) {
     return Padding(
       padding: EdgeInsets.only(
           top: ScreenUtil().setHeight(10), left: ScreenUtil().setHeight(10)),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(ScreenUtil().setHeight(60) / 2),
-        child: Image(
-          image: AssetImage('images/Client/temp_ad1.jpeg'),
-          fit: BoxFit.fill,
-          width: ScreenUtil().setHeight(60),
-          height: ScreenUtil().setHeight(60),
-        ),
-      ),
+          borderRadius: BorderRadius.circular(ScreenUtil().setHeight(60) / 2),
+          child: (userProfile == '')
+              ? Image(
+                  image: AssetImage(AppImage.CProfileImg),
+                  fit: BoxFit.fill,
+                  width: ScreenUtil().setHeight(60),
+                  height: ScreenUtil().setHeight(60),
+                )
+              : ImageNetwork()
+                  .loadNetworkImage(userProfile, ScreenUtil().setHeight(60))),
     );
   }
 
-  Widget lawyerNameAndAbout() {
+  Widget lawyerNameAndAbout(String about, String name) {
     return Expanded(
         child: Padding(
       padding: EdgeInsets.only(
@@ -188,12 +286,12 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Karen A Klein',
+            name,
             style: appThemeTextStyle(16,
                 fontWeight: FontWeight.w700, textColor: Colors.black),
           ),
           Text(
-            'Outstanding attorney handling discrimination & business disputes.',
+            about,
             style: TextStyle(),
           ),
         ],
@@ -201,26 +299,19 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
     ));
   }
 
-  Widget favoriteBtn() {
+  Widget favoriteBtn(bool isFav) {
     return InkWell(
-      child: SvgPicture.asset('images/Client/ic_fav.svg'),
+      child: SvgPicture.asset(
+        'images/Client/ic_fav.svg',
+        color: isFav ? AppColor.ColorRed : Colors.transparent,
+      ),
       onTap: () {
         _pressedOnFavourite();
       },
     );
   }
 
-  Widget lawyerAboutView() {
-    return Padding(
-      padding: EdgeInsets.only(top: 5),
-      child: Text(
-        'Outstanding attorney handling discrimination & business disputes.',
-        style: TextStyle(),
-      ),
-    );
-  }
-
-  Widget bidRateAndLike() {
+  Widget bidRateAndLike(String amount, bool isLike, int likeCount) {
     return Padding(
       padding: EdgeInsets.only(
           left: ScreenUtil().setWidth(17),
@@ -246,7 +337,7 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
                     style: appThemeTextStyle(13, textColor: Colors.black),
                   ),
                   Text(
-                    r'$5000',
+                    '\$' + amount,
                     style: appThemeTextStyle(20,
                         textColor: Colors.black, fontWeight: FontWeight.w700),
                   ),
@@ -275,12 +366,15 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
                           height: 20,
                           child: Image(
                             image: AssetImage('images/Client/ic_like.png'),
+                            color: isLike
+                                ? AppColor.ColorRed
+                                : AppColor.ColorLikeGray,
                           ),
                         ),
                         Padding(
                           padding: EdgeInsets.only(left: 5),
                           child: Text(
-                            '489',
+                            '$likeCount',
                             style: appThemeTextStyle(15,
                                 textColor: Colors.black,
                                 fontWeight: FontWeight.w700),
@@ -317,4 +411,26 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
   }
 
   _pressedOnFavourite() {}
+
+  pullToRefresh() {
+    currentPage = 1;
+    totalCount = 0;
+    getLawyerListByType();
+  }
+
+  loadMore() {
+    if (lawyerList.length <= totalCount) {
+      getLawyerListByType();
+    }
+  }
+
+  getLawyerListByType() {
+    Map<String, dynamic> params = {
+      'type': widget.selectedSegmentOption.toString(),
+      'currentPage': currentPage.toString(),
+      'limit': '5'
+    };
+
+    lawyerListBloc.getLawyerList(params);
+  }
 }

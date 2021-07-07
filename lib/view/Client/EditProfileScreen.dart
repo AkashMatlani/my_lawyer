@@ -109,7 +109,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         )
                       : (userInfo['userProfile'] != "")
                           ? ImageNetwork()
-                              .loadNetworkImage(userInfo['userProfile'])
+                              .loadNetworkImage(userInfo['userProfile'], ScreenUtil().setHeight(100))
                           : Image(
                               image:
                                   AssetImage('images/Client/ic_profile.jpeg'))),

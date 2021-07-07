@@ -38,6 +38,12 @@ class LawyerListType {
   static const Save = 1;
 }
 
+class CaseType {
+  static const Criminal = 1;
+  static const Civil = 2;
+  static const Custom = 3;
+}
+
 class SideMenuOption {
   static const HireLawyer = 'Hire Lawyer';
   static const SavedCases = 'Saved Cases';
@@ -46,4 +52,9 @@ class SideMenuOption {
   static const SearchCases = 'Search Cases';
   static const EditProfile = 'Edit Profile';
   static const ChangePassword = 'Change Password';
+}
+
+class AppImage {
+
+  static const CProfileImg = 'images/Client/ic_profile.jpeg';
 }

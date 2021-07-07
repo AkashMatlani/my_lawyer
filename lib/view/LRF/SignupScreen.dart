@@ -92,7 +92,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   signUpBtn(),
                   txtOrConnectWith(),
                   googleSignInBtn(),
-                  // if (Platform.isIOS) appleSignInBtn(),
                   txtDontHaveAccount()
                 ],
               ),

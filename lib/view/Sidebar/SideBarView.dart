@@ -17,6 +17,7 @@ import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
 import 'package:my_lawyer/view/Client/ViewBidScreen.dart';
 import 'package:my_lawyer/view/LRF/SigninScreen.dart';
 import 'package:my_lawyer/view/LRF/UserSelectionScreen.dart';
+import 'package:my_lawyer/view/Lawyer/SearchCaseScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SideBarView extends StatefulWidget {
@@ -139,73 +140,84 @@ class _SideBarViewState extends State<SideBarView> {
               borderRadius:
                   BorderRadius.only(bottomRight: Radius.circular(54))),
         ),
-        for (Map menuInfo in arrMenuList)
-          ListTile(
-            title: Row(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                      left: ScreenUtil().setWidth(15),
-                      right: ScreenUtil().setWidth(15)),
-                  child: ImageIcon(
-                    AssetImage(menuInfo['img']),
-                    color: Color.fromRGBO(137, 143, 170, 1),
-                  ), //SvgPicture.asset(menuInfo['img']),
+
+        ListView(
+          shrinkWrap: true,
+          children: [
+            for (Map menuInfo in arrMenuList)
+              ListTile(
+                title: Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                          left: ScreenUtil().setWidth(15),
+                          right: ScreenUtil().setWidth(15)),
+                      child: ImageIcon(
+                        AssetImage(menuInfo['img']),
+                        color: Color.fromRGBO(137, 143, 170, 1),
+                      ), //SvgPicture.asset(menuInfo['img']),
+                    ),
+                    Text(
+                      menuInfo['name'],
+                      style: appThemeTextStyle(16, textColor: Colors.black),
+                    )
+                  ],
                 ),
-                Text(
-                  menuInfo['name'],
-                  style: appThemeTextStyle(16, textColor: Colors.black),
-                )
-              ],
-            ),
-            onTap: () {
-              switch (menuInfo['name']) {
-                case SideMenuOption.HireLawyer:
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              LawyerListScreen(LawyerListType.Hire)));
-                  break;
-                case SideMenuOption.SavedCases:
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              LawyerListScreen(LawyerListType.Save)));
-                  break;
+                onTap: () {
+                  switch (menuInfo['name']) {
+                    case SideMenuOption.HireLawyer:
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  LawyerListScreen(LawyerListType.Hire)));
+                      break;
+                    case SideMenuOption.SavedCases:
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  LawyerListScreen(LawyerListType.Save)));
+                      break;
 
-                case SideMenuOption.CreateNewCase:
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CreateCaseScreen()));
-                  break;
+                    case SideMenuOption.CreateNewCase:
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CreateCaseScreen()));
+                      break;
 
-                case SideMenuOption.ViewBids:
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => ViewBidScreen()));
-                  break;
+                    case SideMenuOption.ViewBids:
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => ViewBidScreen()));
+                      break;
 
-                case SideMenuOption.EditProfile:
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EditProfileScreen()));
-                  break;
+                    case SideMenuOption.EditProfile:
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EditProfileScreen()));
+                      break;
 
-                case SideMenuOption.ChangePassword:
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ChangePwdScreen()));
-                  break;
+                    case SideMenuOption.ChangePassword:
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ChangePwdScreen()));
+                      break;
 
-                case SideMenuOption.SearchCases:
-                  break;
-              }
-            },
-          ),
+                    case SideMenuOption.SearchCases:
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SearchCasesScreen()));
+                      break;
+                  }
+                },
+              ),
+          ],
+        ),
+
         Spacer(),
         logout()
       ]),
@@ -249,10 +261,10 @@ class _SideBarViewState extends State<SideBarView> {
                         BorderRadius.circular(ScreenUtil().setHeight(72) / 2),
                     child: (userInfo == null)
                         ? Image(
-                            image: AssetImage('images/Client/ic_profile.jpeg'))
+                            image: AssetImage(AppImage.CProfileImg))
                         : (userInfo['userProfile'] != '')
                             ? ImageNetwork()
-                                .loadNetworkImage(userInfo['userProfile'])
+                                .loadNetworkImage(userInfo['userProfile'], ScreenUtil().setHeight(72))
                             : Image(
                                 image: AssetImage(
                                     'images/Client/ic_profile.jpeg'))))));

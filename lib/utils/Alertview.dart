@@ -59,4 +59,9 @@ class AlertView {
     AlertView()
         .showAlertView(context, message, () => {Navigator.of(context).pop()});
   }
+
+  void showToast(BuildContext context, String message) {
+    SnackBar snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 }

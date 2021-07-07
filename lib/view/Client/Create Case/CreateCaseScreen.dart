@@ -212,17 +212,17 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
 
                   switch (selectedCaseType) {
                     case 'Criminal Case':
-                      caseType = 0;
+                      caseType = CaseType.Criminal;
                       navigateToCaseList(true);
                       break;
 
                     case 'Civil Case':
-                      caseType = 1;
+                      caseType = CaseType.Civil;
                       navigateToCaseList(false);
                       break;
 
                     case 'Custom Case':
-                      caseType = 2;
+                      caseType = CaseType.Custom;
                       navigateToCustomCaseScreen();
                       break;
                   }

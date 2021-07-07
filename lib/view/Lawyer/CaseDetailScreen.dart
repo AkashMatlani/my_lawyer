@@ -1,16 +1,24 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:my_lawyer/bloc/Lawyer/SendProposalBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/networking/APIResponse.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/AppMessages.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/DatePicker.dart';
+import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/view/Lawyer/CaseInfoView.dart';
 
 class CaseDetailScreen extends StatefulWidget {
+  int caseId;
+
+  CaseDetailScreen(this.caseId);
+
   @override
   _CaseDetailScreenState createState() => _CaseDetailScreenState();
 }
@@ -18,11 +26,24 @@ class CaseDetailScreen extends StatefulWidget {
 class _CaseDetailScreenState extends State<CaseDetailScreen> {
   var txtAmountController = TextEditingController();
 
-  var timeToShowBid;
-  var dateToShowBid;
+  var strStartTimeToShowBid;
+  var strEndTimeToShowBid;
+  var strStartDateToShowBid;
+  var strEndDateToShowBid;
 
-  DateTime selectedDateToShowBid = DateTime.now();
-  TimeOfDay selectedTimeToShowBid = TimeOfDay(hour: 00, minute: 00);
+  DateTime selectedStartDateToShowBid = DateTime.now();
+  DateTime selectedEndDateToShowBid = DateTime.now();
+  TimeOfDay selectedStartTimeToShowBid = TimeOfDay(hour: 00, minute: 00);
+  TimeOfDay selectedEndTimeToShowBid = TimeOfDay(hour: 00, minute: 00);
+
+  SendProposalBloc sendProposalBloc;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    sendProposalBloc = SendProposalBloc();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,21 +60,21 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
   Widget caseDetailView() {
     return Container(
         child: Padding(
-      padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-      child: ListView(
-        children: [
-          clientProfileAndName(),
-          txtCaseDescription(),
-          txtDescriptionView(),
-          attachmentView(),
-          Container(height: 1, color: Color.fromRGBO(151, 151, 151, 0.2)),
-          txtFieldAmount(),
-          dateToShowBidView(),
-          timeToShowBidView(),
-          sendProposalAndCancelBtn()
-        ],
-      ),
-    ));
+          padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
+          child: ListView(
+            children: [
+              clientProfileAndName(),
+              txtCaseDescription(),
+              txtDescriptionView(),
+              attachmentView(),
+              Container(height: 1, color: Color.fromRGBO(151, 151, 151, 0.2)),
+              txtFieldAmount(),
+              bidStartDateAndTime(),
+              bidEndDateAndTime(),
+              sendProposalAndCancelBtn()
+            ],
+          ),
+        ));
   }
 
   Widget clientProfileAndName() {
@@ -130,11 +151,12 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
             SizedBox(
               height: ScreenUtil().setHeight(46),
               child: appThemeTextField('Enter Your Bid Amount',
-                  TextInputType.name, txtAmountController,
+                  TextInputType.number, txtAmountController,
                   borderColor: AppColor.ColorBorder,
                   fontSize: 14,
                   fillColor: Colors.white,
-                  filled: true),
+                  filled: true
+              ),
             ),
           ],
         ));
@@ -210,104 +232,239 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
     );
   }
 
-  Widget dateToShowBidView() {
+  Widget bidStartDateAndTime() {
     return Padding(
-      padding: EdgeInsets.only(
-        top: ScreenUtil().setHeight(20),
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        placeHolderText('Date'),
-        Container(
-            width: screenWidth(context),
-            height: ScreenUtil().setHeight(46),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColor.ColorBorder),
-                color: Colors.white),
-            child: InkWell(
-              onTap: () {
-                DatePicker()
-                    .selectDate('yyyy/MM/dd', selectedDateToShowBid, context)
-                    .then((selectedDate) => setState(() {
-                          dateToShowBid = selectedDate['selectedDate'];
-                          selectedDateToShowBid = selectedDate['date'];
-                        }));
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                      style: ButtonStyle(
-                        overlayColor: MaterialStateColor.resolveWith(
-                            (states) => Colors.transparent),
-                      ),
-                      child: Text(
-                        (dateToShowBid == null) ? 'YYYY/MM/DD' : dateToShowBid,
-                        style: appThemeTextStyle(14,
-                            textColor: (dateToShowBid != null)
-                                ? Colors.black
-                                : AppColor.ColorGrayTextFieldHint),
-                      )),
-                  Padding(
-                    padding: EdgeInsets.only(right: ScreenUtil().setWidth(20)),
-                    child: SvgPicture.asset('images/Client/ic_calendar.svg'),
-                  )
-                ],
-              ),
-            )),
-      ]),
-    );
+        padding: EdgeInsets.only(
+          top: ScreenUtil().setHeight(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            placeHolderText('Set Start Duration to Show Your Bid'),
+            Container(
+                width: screenWidth(context),
+                height: ScreenUtil().setHeight(46),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColor.ColorBorder),
+                    color: Colors.white),
+                child: Row(
+                  children: [
+                    Flexible(
+                        flex: 1,
+                        child: Padding(
+                            padding: EdgeInsets.only(
+                                right: ScreenUtil().setWidth(15)),
+                            child: InkWell(
+                              onTap: () {
+                                DatePicker()
+                                    .selectDate('yyyy/MM/dd',
+                                    selectedStartDateToShowBid, context)
+                                    .then((selectedDate) =>
+                                    setState(() {
+                                      strStartDateToShowBid =
+                                      selectedDate['selectedDate'];
+                                      selectedStartDateToShowBid =
+                                      selectedDate['date'];
+                                    }));
+                              },
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  TextButton(
+                                      style: ButtonStyle(
+                                        overlayColor:
+                                        MaterialStateColor.resolveWith(
+                                                (states) => Colors.transparent),
+                                      ),
+                                      child: Text(
+                                        (strStartDateToShowBid == null)
+                                            ? 'YYYY/MM/DD'
+                                            : strStartDateToShowBid,
+                                        style: appThemeTextStyle(14,
+                                            textColor: (strStartDateToShowBid !=
+                                                null)
+                                                ? Colors.black
+                                                : AppColor
+                                                .ColorGrayTextFieldHint),
+                                      )),
+                                  SvgPicture.asset(
+                                      'images/Client/ic_calendar.svg')
+                                ],
+                              ),
+                            ))),
+                    Container(
+                      width: 1,
+                      height: ScreenUtil().setHeight(28),
+                      decoration: BoxDecoration(color: AppColor.ColorBorder),
+                    ),
+                    SizedBox(
+                        width: ScreenUtil().setWidth(130),
+                        child: Padding(
+                            padding: EdgeInsets.only(
+                                left: ScreenUtil().setWidth(15),
+                                right: ScreenUtil().setWidth(20)),
+                            child: InkWell(
+                              onTap: () {
+                                DatePicker()
+                                    .selectTime(
+                                    context, selectedStartTimeToShowBid)
+                                    .then((selectedTime) =>
+                                    setState(() {
+                                      strStartTimeToShowBid =
+                                      selectedTime['selectedTime'];
+                                      selectedStartTimeToShowBid =
+                                      selectedTime['time'];
+                                    }));
+                              },
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  TextButton(
+                                      style: ButtonStyle(
+                                        overlayColor:
+                                        MaterialStateColor.resolveWith(
+                                                (states) => Colors.transparent),
+                                      ),
+                                      child: Text(
+                                        (strStartTimeToShowBid == null)
+                                            ? 'HH:MM'
+                                            : strStartTimeToShowBid,
+                                        style: appThemeTextStyle(14,
+                                            textColor:
+                                            (strStartTimeToShowBid !=
+                                                null)
+                                                ? Colors.black
+                                                : AppColor
+                                                .ColorGrayTextFieldHint),
+                                      )),
+                                  SvgPicture.asset('images/Client/ic_clock.svg')
+                                ],
+                              ),
+                            )))
+                  ],
+                ))
+          ],
+        ));
   }
 
-  Widget timeToShowBidView() {
+  Widget bidEndDateAndTime() {
     return Padding(
-      padding: EdgeInsets.only(
-        top: ScreenUtil().setHeight(20),
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        placeHolderText('Set Duration to Show Your Bid'),
-        Container(
-            width: screenWidth(context),
-            height: ScreenUtil().setHeight(46),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColor.ColorBorder),
-                color: Colors.white),
-            child: InkWell(
-              onTap: () {
-                DatePicker()
-                    .selectTime(context, selectedTimeToShowBid)
-                    .then((selectedTime) => setState(() {
-                          timeToShowBid = selectedTime['selectedTime'];
-                          selectedTimeToShowBid = selectedTime['time'];
-                        }));
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                      style: ButtonStyle(
-                        overlayColor: MaterialStateColor.resolveWith(
-                            (states) => Colors.transparent),
-                      ),
-                      child: Text(
-                        (timeToShowBid == null)
-                            ? 'Select Hours'
-                            : timeToShowBid,
-                        style: appThemeTextStyle(14,
-                            textColor: (timeToShowBid != null)
-                                ? Colors.black
-                                : AppColor.ColorGrayTextFieldHint),
-                      )),
-                  Padding(
-                    padding: EdgeInsets.only(right: ScreenUtil().setWidth(20)),
-                    child: SvgPicture.asset('images/Client/ic_clock.svg'),
-                  )
-                ],
-              ),
-            )),
-      ]),
-    );
+        padding: EdgeInsets.only(
+          top: ScreenUtil().setHeight(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            placeHolderText('Case Date and Time'),
+            Container(
+                width: screenWidth(context),
+                height: ScreenUtil().setHeight(46),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColor.ColorBorder),
+                    color: Colors.white),
+                child: Row(
+                  children: [
+                    Flexible(
+                        flex: 1,
+                        child: Padding(
+                            padding: EdgeInsets.only(
+                                right: ScreenUtil().setWidth(15)),
+                            child: InkWell(
+                              onTap: () {
+                                DatePicker()
+                                    .selectDate('yyyy/MM/dd',
+                                    selectedEndDateToShowBid, context)
+                                    .then((selectedDate) =>
+                                    setState(() {
+                                      strEndDateToShowBid =
+                                      selectedDate['selectedDate'];
+                                      selectedEndDateToShowBid =
+                                      selectedDate['date'];
+                                    }));
+                              },
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  TextButton(
+                                      style: ButtonStyle(
+                                        overlayColor:
+                                        MaterialStateColor.resolveWith(
+                                                (states) => Colors.transparent),
+                                      ),
+                                      child: Text(
+                                        (strEndDateToShowBid == null)
+                                            ? 'YYYY/MM/DD'
+                                            : strEndDateToShowBid,
+                                        style: appThemeTextStyle(14,
+                                            textColor: (strEndDateToShowBid !=
+                                                null)
+                                                ? Colors.black
+                                                : AppColor
+                                                .ColorGrayTextFieldHint),
+                                      )),
+                                  SvgPicture.asset(
+                                      'images/Client/ic_calendar.svg')
+                                ],
+                              ),
+                            ))),
+                    Container(
+                      width: 1,
+                      height: ScreenUtil().setHeight(28),
+                      decoration: BoxDecoration(color: AppColor.ColorBorder),
+                    ),
+                    SizedBox(
+                        width: ScreenUtil().setWidth(130),
+                        child: Padding(
+                            padding: EdgeInsets.only(
+                                left: ScreenUtil().setWidth(15),
+                                right: ScreenUtil().setWidth(20)),
+                            child: InkWell(
+                              onTap: () {
+                                DatePicker()
+                                    .selectTime(
+                                    context, selectedEndTimeToShowBid)
+                                    .then((selectedTime) =>
+                                    setState(() {
+                                      strEndTimeToShowBid =
+                                      selectedTime['selectedTime'];
+                                      selectedEndTimeToShowBid =
+                                      selectedTime['time'];
+                                    }));
+                              },
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  TextButton(
+                                      style: ButtonStyle(
+                                        overlayColor:
+                                        MaterialStateColor.resolveWith(
+                                                (states) => Colors.transparent),
+                                      ),
+                                      child: Text(
+                                        (strEndTimeToShowBid == null)
+                                            ? 'HH:MM'
+                                            : strEndTimeToShowBid,
+                                        style: appThemeTextStyle(14,
+                                            textColor: (strEndTimeToShowBid !=
+                                                null)
+                                                ? Colors.black
+                                                : AppColor
+                                                .ColorGrayTextFieldHint),
+                                      )),
+                                  SvgPicture.asset('images/Client/ic_clock.svg')
+                                ],
+                              ),
+                            )))
+                  ],
+                ))
+          ],
+        ));
   }
 
   Widget sendProposalAndCancelBtn() {
@@ -318,10 +475,11 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
         children: [
           Expanded(
             child: SizedBox(
-                // width: screenWidth(context),
                 height: ScreenUtil().setHeight(52),
                 child: GenericButton().appThemeButton(
-                    'Send Proposal', 16, Colors.white, FontWeight.w700, () {},
+                    'Send Proposal', 16, Colors.white, FontWeight.w700, () {
+                  _pressedOnSendProposal();
+                },
                     borderRadius: 6)),
           ),
           SizedBox(
@@ -329,7 +487,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
           ),
           Expanded(
             child: SizedBox(
-                // width: screenWidth(context),
+              // width: screenWidth(context),
                 height: ScreenUtil().setHeight(52),
                 child: GenericButton().appThemeButton(
                     'Cancel', 16, Colors.black, FontWeight.w700, () {},
@@ -349,5 +507,65 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
             fontWeight: FontWeight.w600, textColor: Colors.black),
       ),
     );
+  }
+
+  _pressedOnSendProposal() {
+    if (txtAmountController.text.isEmpty) {
+      AlertView().showAlert(Messages.CBlankAmount, context);
+      return;
+    } else if (strStartDateToShowBid == null) {
+      AlertView().showAlert(Messages.CBlankStartDate, context);
+      return;
+    } else if (strStartTimeToShowBid == null) {
+      AlertView().showAlert(Messages.CBlankStartTime, context);
+      return;
+    } else if (strEndDateToShowBid == null) {
+      AlertView().showAlert(Messages.CBlankEndDate, context);
+      return;
+    } else if (strEndTimeToShowBid == null) {
+      AlertView().showAlert(Messages.CBlankEndTime, context);
+      return;
+    }
+
+    sendProposalAPI();
+  }
+
+  sendProposalAPI() {
+    Map<String, dynamic> params = {
+      'caseId': widget.caseId.toString(),
+      'amount': txtAmountController.text,
+      'bidStartDate': strStartDateToShowBid,
+      'bidStartTime': strStartTimeToShowBid,
+      'bidEndTime': strEndDateToShowBid,
+      'bidEndDate': strEndTimeToShowBid
+    };
+
+    LoadingView().showLoaderWithTitle(true, context);
+    sendProposalBloc.sendProposalToClient(params);
+
+    sendProposalBloc.sendProposalStream.listen((snapshot) {
+      switch (snapshot.status) {
+        case Status.Loading:
+          return LoadingView(loadingMessage: snapshot.message);
+
+        case Status.Done:
+          LoadingView().showLoaderWithTitle(false, context);
+
+          if (snapshot.data['meta']['status'] == 1) {
+            AlertView().showToast(context, Messages.CSentProposal);
+            Navigator.pop(context);
+          } else {
+            AlertView().showAlertView(context, snapshot.data['meta']['message'],
+                    () => {Navigator.of(context).pop()});
+          }
+          break;
+
+        case Status.Error:
+          LoadingView().showLoaderWithTitle(false, context);
+          AlertView().showAlertView(
+              context, snapshot.message, () => {Navigator.of(context).pop()});
+          break;
+      }
+    });
   }
 }
