@@ -21,7 +21,7 @@ class CaseTypeListModel {
 }
 
 class CaseDataModel {
-  int id;
+  int caseId;
   int clientId;
   String userName;
   String userProfile;
@@ -29,12 +29,12 @@ class CaseDataModel {
   String amount;
 
   CaseDataModel(
-      {this.id, this.clientId, this.userName, this.userProfile, this.caseType, this.amount});
+      {this.caseId, this.clientId, this.userName, this.userProfile, this.caseType, this.amount});
 
   factory CaseDataModel.fromJson(Map<String, dynamic> data) {
     return CaseDataModel(
-      id: data['id'],
-      clientId: data['clientId'],
+      caseId: data['caseId'],
+      clientId: data['userId'],
       userName: data['userName'],
       userProfile: data['userProfile'],
       caseType: data['caseType'],

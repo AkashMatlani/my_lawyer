@@ -4,7 +4,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/BidListModel.dart';
 import 'package:my_lawyer/models/CaseTypeListModel.dart';
+import 'package:my_lawyer/models/LawyerListModel.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/NetworkImage.dart';
@@ -14,8 +16,9 @@ import 'package:my_lawyer/view/Lawyer/CaseDetailScreen.dart';
 class CaseInfoView extends StatefulWidget {
   int userType;
   CaseDataModel caseInfo;
+  BidDataModel bidDetail;
 
-  CaseInfoView(this.userType, this.caseInfo);
+  CaseInfoView(int lawyer, {this.userType, this.caseInfo, this.bidDetail});
 
   @override
   _CaseInfoViewState createState() => _CaseInfoViewState();
@@ -24,6 +27,9 @@ class CaseInfoView extends StatefulWidget {
 class _CaseInfoViewState extends State<CaseInfoView> {
   @override
   Widget build(BuildContext context) {
+    print('Case Info - ${widget.caseInfo}');
+    print('Lawyer Info - ${widget.bidDetail}');
+
     return caseInfoView();
   }
 
@@ -63,7 +69,9 @@ class _CaseInfoViewState extends State<CaseInfoView> {
   Widget lawyerProfilePicView() {
     return ClipRRect(
         borderRadius: BorderRadius.circular(ScreenUtil().setHeight(65) / 2),
-        child: (widget.caseInfo.userProfile == '')
+        child: ((widget.caseInfo == null)
+                ? widget.bidDetail.userProfile == ''
+                : widget.caseInfo.userProfile == '')
             ? Image(
                 image: AssetImage(AppImage.CProfileImg),
                 fit: BoxFit.fill,
@@ -82,7 +90,9 @@ class _CaseInfoViewState extends State<CaseInfoView> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
-            widget.caseInfo.userName,
+            (widget.caseInfo == null)
+                ? widget.bidDetail.lawyerName
+                : widget.caseInfo.userName,
             style: appThemeTextStyle(16,
                 fontWeight: FontWeight.w700, textColor: Colors.black),
           ),
@@ -95,7 +105,9 @@ class _CaseInfoViewState extends State<CaseInfoView> {
                 child: Padding(
                   padding: EdgeInsets.all(4),
                   child: Text(
-                    widget.caseInfo.caseType,
+                    (widget.caseInfo == null)
+                        ? 'Test'
+                        : widget.caseInfo.caseType,
                     textAlign: TextAlign.center,
                     style: appThemeTextStyle(13,
                         fontWeight: FontWeight.w600,
@@ -112,7 +124,9 @@ class _CaseInfoViewState extends State<CaseInfoView> {
             Padding(
               padding: EdgeInsets.only(left: 5),
               child: Text(
-                widget.caseInfo.amount,
+                (widget.caseInfo == null)
+                    ? widget.bidDetail.bidAmount
+                    : widget.caseInfo.amount,
                 style: appThemeTextStyle(14, textColor: Colors.black),
               ),
             )
@@ -141,10 +155,15 @@ class _CaseInfoViewState extends State<CaseInfoView> {
 
   _pressedOnViewDetail() {
     if (widget.userType == UserType.User)
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => LawyerDetailScreen()));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => LawyerDetailScreen(widget.bidDetail.caseId,
+                  widget.bidDetail.lawyerId, widget.bidDetail.lawyerName, false)));
     else
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => CaseDetailScreen(widget.caseInfo.id)));
+          context,
+          MaterialPageRoute(
+              builder: (context) => CaseDetailScreen((widget.caseInfo != null) ? widget.caseInfo.caseId : widget.bidDetail.caseId)));
   }
 }

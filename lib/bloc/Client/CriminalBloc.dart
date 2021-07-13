@@ -20,12 +20,16 @@ class CriminalBloc {
   }
 
   getCriminalList() async {
-    criminalSink.add(APIResponse.loading('Processing...'));
+    criminalSink.add(APIResponse.loading('Loading...'));
     try {
       CaseListModel caseList = await criminalRepository.getCriminalList();
       criminalSink.add(APIResponse.done(caseList));
     } catch (error){
       criminalSink.add(APIResponse.error(error.toString()));
     }
+  }
+
+  dispose() {
+    criminalController.close();
   }
 }

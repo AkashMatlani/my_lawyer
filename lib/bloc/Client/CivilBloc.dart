@@ -18,12 +18,16 @@ class CivilBloc {
   }
 
   getCivilList() async {
-    civilSink.add(APIResponse.loading('Processing...'));
+    civilSink.add(APIResponse.loading('Loading...'));
     try {
       CaseListModel caseList = await civilRepository.getCivilList();
       civilSink.add(APIResponse.done(caseList));
     } catch (error) {
       civilSink.add(APIResponse.error(error.toString()));
     }
+  }
+
+  dispose() {
+    civilController.close();
   }
 }

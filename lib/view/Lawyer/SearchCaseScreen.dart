@@ -201,7 +201,7 @@ class _SearchCasesScreenState extends State<SearchCasesScreen> {
               controller: scrollController,
               itemCount: caseList.length,
               itemBuilder: (context, index) {
-                return CaseInfoView(userType, caseList[index]);
+                return CaseInfoView(userType, caseInfo: caseList[index]);
               }),
         ),
         // ),

@@ -16,7 +16,7 @@ class ChangePasswordBloc {
   }
 
   changePassword(Map<String, dynamic> params) async {
-    changePwdSink.add(APIResponse.loading('processing...'));
+    changePwdSink.add(APIResponse.loading('Loading...'));
 
     try {
       dynamic response = await changePasswordRepository.changePassword(params);

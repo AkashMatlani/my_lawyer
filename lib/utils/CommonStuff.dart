@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:my_lawyer/utils/Constant.dart';
@@ -18,7 +19,7 @@ logOut() {
     if (isSignedIn) _googleSignIn.signOut();
   });
 
-   FirebaseAuth.instance.signOut();
+  FirebaseAuth.instance.signOut();
 }
 
 dynamic getUserInfo() async {
@@ -27,4 +28,11 @@ dynamic getUserInfo() async {
     var userInfo = json.decode(userInfoStr);
     return userInfo;
   });
+}
+
+String formatBytes(int bytes, int decimals) {
+  if (bytes <= 0) return "0 B";
+  const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  var i = (log(bytes) / log(1024)).floor();
+  return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + ' ' + suffixes[i];
 }

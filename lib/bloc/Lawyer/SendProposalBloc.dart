@@ -19,7 +19,7 @@ class SendProposalBloc {
   }
 
   sendProposalToClient(Map<String, dynamic> params) async {
-    sendProposalSink.add(APIResponse.loading('Processing...'));
+    sendProposalSink.add(APIResponse.loading('Loading...'));
     try {
       dynamic response = await sendProposalRepository.sendProposalToClient(
           params);
@@ -29,4 +29,7 @@ class SendProposalBloc {
     }
   }
 
+  dispose() {
+    sendProposalController.close();
+  }
 }

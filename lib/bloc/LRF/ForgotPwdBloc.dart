@@ -19,7 +19,7 @@ class ForgotPwdBloc {
   }
 
   forgotPwd(String email) async {
-    forgotPwdSink.add(APIResponse.loading('processing...'));
+    forgotPwdSink.add(APIResponse.loading('Loading...'));
 
     try {
       dynamic response = await forgotPwdRepository.forgotPwd(email);

@@ -1,32 +1,105 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:my_lawyer/bloc/Client/AcceptProposalBloc.dart';
+import 'package:my_lawyer/bloc/Client/LawyerDetailBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/LawyerDetailModel.dart';
+import 'package:my_lawyer/models/LawyerListModel.dart';
+import 'package:my_lawyer/networking/APIResponse.dart';
+import 'package:my_lawyer/repository/Client/AcceptProposalRepository.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/CommonWidgets.dart';
+import 'package:my_lawyer/utils/LoadingView.dart';
+import 'package:my_lawyer/utils/NetworkImage.dart';
 import 'package:my_lawyer/view/Client/PaymentScreen.dart';
 
 class LawyerDetailScreen extends StatefulWidget {
+  int caseId;
+  int lawyerId;
+  String userName;
+  bool isFromLawyerList;
+
+  LawyerDetailScreen(this.caseId, this.lawyerId, this.userName, this.isFromLawyerList);
+
   @override
   _LawyerDetailScreenState createState() => _LawyerDetailScreenState();
 }
 
 class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
+  AcceptBidProposalBloc acceptBidProposalBloc;
+  LawyerDetailBloc lawyerDetailBloc;
+
+  LawyerDataModel lawyerDataModel;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    acceptBidProposalBloc = AcceptBidProposalBloc();
+    lawyerDetailBloc = LawyerDetailBloc();
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    getLawyerDetail();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Case Detail',
+        title: Text(widget.userName,
             style: appThemeTextStyle(20,
                 fontWeight: FontWeight.w600, textColor: Colors.black)),
       ),
-      body: lawyerDetailView(),
+      body: lawyerDetailStreamControllerBuild(),
     );
   }
 
-  Widget lawyerDetailView() {
+  Widget lawyerDetailStreamControllerBuild() {
     return Container(
-        child: Padding(
+        child: StreamBuilder<APIResponse<LawyerDetailModel>>(
+            stream: lawyerDetailBloc.lawyerDetailStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                switch (snapshot.data.status) {
+                  case Status.Loading:
+                    {
+                      return Center(
+                        child: LoadingView().loader(),
+                      );
+                    }
+                    break;
+
+                  case Status.Done:
+                    {
+                      lawyerDataModel = snapshot.data.data.data;
+                      return lawyerDetailView();
+                    }
+
+                  case Status.Error:
+                    AlertView()
+                        .showAlertView(context, snapshot.data.message, () {});
+                }
+              } else {
+                return showLoaderInList();
+              }
+            }));
+  }
+
+  Widget lawyerDetailView() {
+    return
+        // Container(
+        //   child:
+        Padding(
             padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
             child: Column(
               children: [
@@ -41,22 +114,24 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
                     ],
                   ),
                 ),
-                sendAcceptAndCancelBtn()
+               if(!widget.isFromLawyerList) sendAcceptAndCancelBtn()
               ],
-            )));
+            ));
   }
 
   Widget userProfileInfo() {
     return Row(children: [
       ClipRRect(
-        borderRadius: BorderRadius.circular(ScreenUtil().setHeight(80) / 2),
-        child: Image(
-          image: AssetImage('images/Client/temp_ad1.jpeg'),
-          fit: BoxFit.fill,
-          width: ScreenUtil().setHeight(80),
-          height: ScreenUtil().setHeight(80),
-        ),
-      ),
+          borderRadius: BorderRadius.circular(ScreenUtil().setHeight(80) / 2),
+          child: (lawyerDataModel.userProfile == '')
+              ? Image(
+                  image: AssetImage('images/Client/temp_ad1.jpeg'),
+                  fit: BoxFit.fill,
+                  width: ScreenUtil().setHeight(80),
+                  height: ScreenUtil().setHeight(80),
+                )
+              : ImageNetwork().loadNetworkImage(
+                  lawyerDataModel.userProfile, ScreenUtil().setHeight(60))),
       Padding(
         padding: EdgeInsets.only(
             left: ScreenUtil().setWidth(10), right: ScreenUtil().setWidth(15)),
@@ -65,7 +140,7 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                'Donald John-Mark Kenney',
+                lawyerDataModel.lawyerName,
                 style: appThemeTextStyle(17,
                     fontWeight: FontWeight.w700, textColor: Colors.black),
               ),
@@ -80,7 +155,7 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
                       width: 5,
                     ),
                     Text(
-                      'donaldjohn@gmail.com',
+                      lawyerDataModel.email,
                       style: appThemeTextStyle(14, textColor: Colors.black),
                     ),
                   ],
@@ -100,7 +175,7 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
                       width: 5,
                     ),
                     Text(
-                      '413',
+                      '${lawyerDataModel.likeCount}',
                       style: appThemeTextStyle(14, textColor: Colors.black),
                     ),
                   ],
@@ -135,7 +210,7 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
                       fontWeight: FontWeight.w600),
                 ),
                 Text(
-                  r'$5000',
+                  r'$' + '${lawyerDataModel.bidAmount}',
                   style: appThemeTextStyle(20,
                       textColor: Colors.black, fontWeight: FontWeight.w700),
                 ),
@@ -155,7 +230,7 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
 
   Widget txtAboutUsView() {
     return Text(
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim, metus efficitur ullamcorper dictum, eros tellus gravida mi, in luctus turpis magna ac urna. Phasellus venenatis magna odio, at ultrices nisi pellentesque eget. Ut bibendum pulvinar egestas. Quisque non purus a lorem facilisis posuere vitae eu leo purus a lorem.',
+      lawyerDataModel.about,
       style: appThemeTextStyle(15,
           textColor: Color.fromRGBO(0, 0, 0, 0.8), height: 2),
     );
@@ -194,12 +269,59 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
   }
 
   _pressedOnAccept() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => PaymentScreen()));
+    acceptBidProposalAPI();
   }
 
   _pressedOnCancel() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => PaymentScreen()));
+    Navigator.of(context).pop();
+  }
+
+  getLawyerDetail() {
+    // LoadingView().showLoaderWithTitle(true, context);
+    lawyerDetailBloc.getLawyerDetail({
+      'caseId': widget.caseId.toString(),
+      'lawyerId': widget.lawyerId.toString()
+    });
+  }
+
+  acceptBidProposalAPI() {
+    Map<String, dynamic> params = {
+      'caseId': widget.caseId.toString(),
+      'lawyerId': widget.lawyerId.toString()
+    };
+    acceptBidProposalBloc.acceptBidProposal(params);
+
+    acceptBidProposalBloc.acceptBidStream.listen((snspshot) {
+      switch (snspshot.status) {
+        case Status.Loading:
+          return LoadingView(loadingMessage: snspshot.message);
+
+        case Status.Done:
+          LoadingView().showLoaderWithTitle(false, context);
+
+          if (snspshot.data['meta']['status'] == 1) {
+            AlertView().showAlertView(
+                context,
+                snspshot.data['meta']['message'],
+                () => {
+                      Navigator.of(context).pop(),
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PaymentScreen()))
+                    });
+          } else {
+            AlertView().showAlertView(context, snspshot.data['meta']['message'],
+                () => {Navigator.of(context).pop()});
+          }
+          break;
+
+        case Status.Error:
+          LoadingView().showLoaderWithTitle(false, context);
+          AlertView().showAlertView(
+              context, snspshot.message, () => {Navigator.of(context).pop()});
+          break;
+      }
+    });
   }
 }

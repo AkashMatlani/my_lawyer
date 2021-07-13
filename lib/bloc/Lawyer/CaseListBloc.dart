@@ -20,12 +20,16 @@ class CaseListBloc {
   }
 
   getCaseListByType(Map<String, dynamic> params) async {
-    caseListSink.add(APIResponse.loading('Processing...'));
+    caseListSink.add(APIResponse.loading('Loading...'));
     try {
       CaseTypeListModel caseList = await caseListRepository.getCaseList(params);
       caseListSink.add(APIResponse.done(caseList));
     } catch (error) {
       caseListSink.add(APIResponse.error(error.toString()));
     }
+  }
+
+  dispose() {
+    caseListController.close();
   }
 }

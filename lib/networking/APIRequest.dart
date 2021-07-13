@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,6 +18,12 @@ class APITag {
   static const caseList = 'caseList';
   static const sendProposal = 'sendProposal';
   static const lawyerList = 'lawyerList';
+  static const isLike = 'isLike';
+  static const favLawyer = 'favLawyer';
+  static const acceptBid = 'acceptBid';
+  static const lawyerDetail = 'lawyerDetail';
+  static const viewBids = 'viewBids';
+  static const caseDetail = 'caseDetail';
 }
 
 class APIRequestHelper {

@@ -18,7 +18,7 @@ class SignInBloc {
   }
 
   signInUser(Map<String, dynamic> params) async {
-    signInSink.add(APIResponse.loading('Processing...'));
+    signInSink.add(APIResponse.loading('Loading...'));
 
     try {
       UserModel response = await signInRepository.signInUser(params);

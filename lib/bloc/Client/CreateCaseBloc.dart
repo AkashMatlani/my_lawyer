@@ -20,12 +20,16 @@ class CreateCaseBloc {
   }
 
   createCase(Map<String, dynamic> params, List<dynamic> files) async {
-    createCaseSink.add(APIResponse.loading('Processing...'));
+    createCaseSink.add(APIResponse.loading('Loading...'));
     try {
       dynamic response = await createCaseRepository.createCase(params, files);
       createCaseSink.add(APIResponse.done(response));
     } catch (error) {
       createCaseSink.add(APIResponse.error(error.toString()));
     }
+  }
+
+  dispose() {
+    createCaseController.close();
   }
 }

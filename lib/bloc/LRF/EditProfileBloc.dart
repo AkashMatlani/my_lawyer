@@ -21,7 +21,7 @@ class EditProfileBloc {
   }
 
   editProfile(Map<String, dynamic> params, String file) async {
-    editProfileSink.add(APIResponse.loading('processing...'));
+    editProfileSink.add(APIResponse.loading('Loading...'));
 
     try {
       UserModel response = await editProfileRepository.editProfile(params, file);

@@ -2,17 +2,23 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:my_lawyer/bloc/Lawyer/CaseDetailBloc.dart';
 import 'package:my_lawyer/bloc/Lawyer/SendProposalBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/CaseDetailModel.dart';
+import 'package:my_lawyer/models/CaseTypeListModel.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/AppMessages.dart';
+import 'package:my_lawyer/utils/CommonWidgets.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/DatePicker.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
+import 'package:my_lawyer/utils/NetworkImage.dart';
 import 'package:my_lawyer/view/Lawyer/CaseInfoView.dart';
+import 'package:my_lawyer/view/Lawyer/ZoomImageScreen.dart';
 
 class CaseDetailScreen extends StatefulWidget {
   int caseId;
@@ -37,12 +43,22 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
   TimeOfDay selectedEndTimeToShowBid = TimeOfDay(hour: 00, minute: 00);
 
   SendProposalBloc sendProposalBloc;
+  CaseDetailBloc caseDetailBloc;
+  CaseDetailModel caseDetailModel;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    caseDetailBloc = CaseDetailBloc();
     sendProposalBloc = SendProposalBloc();
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    getCaseDetailAPI();
   }
 
   @override
@@ -53,41 +69,74 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
             style: appThemeTextStyle(20,
                 fontWeight: FontWeight.w600, textColor: Colors.black)),
       ),
-      body: caseDetailView(),
+      body: caseDetailStreamBuilder(),
     );
   }
 
-  Widget caseDetailView() {
+  Widget caseDetailStreamBuilder() {
     return Container(
-        child: Padding(
-          padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-          child: ListView(
-            children: [
-              clientProfileAndName(),
-              txtCaseDescription(),
-              txtDescriptionView(),
-              attachmentView(),
-              Container(height: 1, color: Color.fromRGBO(151, 151, 151, 0.2)),
-              txtFieldAmount(),
-              bidStartDateAndTime(),
-              bidEndDateAndTime(),
-              sendProposalAndCancelBtn()
-            ],
-          ),
-        ));
+        child: StreamBuilder(
+            stream: caseDetailBloc.caseDetailStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                switch (snapshot.data.status) {
+                  case Status.Loading:
+                    {
+                      return Center(
+                        child: LoadingView().loader(),
+                      );
+                    }
+                    break;
+
+                  case Status.Done:
+                    {
+                      caseDetailModel = snapshot.data.data;
+                      return caseDetailView();
+                    }
+
+                  case Status.Error:
+                    AlertView()
+                        .showAlertView(context, snapshot.data.message, () {});
+                }
+              } else {
+                return showLoaderInList();
+              }
+            }));
+  }
+
+  Widget caseDetailView() {
+    return Padding(
+      padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
+      child: ListView(
+        children: [
+          clientProfileAndName(),
+          txtCaseDescription(),
+          txtDescriptionView(),
+          for (dynamic attachInfo in caseDetailModel.attachment)
+            attachmentView(attachInfo),
+          Container(height: 1, color: Color.fromRGBO(151, 151, 151, 0.2)),
+          txtFieldAmount(),
+          bidStartDateAndTime(),
+          bidEndDateAndTime(),
+          sendProposalAndCancelBtn()
+        ],
+      ),
+    );
   }
 
   Widget clientProfileAndName() {
     return Row(children: [
       ClipRRect(
-        borderRadius: BorderRadius.circular(ScreenUtil().setHeight(80) / 2),
-        child: Image(
-          image: AssetImage('images/Client/temp_ad1.jpeg'),
-          fit: BoxFit.fill,
-          width: ScreenUtil().setHeight(80),
-          height: ScreenUtil().setHeight(80),
-        ),
-      ),
+          borderRadius: BorderRadius.circular(ScreenUtil().setHeight(80) / 2),
+          child: (caseDetailModel.clientProfile == '')
+              ? Image(
+                  image: AssetImage('images/Client/temp_ad1.jpeg'),
+                  fit: BoxFit.fill,
+                  width: ScreenUtil().setHeight(80),
+                  height: ScreenUtil().setHeight(80),
+                )
+              : ImageNetwork().loadNetworkImage(
+                  caseDetailModel.clientProfile, ScreenUtil().setHeight(80))),
       Padding(
         padding: EdgeInsets.only(
             left: ScreenUtil().setWidth(15), right: ScreenUtil().setWidth(15)),
@@ -96,7 +145,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                'Miranda Gomes',
+                caseDetailModel.clientName,
                 style: appThemeTextStyle(17,
                     fontWeight: FontWeight.w700, textColor: Colors.black),
               ),
@@ -109,7 +158,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                   child: Padding(
                     padding: EdgeInsets.all(4),
                     child: Text(
-                      'Criminal',
+                      caseDetailModel.caseType,
                       textAlign: TextAlign.center,
                       style: appThemeTextStyle(13,
                           fontWeight: FontWeight.w600,
@@ -136,7 +185,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
 
   Widget txtDescriptionView() {
     return Text(
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim, metus efficitur ullamcorper dictum, eros tellus gravida mi, in luctus turpis magna ac urna. Phasellus venenatis magna odio, at ultrices nisi pellentesque eget. Ut bibendum pulvinar egestas. Quisque non purus a lorem facilisis posuere vitae eu leo purus a lorem.',
+      caseDetailModel.description,
       style: appThemeTextStyle(14, textColor: Colors.black, height: 2),
     );
   }
@@ -155,14 +204,13 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                   borderColor: AppColor.ColorBorder,
                   fontSize: 14,
                   fillColor: Colors.white,
-                  filled: true
-              ),
+                  filled: true),
             ),
           ],
         ));
   }
 
-  Widget attachmentView() {
+  Widget attachmentView(String attachURL) {
     return Padding(
       padding: EdgeInsets.only(
           top: ScreenUtil().setHeight(20), bottom: ScreenUtil().setHeight(20)),
@@ -213,7 +261,13 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                         width: 30,
                       ),
                       InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      ZoomImageScreen(attachURL), fullscreenDialog: true));
+                        },
                         child: Text(
                           'View',
                           style: appThemeTextStyle(12,
@@ -259,23 +313,22 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                               onTap: () {
                                 DatePicker()
                                     .selectDate('yyyy/MM/dd',
-                                    selectedStartDateToShowBid, context)
-                                    .then((selectedDate) =>
-                                    setState(() {
-                                      strStartDateToShowBid =
-                                      selectedDate['selectedDate'];
-                                      selectedStartDateToShowBid =
-                                      selectedDate['date'];
-                                    }));
+                                        selectedStartDateToShowBid, context)
+                                    .then((selectedDate) => setState(() {
+                                          strStartDateToShowBid =
+                                              selectedDate['selectedDate'];
+                                          selectedStartDateToShowBid =
+                                              selectedDate['date'];
+                                        }));
                               },
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   TextButton(
                                       style: ButtonStyle(
                                         overlayColor:
-                                        MaterialStateColor.resolveWith(
+                                            MaterialStateColor.resolveWith(
                                                 (states) => Colors.transparent),
                                       ),
                                       child: Text(
@@ -284,10 +337,10 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                                             : strStartDateToShowBid,
                                         style: appThemeTextStyle(14,
                                             textColor: (strStartDateToShowBid !=
-                                                null)
+                                                    null)
                                                 ? Colors.black
                                                 : AppColor
-                                                .ColorGrayTextFieldHint),
+                                                    .ColorGrayTextFieldHint),
                                       )),
                                   SvgPicture.asset(
                                       'images/Client/ic_calendar.svg')
@@ -309,23 +362,22 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                               onTap: () {
                                 DatePicker()
                                     .selectTime(
-                                    context, selectedStartTimeToShowBid)
-                                    .then((selectedTime) =>
-                                    setState(() {
-                                      strStartTimeToShowBid =
-                                      selectedTime['selectedTime'];
-                                      selectedStartTimeToShowBid =
-                                      selectedTime['time'];
-                                    }));
+                                        context, selectedStartTimeToShowBid)
+                                    .then((selectedTime) => setState(() {
+                                          strStartTimeToShowBid =
+                                              selectedTime['selectedTime'];
+                                          selectedStartTimeToShowBid =
+                                              selectedTime['time'];
+                                        }));
                               },
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   TextButton(
                                       style: ButtonStyle(
                                         overlayColor:
-                                        MaterialStateColor.resolveWith(
+                                            MaterialStateColor.resolveWith(
                                                 (states) => Colors.transparent),
                                       ),
                                       child: Text(
@@ -333,12 +385,11 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                                             ? 'HH:MM'
                                             : strStartTimeToShowBid,
                                         style: appThemeTextStyle(14,
-                                            textColor:
-                                            (strStartTimeToShowBid !=
-                                                null)
+                                            textColor: (strStartTimeToShowBid !=
+                                                    null)
                                                 ? Colors.black
                                                 : AppColor
-                                                .ColorGrayTextFieldHint),
+                                                    .ColorGrayTextFieldHint),
                                       )),
                                   SvgPicture.asset('images/Client/ic_clock.svg')
                                 ],
@@ -377,23 +428,22 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                               onTap: () {
                                 DatePicker()
                                     .selectDate('yyyy/MM/dd',
-                                    selectedEndDateToShowBid, context)
-                                    .then((selectedDate) =>
-                                    setState(() {
-                                      strEndDateToShowBid =
-                                      selectedDate['selectedDate'];
-                                      selectedEndDateToShowBid =
-                                      selectedDate['date'];
-                                    }));
+                                        selectedEndDateToShowBid, context)
+                                    .then((selectedDate) => setState(() {
+                                          strEndDateToShowBid =
+                                              selectedDate['selectedDate'];
+                                          selectedEndDateToShowBid =
+                                              selectedDate['date'];
+                                        }));
                               },
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   TextButton(
                                       style: ButtonStyle(
                                         overlayColor:
-                                        MaterialStateColor.resolveWith(
+                                            MaterialStateColor.resolveWith(
                                                 (states) => Colors.transparent),
                                       ),
                                       child: Text(
@@ -402,10 +452,10 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                                             : strEndDateToShowBid,
                                         style: appThemeTextStyle(14,
                                             textColor: (strEndDateToShowBid !=
-                                                null)
+                                                    null)
                                                 ? Colors.black
                                                 : AppColor
-                                                .ColorGrayTextFieldHint),
+                                                    .ColorGrayTextFieldHint),
                                       )),
                                   SvgPicture.asset(
                                       'images/Client/ic_calendar.svg')
@@ -427,23 +477,22 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                               onTap: () {
                                 DatePicker()
                                     .selectTime(
-                                    context, selectedEndTimeToShowBid)
-                                    .then((selectedTime) =>
-                                    setState(() {
-                                      strEndTimeToShowBid =
-                                      selectedTime['selectedTime'];
-                                      selectedEndTimeToShowBid =
-                                      selectedTime['time'];
-                                    }));
+                                        context, selectedEndTimeToShowBid)
+                                    .then((selectedTime) => setState(() {
+                                          strEndTimeToShowBid =
+                                              selectedTime['selectedTime'];
+                                          selectedEndTimeToShowBid =
+                                              selectedTime['time'];
+                                        }));
                               },
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   TextButton(
                                       style: ButtonStyle(
                                         overlayColor:
-                                        MaterialStateColor.resolveWith(
+                                            MaterialStateColor.resolveWith(
                                                 (states) => Colors.transparent),
                                       ),
                                       child: Text(
@@ -452,10 +501,10 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                                             : strEndTimeToShowBid,
                                         style: appThemeTextStyle(14,
                                             textColor: (strEndTimeToShowBid !=
-                                                null)
+                                                    null)
                                                 ? Colors.black
                                                 : AppColor
-                                                .ColorGrayTextFieldHint),
+                                                    .ColorGrayTextFieldHint),
                                       )),
                                   SvgPicture.asset('images/Client/ic_clock.svg')
                                 ],
@@ -479,15 +528,14 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                 child: GenericButton().appThemeButton(
                     'Send Proposal', 16, Colors.white, FontWeight.w700, () {
                   _pressedOnSendProposal();
-                },
-                    borderRadius: 6)),
+                }, borderRadius: 6)),
           ),
           SizedBox(
             width: 10,
           ),
           Expanded(
             child: SizedBox(
-              // width: screenWidth(context),
+                // width: screenWidth(context),
                 height: ScreenUtil().setHeight(52),
                 child: GenericButton().appThemeButton(
                     'Cancel', 16, Colors.black, FontWeight.w700, () {},
@@ -530,14 +578,18 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
     sendProposalAPI();
   }
 
+  getCaseDetailAPI() {
+    caseDetailBloc.getCaseDetail(widget.caseId);
+  }
+
   sendProposalAPI() {
     Map<String, dynamic> params = {
       'caseId': widget.caseId.toString(),
       'amount': txtAmountController.text,
       'bidStartDate': strStartDateToShowBid,
       'bidStartTime': strStartTimeToShowBid,
-      'bidEndTime': strEndDateToShowBid,
-      'bidEndDate': strEndTimeToShowBid
+      'bidEndTime': strEndTimeToShowBid,
+      'bidEndDate': strEndDateToShowBid
     };
 
     LoadingView().showLoaderWithTitle(true, context);
@@ -556,7 +608,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
             Navigator.pop(context);
           } else {
             AlertView().showAlertView(context, snapshot.data['meta']['message'],
-                    () => {Navigator.of(context).pop()});
+                () => {Navigator.of(context).pop()});
           }
           break;
 

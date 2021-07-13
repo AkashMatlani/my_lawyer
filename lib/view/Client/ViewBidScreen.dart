@@ -1,10 +1,18 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:my_lawyer/bloc/Client/BidListBloc.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/BidListModel.dart';
+import 'package:my_lawyer/models/LawyerListModel.dart';
+import 'package:my_lawyer/networking/APIResponse.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
+import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/CommonWidgets.dart';
 import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/utils/LoadingView.dart';
+import 'package:my_lawyer/view/Client/LawyerListInfoView.dart';
 import 'package:my_lawyer/view/Lawyer/CaseInfoView.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +25,14 @@ class ViewBidScreen extends StatefulWidget {
 class _ViewBidScreenState extends State<ViewBidScreen> {
   int userType = 0;
 
+  int currentPage = 1;
+  int totalCount = 0;
+  List<LawyerDataModel> bidList = [];
+
+  ScrollController scrollController = ScrollController();
+
+  BidListBloc bidListBloc;
+
   @override
   initState() {
     SharedPreferences.getInstance().then((prefs) {
@@ -28,7 +44,17 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
       });
     });
 
+    bidListBloc = BidListBloc();
     super.initState();
+
+    pullToRefresh();
+
+    scrollController.addListener(() {
+      if (scrollController.offset ==
+          scrollController.position.maxScrollExtent) {
+        loadMore();
+      }
+    });
   }
 
   @override
@@ -45,16 +71,96 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
         ),
       ),
       drawer: SideBarView(),
-      body: bidList(),
+      body: bidStreamControllerBuilder(),
     );
   }
 
-  Widget bidList() {
+  Widget bidStreamControllerBuilder() {
+    return RefreshIndicator(
+        backgroundColor: AppColor.ColorRed,
+        color: Colors.white,
+        child: StreamBuilder<APIResponse<LawyerListModel>>(
+            stream: bidListBloc.bidListStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                switch (snapshot.data.status) {
+                  case Status.Loading:
+                    {
+                      if (currentPage == 1) {
+                        return Center(
+                          child: LoadingView().loader(),
+                        );
+                      } else {
+                        if (bidList.length > 0) {
+                          return bidListView();
+                        }
+                      }
+                    }
+                    break;
+
+                  case Status.Done:
+                    {
+                      if (currentPage == 1) {
+                        bidList.clear();
+                      }
+
+                      if (bidList.length <= totalCount) {
+                        currentPage = currentPage + 1;
+                      }
+
+                      if (snapshot.data.data.data.length > 0) {
+                        bidList = bidList + snapshot.data.data.data;
+                        totalCount = snapshot.data.data.meta.count;
+                      }
+
+                      if (bidList.length > 0) {
+                        return bidListView();
+                      } else {
+                        return widgetNotAvailableData('Bid list not found.');
+                      }
+                      break;
+                    }
+
+                  case Status.Error:
+                    AlertView()
+                        .showAlertView(context, snapshot.data.message, () {});
+                }
+              } else {
+                return showLoaderInList();
+              }
+            }),
+        onRefresh: () async {
+          pullToRefresh();
+        });
+  }
+
+  Widget bidListView() {
     return Container(
       padding: EdgeInsets.only(top: ScreenUtil().setHeight(10)),
-      child: ListView.builder(itemBuilder: (context, index) {
-        // return CaseInfoView(userType);
-      }),
+      child: ListView.builder(
+          controller: scrollController,
+          itemCount: bidList.length,
+          itemBuilder: (context, index) {
+            return LawyerListInfoView(bidList[index], index, false, (index, bidInfo) {
+              setState(() {
+                bidList[index] = bidInfo;
+              });
+            }); //CaseInfoView(UserType.Lawyer, bidDetail: bidList[index]);
+          }),
     );
+  }
+
+  pullToRefresh() {
+    currentPage = 1;
+    totalCount = 0;
+    bidListBloc
+        .getBidList({'currentPage': currentPage.toString(), 'limit': '5'});
+  }
+
+  loadMore() {
+    if (bidList.length <= totalCount) {
+      bidListBloc
+          .getBidList({'currentPage': currentPage.toString(), 'limit': '5'});
+    }
   }
 }
