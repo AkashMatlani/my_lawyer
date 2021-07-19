@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_lawyer/bloc/Lawyer/CaseListBloc.dart';
@@ -26,6 +27,7 @@ class _SearchCasesScreenState extends State<SearchCasesScreen> {
   int userType = 0;
   int currentPage = 1;
   int totalCount = 0;
+  bool isUpdate = false;
 
   List<CaseDataModel> caseList = [];
 
@@ -42,6 +44,8 @@ class _SearchCasesScreenState extends State<SearchCasesScreen> {
         userType = userInfo['userType'];
       });
     });
+
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
 
     super.initState();
     caseListBloc = CaseListBloc();
@@ -159,14 +163,17 @@ class _SearchCasesScreenState extends State<SearchCasesScreen> {
                       caseList.clear();
                     }
 
-                    if (caseList.length <= totalCount) {
-                      currentPage = currentPage + 1;
-                    }
+                    if (isUpdate) {
+                      if (snapshot.data.data.data.length > 0) {
+                        caseList = caseList + snapshot.data.data.data;
+                        totalCount = snapshot.data.data.meta.count;
+                      }
 
-                    if (snapshot.data.data.data.length > 0) {
-                      caseList = caseList + snapshot.data.data.data;
+                      if (caseList.length <= totalCount) {
+                        currentPage = currentPage + 1;
+                      }
 
-                      totalCount = snapshot.data.data.meta.count;
+                      isUpdate = false;
                     }
 
                     if (caseList.length > 0) {
@@ -175,8 +182,8 @@ class _SearchCasesScreenState extends State<SearchCasesScreen> {
                       return widgetNotAvailableData(
                           'Case not found for selected type.');
                     }
-                    break;
                   }
+                  break;
 
                 case Status.Error:
                   AlertView()
@@ -193,18 +200,16 @@ class _SearchCasesScreenState extends State<SearchCasesScreen> {
     return RefreshIndicator(
         backgroundColor: AppColor.ColorRed,
         color: Colors.white,
-        // child: Flexible(
-        //   flex: 1,
         child: Padding(
           padding: EdgeInsets.only(top: ScreenUtil().setHeight(10)),
           child: ListView.builder(
+              physics: AlwaysScrollableScrollPhysics(),
               controller: scrollController,
               itemCount: caseList.length,
               itemBuilder: (context, index) {
                 return CaseInfoView(userType, caseInfo: caseList[index]);
               }),
         ),
-        // ),
         onRefresh: () async => pullToRefresh());
   }
 
@@ -221,6 +226,8 @@ class _SearchCasesScreenState extends State<SearchCasesScreen> {
   }
 
   getCaseListByType() {
+    isUpdate = true;
+
     Map<String, dynamic> params = {
       'caseTypeId': selectedCase.toString(),
       'currentPage': currentPage.toString(),

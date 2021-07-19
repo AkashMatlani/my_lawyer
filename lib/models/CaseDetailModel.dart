@@ -21,7 +21,7 @@ class CaseDetailModel {
         caseId: data['caseId'],
         clientName: data['clientName'],
         clientProfile: data['clientProfile'],
-        caseType: data['caseType'],
+        caseType: data['caseTypeName'],
         description: data['description'],
         attachment: data['attachment']);
   }

@@ -1,8 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_lawyer/bloc/Client/FavouriteLawyerBloc.dart';
 import 'package:my_lawyer/bloc/Client/LikeLawyerBloc.dart';
+import 'package:my_lawyer/bloc/Client/UnFavouriteLawyerBloc.dart';
+import 'package:my_lawyer/bloc/Client/UnLikeBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/LawyerListModel.dart';
@@ -14,13 +17,17 @@ import 'package:my_lawyer/view/Client/LawyerDetailScreen.dart';
 typedef getUpdatedLawyerDetail = Function(
     int index, LawyerDataModel lawyerDataModel);
 
+// typedef getUpdatedLawyerDetail = Function(
+//     int index, bool isSelected, bool isLike);
+
 class LawyerListInfoView extends StatefulWidget {
   LawyerDataModel lawyerDataModel;
   int index;
   bool isFromLawyerList;
   getUpdatedLawyerDetail callBack;
 
-  LawyerListInfoView(this.lawyerDataModel, this.index, this.isFromLawyerList, this.callBack);
+  LawyerListInfoView(
+      this.lawyerDataModel, this.index, this.isFromLawyerList, this.callBack);
 
   @override
   _LawyerListInfoViewState createState() => _LawyerListInfoViewState();
@@ -28,7 +35,10 @@ class LawyerListInfoView extends StatefulWidget {
 
 class _LawyerListInfoViewState extends State<LawyerListInfoView> {
   LikeLawyerBloc likeLawyerBloc = LikeLawyerBloc();
+  UnLikeLawyerBloc unLikeLawyerBloc = UnLikeLawyerBloc();
+
   FavouriteLawyerBloc favouriteLawyerBloc = FavouriteLawyerBloc();
+  UnFavouriteLawyerBloc unFavouriteLawyerBloc = UnFavouriteLawyerBloc();
 
   @override
   Widget build(BuildContext context) {
@@ -118,10 +128,21 @@ class _LawyerListInfoViewState extends State<LawyerListInfoView> {
 
   Widget favoriteBtn(bool isFav, int index) {
     return InkWell(
-      child: SvgPicture.asset(
-        'images/Client/ic_fav.svg',
-        color: isFav ? AppColor.ColorRed : Colors.transparent,
+      child: Padding(
+        padding: EdgeInsets.all(20),
+        child: Image(
+          image: isFav
+              ? AssetImage('images/Client/ic_fav_selected.png')
+              : AssetImage('images/Client/ic_fav.png'),
+          width: ScreenUtil().setHeight(16),
+          height: ScreenUtil().setHeight(16),
+        ),
       ),
+
+      // SvgPicture.asset(
+      //   'images/Client/ic_fav.svg',
+      //   color: isFav ? AppColor.ColorRed : Colors.transparent,
+      // ),
       onTap: () {
         _pressedOnFavourite();
       },
@@ -228,7 +249,10 @@ class _LawyerListInfoViewState extends State<LawyerListInfoView> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => LawyerDetailScreen(
-                        lawyerInfo.caseId, lawyerInfo.lawyerId, lawyerInfo.lawyerName, widget.isFromLawyerList)));
+                        lawyerInfo.caseId,
+                        lawyerInfo.lawyerId,
+                        lawyerInfo.lawyerName,
+                        widget.isFromLawyerList)));
           }, borderRadius: 6)),
     );
   }
@@ -239,10 +263,15 @@ class _LawyerListInfoViewState extends State<LawyerListInfoView> {
 
     widget.callBack(widget.index, updatedLawyerInfo);
 
-    favouriteLawyerBloc.favLawyerProfile({
-      'lawyerId': updatedLawyerInfo.lawyerId,
-      'isFavorite': updatedLawyerInfo.isLike
-    });
+    if (updatedLawyerInfo.isFav) {
+      favouriteLawyerBloc.favLawyerProfile({
+        'lawyerId': updatedLawyerInfo.lawyerId.toString(),
+      });
+    } else {
+      unFavouriteLawyerBloc.unFavLawyerProfile({
+        'lawyerId': updatedLawyerInfo.lawyerId.toString(),
+      });
+    }
   }
 
   _pressedOnLike() {
@@ -254,9 +283,16 @@ class _LawyerListInfoViewState extends State<LawyerListInfoView> {
 
     widget.callBack(widget.index, updatedLawyerInfo);
 
-    likeLawyerBloc.likeLawyerProfile({
-      'lawyerId': updatedLawyerInfo.lawyerId,
-      'isLike': updatedLawyerInfo.isLike
-    });
+    if (updatedLawyerInfo.isLike) {
+      likeLawyerBloc.likeLawyerProfile({
+        'lawyerId': updatedLawyerInfo.lawyerId.toString(),
+        'caseId': updatedLawyerInfo.caseId.toString()
+      });
+    } else {
+      unLikeLawyerBloc.unLikeLawyerProfile({
+        'lawyerId': updatedLawyerInfo.lawyerId.toString(),
+        'caseId': updatedLawyerInfo.caseId.toString()
+      });
+    }
   }
 }

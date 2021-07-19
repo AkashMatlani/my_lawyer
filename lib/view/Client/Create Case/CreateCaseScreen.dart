@@ -466,7 +466,7 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                     Padding(
                       padding: EdgeInsets.only(right: 10),
                       child:
-                          SvgPicture.asset('images/Client/ic_attachment.svg'),
+                          SvgPicture.asset('images/Client/ic_attachment.svg', width: 15, height: 15,),
                     )
                   ],
                 ),
@@ -613,7 +613,7 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
       AlertView().showAlert(Messages.CBlankState, context);
     } else if (selectedCounty == null) {
       AlertView().showAlert(Messages.CBlankCounty, context);
-    } else if (selectedCaseList.length == 0) {
+    } else if (selectedCaseList.length == 0 && caseType != CaseType.Custom) {
       AlertView().showAlert(Messages.CBlankCase, context);
     } else if (txtCasePortionController.text.isEmpty) {
       AlertView().showAlert(Messages.CBlankCasePortion, context);
@@ -738,7 +738,7 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
       'stateId': selectedState.id.toString(),
       'countyId': selectedCounty.countyId.toString(),
       'caseTypeId': caseType.toString(),
-      'caseType': (caseType == 2) ? customCase : caseList.toString(),
+      'caseType': (caseType == CaseType.Custom) ? customCase : caseList.toString(),
       'casePortion': txtCasePortionController.text,
       'registrationNote': txtRegistrationNoteController.text,
       'caseDateTime': '$date $caseTime',

@@ -7,4 +7,9 @@ class LikeLawyerRepository {
     var response = await helper.post(APITag.isLike, params);
     return response;
   }
+
+  Future<dynamic> unLikeLawyer(Map<String, dynamic> params) async {
+    var response = await helper.post(APITag.unLike, params);
+    return response;
+  }
 }

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_lawyer/bloc/Client/BidListBloc.dart';
+import 'package:my_lawyer/bloc/Client/FavouriteLawyerBloc.dart';
+import 'package:my_lawyer/bloc/Client/LikeLawyerBloc.dart';
+import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/BidListModel.dart';
 import 'package:my_lawyer/models/LawyerListModel.dart';
@@ -12,6 +15,8 @@ import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/CommonWidgets.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
+import 'package:my_lawyer/utils/NetworkImage.dart';
+import 'package:my_lawyer/view/Client/LawyerDetailScreen.dart';
 import 'package:my_lawyer/view/Client/LawyerListInfoView.dart';
 import 'package:my_lawyer/view/Lawyer/CaseInfoView.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
@@ -28,10 +33,13 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
   int currentPage = 1;
   int totalCount = 0;
   List<LawyerDataModel> bidList = [];
+  bool isUpdateList = false;
 
   ScrollController scrollController = ScrollController();
 
   BidListBloc bidListBloc;
+  LikeLawyerBloc likeLawyerBloc = LikeLawyerBloc();
+  FavouriteLawyerBloc favouriteLawyerBloc = FavouriteLawyerBloc();
 
   @override
   initState() {
@@ -104,13 +112,15 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
                         bidList.clear();
                       }
 
-                      if (bidList.length <= totalCount) {
-                        currentPage = currentPage + 1;
-                      }
+                      if (!isUpdateList) {
+                        if (bidList.length <= totalCount) {
+                          currentPage = currentPage + 1;
+                        }
 
-                      if (snapshot.data.data.data.length > 0) {
-                        bidList = bidList + snapshot.data.data.data;
-                        totalCount = snapshot.data.data.meta.count;
+                        if (snapshot.data.data.data.length > 0) {
+                          bidList = bidList + snapshot.data.data.data;
+                          totalCount = snapshot.data.data.meta.count;
+                        }
                       }
 
                       if (bidList.length > 0) {
@@ -138,12 +148,16 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
     return Container(
       padding: EdgeInsets.only(top: ScreenUtil().setHeight(10)),
       child: ListView.builder(
+          physics: AlwaysScrollableScrollPhysics(),
           controller: scrollController,
           itemCount: bidList.length,
           itemBuilder: (context, index) {
-            return LawyerListInfoView(bidList[index], index, false, (index, bidInfo) {
+            return LawyerListInfoView(bidList[index], index, false,
+                (index, bidInfo) {
               setState(() {
+                isUpdateList = true;
                 bidList[index] = bidInfo;
+                print('Length - ${bidList.length}');
               });
             }); //CaseInfoView(UserType.Lawyer, bidDetail: bidList[index]);
           }),
@@ -151,6 +165,7 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
   }
 
   pullToRefresh() {
+    isUpdateList = false;
     currentPage = 1;
     totalCount = 0;
     bidListBloc
@@ -159,6 +174,7 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
 
   loadMore() {
     if (bidList.length <= totalCount) {
+      isUpdateList = false;
       bidListBloc
           .getBidList({'currentPage': currentPage.toString(), 'limit': '5'});
     }

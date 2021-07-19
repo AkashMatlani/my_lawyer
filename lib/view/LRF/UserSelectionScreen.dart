@@ -91,6 +91,6 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
 
   _pressedOnFindButton(int userType) {
     Navigator.push(context,
-        MaterialPageRoute(builder: (context) => (widget.isDoneSetup) ? SignInScreen(userType) : TutorialScreen(userType)));
+        MaterialPageRoute(builder: (context) => (widget.isDoneSetup == null || !widget.isDoneSetup) ?  TutorialScreen(userType) : SignInScreen(userType)));
   }
 }

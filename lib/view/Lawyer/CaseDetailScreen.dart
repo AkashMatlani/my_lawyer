@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -12,13 +13,17 @@ import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/AppMessages.dart';
+import 'package:my_lawyer/utils/CommonStuff.dart';
 import 'package:my_lawyer/utils/CommonWidgets.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/DatePicker.dart';
+import 'package:my_lawyer/utils/DownloadFile.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/utils/NetworkImage.dart';
 import 'package:my_lawyer/view/Lawyer/CaseInfoView.dart';
+import 'package:my_lawyer/view/Lawyer/PDFViewer.dart';
 import 'package:my_lawyer/view/Lawyer/ZoomImageScreen.dart';
+import 'package:path/path.dart' as path;
 
 class CaseDetailScreen extends StatefulWidget {
   int caseId;
@@ -36,6 +41,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
   var strEndTimeToShowBid;
   var strStartDateToShowBid;
   var strEndDateToShowBid;
+  bool isDownloading = false;
 
   DateTime selectedStartDateToShowBid = DateTime.now();
   DateTime selectedEndDateToShowBid = DateTime.now();
@@ -52,12 +58,6 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
     super.initState();
     caseDetailBloc = CaseDetailBloc();
     sendProposalBloc = SendProposalBloc();
-  }
-
-  @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
     getCaseDetailAPI();
   }
 
@@ -130,7 +130,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
           borderRadius: BorderRadius.circular(ScreenUtil().setHeight(80) / 2),
           child: (caseDetailModel.clientProfile == '')
               ? Image(
-                  image: AssetImage('images/Client/temp_ad1.jpeg'),
+                  image: AssetImage('images/Client/ic_profile.jpeg'),
                   fit: BoxFit.fill,
                   width: ScreenUtil().setHeight(80),
                   height: ScreenUtil().setHeight(80),
@@ -215,7 +215,6 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
       padding: EdgeInsets.only(
           top: ScreenUtil().setHeight(20), bottom: ScreenUtil().setHeight(20)),
       child: Container(
-        height: ScreenUtil().setHeight(70),
         decoration: BoxDecoration(
             color: AppColor.ColorAttachmentGray,
             borderRadius: BorderRadius.circular(6)),
@@ -231,53 +230,69 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
             ),
             Padding(
               padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'my-criminal-case-detail.pdf',
-                    style: appThemeTextStyle(14, textColor: Colors.black),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 5, bottom: 5),
-                    child: Text(
-                      '1.8 MB',
-                      style: appThemeTextStyle(12,
-                          textColor: Color.fromRGBO(0, 0, 0, 0.4)),
+              child: Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      getFileNameFromURL(attachURL),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: appThemeTextStyle(12, textColor: Colors.black),
                     ),
-                  ),
-                  Row(
-                    children: [
-                      InkWell(
-                        onTap: () {},
-                        child: Text(
-                          'Download',
-                          style: appThemeTextStyle(12,
-                              fontWeight: FontWeight.w600,
-                              textColor: Colors.black),
-                        ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 5, bottom: 5),
+                      child: Text(
+                        '',
+                        style: appThemeTextStyle(12,
+                            textColor: Color.fromRGBO(0, 0, 0, 0.4)),
                       ),
-                      SizedBox(
-                        width: 30,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      ZoomImageScreen(attachURL), fullscreenDialog: true));
-                        },
-                        child: Text(
-                          'View',
-                          style: appThemeTextStyle(12,
-                              fontWeight: FontWeight.w600,
-                              textColor: Colors.black),
+                    ),
+                    Row(
+                      children: [
+                        InkWell(
+                            onTap: () {
+                              if (!isDownloading) {
+                                setState(() {
+                                  isDownloading = true;
+                                });
+                                downloadFile(attachURL,
+                                        getFileNameFromURL(attachURL), context)
+                                    .then((isProcessing) => setState(() {
+                                          isDownloading = false;
+                                        }));
+                              }
+                            },
+                            child: SizedBox(
+                              height: ScreenUtil().setHeight(20),
+                              child: Text(
+                                isDownloading ? 'Downloading...' : 'Download',
+                                style: appThemeTextStyle(12,
+                                    fontWeight: FontWeight.w600,
+                                    textColor: Colors.black),
+                              ),
+                            )),
+                        SizedBox(
+                          width: 30,
                         ),
-                      )
-                    ],
-                  ),
-                ],
+                        InkWell(
+                            onTap: () {
+                              // html.window.open(attachURL, 'name');
+                              _pressedOnViewFile(attachURL);
+                            },
+                            child: SizedBox(
+                              height: ScreenUtil().setHeight(20),
+                              child: Text(
+                                'View',
+                                style: appThemeTextStyle(12,
+                                    fontWeight: FontWeight.w600,
+                                    textColor: Colors.black),
+                              ),
+                            ))
+                      ],
+                    ),
+                  ],
+                ),
               ),
             )
           ],
@@ -409,7 +424,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            placeHolderText('Case Date and Time'),
+            placeHolderText('Set End Duration to Show Your Bid'),
             Container(
                 width: screenWidth(context),
                 height: ScreenUtil().setHeight(46),
@@ -535,11 +550,11 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
           ),
           Expanded(
             child: SizedBox(
-                // width: screenWidth(context),
                 height: ScreenUtil().setHeight(52),
                 child: GenericButton().appThemeButton(
-                    'Cancel', 16, Colors.black, FontWeight.w700, () {},
-                    borderRadius: 6, bgColor: AppColor.ColorGrayDottedLine)),
+                    'Cancel', 16, Colors.black, FontWeight.w700, () {
+                  Navigator.pop(context);
+                }, borderRadius: 6, bgColor: AppColor.ColorGrayDottedLine)),
           )
         ],
       ),
@@ -586,10 +601,8 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
     Map<String, dynamic> params = {
       'caseId': widget.caseId.toString(),
       'amount': txtAmountController.text,
-      'bidStartDate': strStartDateToShowBid,
-      'bidStartTime': strStartTimeToShowBid,
-      'bidEndTime': strEndTimeToShowBid,
-      'bidEndDate': strEndDateToShowBid
+      'bidStartDateTime': '$strStartDateToShowBid $strStartTimeToShowBid',
+      'bidEndDateTime': '$strEndDateToShowBid $strEndTimeToShowBid'
     };
 
     LoadingView().showLoaderWithTitle(true, context);
@@ -619,5 +632,25 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
           break;
       }
     });
+  }
+
+  _pressedOnViewFile(String attachURL) {
+    final extension = path.extension(attachURL); // '.dart'
+
+    if (extension == '.pdf') {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PDFViewerScreen(
+                    attachURL,
+                  ),
+              fullscreenDialog: true));
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ZoomImageScreen(attachURL),
+              fullscreenDialog: true));
+    }
   }
 }

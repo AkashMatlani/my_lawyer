@@ -12,9 +12,11 @@ import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/AppMessages.dart';
+import 'package:my_lawyer/utils/CommonStuff.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:my_lawyer/bloc/LRF/SignupBloc.dart';
+import 'package:my_lawyer/utils/FCMService.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/utils/StringExtension.dart';
 import 'package:my_lawyer/utils/SocialLogin.dart';
@@ -364,6 +366,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               'email': userInfo.email,
               'about': userInfo.about
             });
+
+
+            registeredDeviceToken();
 
             if (widget.userType == UserType.User) {
               _navigateToCreateCaseScreen();

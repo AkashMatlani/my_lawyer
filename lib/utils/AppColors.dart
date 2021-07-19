@@ -18,4 +18,6 @@ class AppColor {
   static const ColorYellowSegment = Color.fromRGBO(244, 197, 69, 1);
   static const ColorAttachmentGray = Color.fromRGBO(247, 247, 247, 1);
   static const ColorLikeGray = Color.fromRGBO(163, 163, 163, 1);
+  static const ColorTextFieldGrayBoarder = Color.fromRGBO(210, 210, 210, 1);
+
 }

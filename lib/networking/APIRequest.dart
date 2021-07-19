@@ -19,11 +19,16 @@ class APITag {
   static const sendProposal = 'sendProposal';
   static const lawyerList = 'lawyerList';
   static const isLike = 'isLike';
+  static const unLike = 'unLike';
   static const favLawyer = 'favLawyer';
+  static const UnFavLawyer = 'unfavLawyer';
   static const acceptBid = 'acceptBid';
   static const lawyerDetail = 'lawyerDetail';
   static const viewBids = 'viewBids';
   static const caseDetail = 'caseDetail';
+  static const registeredDeviceToken = 'registerDeviceToken';
+  static const adList = 'adList';
+  static const removeDeviceToken = 'removeDeviceToken';
 }
 
 class APIRequestHelper {
@@ -105,9 +110,11 @@ class APIRequestHelper {
 
       if (files.length > 0) {
         if (files.length == 1) {
-          var multiPart =
-              await http.MultipartFile.fromPath(fileParamName, files.first);
-          request.files.add(multiPart);
+          if (files.first != '') {
+            var multiPart =
+                await http.MultipartFile.fromPath(fileParamName, files.first);
+            request.files.add(multiPart);
+          }
         } else {
           List<http.MultipartFile> multiPartFiles = [];
 
@@ -119,6 +126,9 @@ class APIRequestHelper {
 
           request.files.addAll(multiPartFiles);
         }
+      } else {
+        var multiPart = await http.MultipartFile.fromPath(fileParamName, '');
+        request.files.add(multiPart);
       }
 
       if (parameters != null) {

@@ -7,4 +7,9 @@ class FavouriteLawyerRepository {
     var response = await helper.post(APITag.favLawyer, params);
     return response;
   }
+
+  Future<dynamic> unFavLawyer(Map<String, dynamic> params) async {
+    var response = await helper.post(APITag.UnFavLawyer, params);
+    return response;
+  }
 }

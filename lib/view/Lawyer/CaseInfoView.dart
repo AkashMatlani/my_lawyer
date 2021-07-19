@@ -79,7 +79,10 @@ class _CaseInfoViewState extends State<CaseInfoView> {
                 height: ScreenUtil().setHeight(65),
               )
             : ImageNetwork().loadNetworkImage(
-                widget.caseInfo.userProfile, ScreenUtil().setHeight(65)));
+                ((widget.caseInfo == null)
+                    ? widget.bidDetail.userProfile
+                    : widget.caseInfo.userProfile),
+                ScreenUtil().setHeight(65)));
   }
 
   Widget caseInfo() {
@@ -106,7 +109,7 @@ class _CaseInfoViewState extends State<CaseInfoView> {
                   padding: EdgeInsets.all(4),
                   child: Text(
                     (widget.caseInfo == null)
-                        ? 'Test'
+                        ? ''
                         : widget.caseInfo.caseType,
                     textAlign: TextAlign.center,
                     style: appThemeTextStyle(13,
@@ -158,12 +161,18 @@ class _CaseInfoViewState extends State<CaseInfoView> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => LawyerDetailScreen(widget.bidDetail.caseId,
-                  widget.bidDetail.lawyerId, widget.bidDetail.lawyerName, false)));
-    else
+              builder: (context) => LawyerDetailScreen(
+                  widget.bidDetail.caseId,
+                  widget.bidDetail.lawyerId,
+                  widget.bidDetail.lawyerName,
+                  false)));
+    else {
+      final caseDetailScreen = CaseDetailScreen((widget.caseInfo != null)
+          ? widget.caseInfo.caseId
+          : widget.bidDetail.caseId);
+
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => CaseDetailScreen((widget.caseInfo != null) ? widget.caseInfo.caseId : widget.bidDetail.caseId)));
+          context, MaterialPageRoute(builder: (context) => caseDetailScreen));
+    }
   }
 }

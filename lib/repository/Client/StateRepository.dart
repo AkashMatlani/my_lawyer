@@ -15,14 +15,19 @@ class StateRepository {
         var result = databaseHelper
             .insertStateData(StateModel(int.parse(state['id']), state['name']));
 
-        if (result != 0) {
-          print('State Added ========');
-        }
+        if (result != 0) {}
       }
 
       var list = databaseHelper.getStateList().then((value) {
         print('State Count - ${value.length}');
       });
     }
+  }
+
+  getStateList() {
+    databaseHelper.getStateList().then((value) {
+      print('State Count - ${value.length}');
+      if (value.length == 0) stateList();
+    });
   }
 }

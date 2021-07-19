@@ -84,15 +84,30 @@ class _PaymentScreenState extends State<PaymentScreen> {
             Text('Payment Information'),
             Row(
               children: [
-                Container(
+                SizedBox(
                     width: ScreenUtil().setWidth(66),
                     height: ScreenUtil().setHeight(41),
-                    color: Colors.red,
                     child: InkWell(
-                      onTap: () {
-                        
-                      },
-                    ))
+                        onTap: () {},
+                        child: Image(
+                          image: AssetImage('images/Client/ic_paypal.png'),
+                        ))),
+                SizedBox(
+                    width: ScreenUtil().setWidth(66),
+                    height: ScreenUtil().setHeight(41),
+                    child: InkWell(
+                        onTap: () {},
+                        child: Image(
+                          image: AssetImage('images/Client/ic_visa.png'),
+                        ))),
+                SizedBox(
+                    width: ScreenUtil().setWidth(66),
+                    height: ScreenUtil().setHeight(41),
+                    child: InkWell(
+                        onTap: () {},
+                        child: Image(
+                          image: AssetImage('images/Client/ic_master.png'),
+                        )))
               ],
             )
           ],

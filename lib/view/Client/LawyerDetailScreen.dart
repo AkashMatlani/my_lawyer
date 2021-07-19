@@ -24,7 +24,8 @@ class LawyerDetailScreen extends StatefulWidget {
   String userName;
   bool isFromLawyerList;
 
-  LawyerDetailScreen(this.caseId, this.lawyerId, this.userName, this.isFromLawyerList);
+  LawyerDetailScreen(
+      this.caseId, this.lawyerId, this.userName, this.isFromLawyerList);
 
   @override
   _LawyerDetailScreenState createState() => _LawyerDetailScreenState();
@@ -114,7 +115,7 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
                     ],
                   ),
                 ),
-               if(!widget.isFromLawyerList) sendAcceptAndCancelBtn()
+                if (!widget.isFromLawyerList) sendAcceptAndCancelBtn()
               ],
             ));
   }
@@ -125,7 +126,7 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
           borderRadius: BorderRadius.circular(ScreenUtil().setHeight(80) / 2),
           child: (lawyerDataModel.userProfile == '')
               ? Image(
-                  image: AssetImage('images/Client/temp_ad1.jpeg'),
+                  image: AssetImage('images/Client/ic_profile.jpeg'),
                   fit: BoxFit.fill,
                   width: ScreenUtil().setHeight(80),
                   height: ScreenUtil().setHeight(80),

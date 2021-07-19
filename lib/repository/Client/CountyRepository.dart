@@ -26,21 +26,13 @@ class CountyRepository {
         print('County Count - ${value.length}');
       });
     }
+  }
 
-    // if (response['data'] != null) {
-    //   List<dynamic> data = response['data'];
-    //   data.map((countyInfo) {
-    //     var result = databaseHelper.insertCountyData(CountyModel(
-    //         int.parse(countyInfo['stateId']), int.parse(countyInfo['countyId']), countyInfo['name']));
-    //
-    //     if (result != 0) {
-    //       print('County Added ========');
-    //
-    //       var list = databaseHelper.getCountyList(37).then((value) {
-    //         print('County Count - ${value.length}');
-    //       });
-    //     }
-    //   });
-    // }
+  getCountryList() {
+    databaseHelper.getCountyMapList().then((value) {
+      print('County Count - ${value.length}');
+
+      if (value.length == 0) countyList();
+    });
   }
 }

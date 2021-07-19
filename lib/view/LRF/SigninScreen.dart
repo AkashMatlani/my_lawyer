@@ -15,6 +15,7 @@ import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/AppMessages.dart';
+import 'package:my_lawyer/utils/CommonStuff.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/DatabaseHelper.dart';
 import 'package:my_lawyer/utils/SocialLogin.dart';
@@ -335,6 +336,9 @@ class _SignInScreenState extends State<SignInScreen> {
           LoadingView().showLoaderWithTitle(false, context);
           if ((snapshot.data.meta as UserMetaModel).status == 1) {
             //...Redirect on Home Screen
+
+            registeredDeviceToken();
+
             UserInfoModel userInfo = snapshot.data.data;
             storeUserInfo((snapshot.data.meta as UserMetaModel).token, {
               'userName': userInfo.userName,
@@ -400,6 +404,8 @@ class _SignInScreenState extends State<SignInScreen> {
               'email': userInfo.email,
               'about': userInfo.about
             });
+
+            registeredDeviceToken();
 
             if (widget.userType == UserType.User) {
               _navigateToCreateCaseScreen();

@@ -29,7 +29,12 @@ class CaseDataModel {
   String amount;
 
   CaseDataModel(
-      {this.caseId, this.clientId, this.userName, this.userProfile, this.caseType, this.amount});
+      {this.caseId,
+      this.clientId,
+      this.userName,
+      this.userProfile,
+      this.caseType,
+      this.amount});
 
   factory CaseDataModel.fromJson(Map<String, dynamic> data) {
     return CaseDataModel(
@@ -38,7 +43,11 @@ class CaseDataModel {
       userName: data['userName'],
       userProfile: data['userProfile'],
       caseType: data['caseType'],
-      amount: (data['amount'] == 0) ? 'Not Bid Yet' : data['amount'],
+      amount: (data['amount'] == 0) ||
+              (data['amount'] == null) ||
+              (data['amount'] == '')
+          ? 'Not Bid Yet'
+          : r'$' + data['amount'],
     );
   }
 }

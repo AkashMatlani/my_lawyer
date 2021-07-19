@@ -46,7 +46,7 @@ class LawyerDataModel {
       lawyerId: data['lawyerId'],
       lawyerName: data['lawyerName'],
       userProfile: data['lawyerProfile'],
-      about: data['about'],
+      about: (data['about'] == null) ? '' : data['about'],
       bidAmount: data['bidAmount'],
       isLike: data['isLike'],
       isFav: data['isFav'],

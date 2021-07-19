@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:my_lawyer/bloc/Client/AdListBloc.dart';
 import 'package:my_lawyer/bloc/Client/LawyerListBloc.dart';
 import 'package:my_lawyer/bloc/Client/LikeLawyerBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/models/AdModel.dart';
 import 'package:my_lawyer/models/LawyerListModel.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
@@ -18,6 +20,7 @@ import 'package:my_lawyer/utils/NetworkImage.dart';
 import 'package:my_lawyer/view/Client/LawyerDetailScreen.dart';
 import 'package:my_lawyer/view/Client/LawyerListInfoView.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
+import 'package:page_view_indicators/circle_page_indicator.dart';
 
 class LawyerListScreen extends StatefulWidget {
   int selectedSegmentOption = LawyerListType.Hire;
@@ -29,26 +32,27 @@ class LawyerListScreen extends StatefulWidget {
 }
 
 class _LawyerListScreenState extends State<LawyerListScreen> {
-  var adList = [
-    'images/Client/temp_ad1.jpeg',
-    'images/Client/temp_ad2.jpeg',
-    'images/Client/temp_ad3.jpeg',
-    'images/Client/temp_ad4.jpeg'
-  ];
-
   int currentPage = 1;
   int totalCount = 0;
+  bool isUpdatedList = false;
+
   List<LawyerDataModel> lawyerList = [];
+  List<AdDataModel> adList = [];
 
   ScrollController scrollController = ScrollController();
   LawyerListBloc lawyerListBloc = LawyerListBloc();
   LikeLawyerBloc likeLawyerBloc = LikeLawyerBloc();
+  AdListBloc adListBloc = AdListBloc();
+
+  PageController pageController = PageController();
+  final currentPageNotifier = ValueNotifier<int>(0);
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
+    getAdList();
     pullToRefresh();
 
     scrollController.addListener(() {
@@ -86,7 +90,8 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
       child: Column(
         children: [
           sliderSegementView(),
-          advertisementView(),
+          if (adList.length > 0) advertisementView(),
+          pageIndicatorView(),
           Expanded(child: lawyerListStreamBuilder())
         ],
       ),
@@ -134,22 +139,59 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
     return Padding(
       padding: EdgeInsets.only(top: ScreenUtil().setHeight(20)),
       child: Container(
-          width: screenWidth(context),
-          height: ScreenUtil().setHeight(141),
-          child: PageView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: adList.length,
-              itemBuilder: (context, index) {
-                return SizedBox(
-                    width: screenWidth(context) - 40,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image(
-                        image: AssetImage(adList[index]),
-                        fit: BoxFit.fill,
-                      ),
-                    ));
-              })),
+        width: screenWidth(context),
+        height: ScreenUtil().setHeight(141),
+        child: PageView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: adList.length,
+          itemBuilder: (context, index) {
+            return SizedBox(
+                width: screenWidth(context) - 40,
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      adList[index].adImg,
+                      fit: BoxFit.fill,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        }
+                        return Container(
+                          child: Center(
+                              child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1,
+                              color: AppColor.ColorRed,
+                            ),
+                          )),
+                        );
+                      },
+                    )));
+          },
+          onPageChanged: (selectedIndex) {
+            setState(() {
+              currentPageNotifier.value = selectedIndex;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget pageIndicatorView() {
+    return Padding(
+      padding: EdgeInsets.only(top: 7),
+      child: CirclePageIndicator(
+        currentPageNotifier: currentPageNotifier,
+        itemCount: adList.length,
+        dotColor: AppColor.ColorDarkGray,
+        selectedDotColor: AppColor.ColorYellow,
+        dotSpacing: 3,
+        size: ScreenUtil().setWidth(10),
+      ),
     );
   }
 
@@ -182,13 +224,15 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
                         lawyerList.clear();
                       }
 
-                      if (lawyerList.length <= totalCount) {
-                        currentPage = currentPage + 1;
-                      }
+                      if (!isUpdatedList) {
+                        if (snapshot.data.data.data.length > 0) {
+                          lawyerList = lawyerList + snapshot.data.data.data;
+                          totalCount = snapshot.data.data.meta.count;
+                        }
 
-                      if (snapshot.data.data.data.length > 0) {
-                        lawyerList = lawyerList + snapshot.data.data.data;
-                        totalCount = snapshot.data.data.meta.count;
+                        if (lawyerList.length <= totalCount) {
+                          currentPage = currentPage + 1;
+                        }
                       }
 
                       if (lawyerList.length > 0) {
@@ -217,12 +261,14 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
     return Padding(
       padding: EdgeInsets.only(top: ScreenUtil().setHeight(10)),
       child: ListView.builder(
+          physics: AlwaysScrollableScrollPhysics(),
           controller: scrollController,
           itemCount: lawyerList.length,
           itemBuilder: (context, index) {
             return LawyerListInfoView(lawyerList[index], index, true,
                 (index, lawyerInfo) {
               setState(() {
+                isUpdatedList = true;
                 lawyerList[index] = lawyerInfo;
               });
             }); //lawyerInfoView(lawyerList[index], index);
@@ -230,212 +276,8 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
     );
   }
 
-  // Widget lawyerInfoView(LawyerDataModel lawyerInfo, int index) {
-  //   return Padding(
-  //       padding: EdgeInsets.only(
-  //         top: ScreenUtil().setHeight(10),
-  //         bottom: ScreenUtil().setHeight(10),
-  //       ),
-  //       child: Container(
-  //         width: screenWidth(context),
-  //         decoration: BoxDecoration(
-  //             color: Colors.white,
-  //             border: Border.all(color: AppColor.ColorBorder, width: 0.5),
-  //             borderRadius: BorderRadius.circular(8),
-  //             boxShadow: [
-  //               BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.11), blurRadius: 2)
-  //             ]),
-  //         child: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           mainAxisAlignment: MainAxisAlignment.start,
-  //           children: [
-  //             Row(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 lawyerProfilePicView(lawyerInfo.userProfile),
-  //                 lawyerNameAndAbout(lawyerInfo.about, lawyerInfo.lawyerName),
-  //                 favoriteBtn(lawyerInfo.isFav, index),
-  //               ],
-  //             ),
-  //             bidRateAndLike(lawyerInfo.bidAmount, lawyerInfo.isLike,
-  //                 lawyerInfo.likeCount, index),
-  //             viewDetailBtn(lawyerInfo)
-  //           ],
-  //         ),
-  //       ));
-  // }
-  //
-  // Widget lawyerProfilePicView(String userProfile) {
-  //   return Padding(
-  //     padding: EdgeInsets.only(
-  //         top: ScreenUtil().setHeight(10), left: ScreenUtil().setHeight(10)),
-  //     child: ClipRRect(
-  //         borderRadius: BorderRadius.circular(ScreenUtil().setHeight(60) / 2),
-  //         child: (userProfile == '')
-  //             ? Image(
-  //                 image: AssetImage(AppImage.CProfileImg),
-  //                 fit: BoxFit.fill,
-  //                 width: ScreenUtil().setHeight(60),
-  //                 height: ScreenUtil().setHeight(60),
-  //               )
-  //             : ImageNetwork()
-  //                 .loadNetworkImage(userProfile, ScreenUtil().setHeight(60))),
-  //   );
-  // }
-  //
-  // Widget lawyerNameAndAbout(String about, String name) {
-  //   return Expanded(
-  //       child: Padding(
-  //     padding: EdgeInsets.only(
-  //         left: ScreenUtil().setWidth(13),
-  //         top: ScreenUtil().setHeight(13),
-  //         right: ScreenUtil().setWidth(13)),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text(
-  //           name,
-  //           style: appThemeTextStyle(16,
-  //               fontWeight: FontWeight.w700, textColor: Colors.black),
-  //         ),
-  //         Text(
-  //           about,
-  //           style: TextStyle(),
-  //         ),
-  //       ],
-  //     ),
-  //   ));
-  // }
-  //
-  // Widget favoriteBtn(bool isFav, int index) {
-  //   return InkWell(
-  //     child: SvgPicture.asset(
-  //       'images/Client/ic_fav.svg',
-  //       color: isFav ? AppColor.ColorRed : Colors.transparent,
-  //     ),
-  //     onTap: () {
-  //       _pressedOnFavourite(lawyerList[index], index);
-  //     },
-  //   );
-  // }
-  //
-  // Widget bidRateAndLike(String amount, bool isLike, int likeCount, int index) {
-  //   return Padding(
-  //     padding: EdgeInsets.only(
-  //         left: ScreenUtil().setWidth(17),
-  //         right: ScreenUtil().setWidth(17),
-  //         top: ScreenUtil().setHeight(12)),
-  //     child: Container(
-  //       width: screenWidth(context),
-  //       height: ScreenUtil().setHeight(47),
-  //       decoration: BoxDecoration(
-  //         color: Colors.white,
-  //         border: Border.all(color: AppColor.ColorBorder, width: 0.5),
-  //         borderRadius: BorderRadius.circular(6),
-  //       ),
-  //       child: Row(
-  //         children: [
-  //           Expanded(
-  //             flex: 1,
-  //             child: Column(
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               children: [
-  //                 Text(
-  //                   'Bid Rate',
-  //                   style: appThemeTextStyle(13, textColor: Colors.black),
-  //                 ),
-  //                 Text(
-  //                   '\$' + amount,
-  //                   style: appThemeTextStyle(20,
-  //                       textColor: Colors.black, fontWeight: FontWeight.w700),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //           Container(
-  //             width: 1,
-  //             height: ScreenUtil().setHeight(47),
-  //             color: AppColor.ColorBorder,
-  //           ),
-  //           Expanded(
-  //             child: Column(
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               children: [
-  //                 Text(
-  //                   'Like',
-  //                   style: appThemeTextStyle(13, textColor: Colors.black),
-  //                 ),
-  //                 InkWell(
-  //                   onTap: () {
-  //                     _pressedOnLike(lawyerList[index], index);
-  //                   },
-  //                   child: Row(
-  //                     mainAxisAlignment: MainAxisAlignment.center,
-  //                     children: [
-  //                       SizedBox(
-  //                         width: 20,
-  //                         height: 20,
-  //                         child: Image(
-  //                           image: AssetImage('images/Client/ic_like.png'),
-  //                           color: isLike
-  //                               ? AppColor.ColorRed
-  //                               : AppColor.ColorLikeGray,
-  //                         ),
-  //                       ),
-  //                       Padding(
-  //                         padding: EdgeInsets.only(left: 5),
-  //                         child: Text(
-  //                           '$likeCount',
-  //                           style: appThemeTextStyle(15,
-  //                               textColor: Colors.black,
-  //                               fontWeight: FontWeight.w700),
-  //                         ),
-  //                       )
-  //                     ],
-  //                   ),
-  //                 )
-  //               ],
-  //             ),
-  //           )
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-  //
-  // Widget viewDetailBtn(LawyerDataModel lawyerInfo) {
-  //   return Padding(
-  //     padding: EdgeInsets.only(
-  //         top: ScreenUtil().setHeight(24),
-  //         left: ScreenUtil().setWidth(16),
-  //         right: ScreenUtil().setWidth(16),
-  //         bottom: ScreenUtil().setHeight(16)),
-  //     child: SizedBox(
-  //         width: screenWidth(context),
-  //         height: ScreenUtil().setHeight(38),
-  //         child: GenericButton().appThemeButton(
-  //             'View Detail', 16, Colors.white, FontWeight.w700, () {
-  //           Navigator.push(context,
-  //               MaterialPageRoute(builder: (context) => LawyerDetailScreen(lawyerInfo.caseId, lawyerInfo.lawyerId)));
-  //         }, borderRadius: 6)),
-  //   );
-  // }
-  //
-  // _pressedOnFavourite(LawyerDataModel lawyerInfo, int index) {
-  //   var updatedLawyerInfo = lawyerInfo;
-  //   updatedLawyerInfo.isFav = !updatedLawyerInfo.isFav;
-  //
-  //   setState(() {
-  //     lawyerList[index] = updatedLawyerInfo;
-  //   });
-  //
-  //   likeLawyerBloc.likeLawyerProfile({
-  //     'lawyerId': updatedLawyerInfo.lawyerId,
-  //     'isFavorite': updatedLawyerInfo.isLike
-  //   });
-  // }
-
   pullToRefresh() {
+    isUpdatedList = false;
     currentPage = 1;
     totalCount = 0;
     getLawyerListByType();
@@ -443,6 +285,7 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
 
   loadMore() {
     if (lawyerList.length <= totalCount) {
+      isUpdatedList = false;
       getLawyerListByType();
     }
   }
@@ -457,20 +300,24 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
     lawyerListBloc.getLawyerList(params);
   }
 
-// _pressedOnLike(LawyerDataModel lawyerInfo, int index) {
-//   var updatedLawyerInfo = lawyerInfo;
-//   updatedLawyerInfo.isLike = !updatedLawyerInfo.isLike;
-//   updatedLawyerInfo.likeCount = (updatedLawyerInfo.isLike)
-//       ? updatedLawyerInfo.likeCount + 1
-//       : updatedLawyerInfo.likeCount - 1;
-//
-//   setState(() {
-//     lawyerList[index] = updatedLawyerInfo;
-//   });
-//
-//   likeLawyerBloc.likeLawyerProfile({
-//     'lawyerId': updatedLawyerInfo.lawyerId,
-//     'isLike': updatedLawyerInfo.isLike
-//   });
-// }
+  getAdList() {
+    adListBloc.getAdList();
+
+    adListBloc.adListStream.listen((snapshot) {
+      switch (snapshot.status) {
+        case Status.Loading:
+          break;
+
+        case Status.Done:
+          setState(() {
+            adList = snapshot.data.data;
+          });
+
+          break;
+
+        case Status.Error:
+          break;
+      }
+    });
+  }
 }

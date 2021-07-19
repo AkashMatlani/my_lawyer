@@ -40,8 +40,9 @@ class DatabaseHelper {
   Future<Database> initializeDatabase() async {
     //... Get document directory path for both iOS and Android to store database
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = directory.path + 'mylawyer.db';
+    String path = directory.path + '/mylawyer.db';
 
+    print('Database Path - $path');
     //... Open/Create Database
     var lawyerDB = openDatabase(path, version: 1, onCreate: createDB);
     return lawyerDB;

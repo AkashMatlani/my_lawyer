@@ -31,6 +31,8 @@ class UserPrefernces {
   static const UserToken = 'UserToken';
   static const UserInfo = 'UserInfo';
   static const DoneSetup = 'DoneSetup';
+  static const FCMToken = 'FCMToken';
+
 }
 
 class LawyerListType {

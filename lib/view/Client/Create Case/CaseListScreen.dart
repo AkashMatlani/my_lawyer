@@ -8,7 +8,9 @@ import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/CaseListModel.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/AppMessages.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
 
@@ -191,6 +193,11 @@ class _CaseListScreenState extends State<CaseListScreen> {
   }
 
   _pressedOnSubmit() {
+    if (selectedCase.length == 0) {
+      AlertView().showAlert(Messages.CBlankCase, context);
+      return;
+    }
+
     Navigator.pop(context, selectedCase);
   }
 
