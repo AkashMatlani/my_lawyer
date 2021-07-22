@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
+import 'package:my_lawyer/utils/AppMessages.dart';
 import 'package:my_lawyer/utils/Constant.dart';
 
 class CustomCaseScreen extends StatefulWidget {
@@ -86,6 +88,10 @@ class _CustomCaseScreenState extends State<CustomCaseScreen> {
   }
 
   _pressedOnSubmit() {
+    if (txtCustomCaseController.text.isEmpty) {
+      AlertView().showAlert(Messages.CBlankCustomDesc, context);
+      return;
+    }
     Navigator.pop(context, txtCustomCaseController.text);
   }
 }

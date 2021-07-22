@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/Constant.dart';
+import 'package:my_lawyer/view/Client/PaypalPayment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -54,9 +55,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            txtTitleView('First Name'),
-            txtSubTitleView(),
-            txtTitleView('Last Name'),
+            txtTitleView('User Name'),
             txtSubTitleView(),
             txtTitleView('Email'),
             Row(
@@ -78,37 +77,58 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
             Padding(
               padding: EdgeInsets.only(
-                  top: ScreenUtil().setHeight(20),
-                  bottom: ScreenUtil().setHeight(16)),
+                top: ScreenUtil().setHeight(20),
+                bottom: ScreenUtil().setHeight(16),
+              ),
+              child: Divider(
+                height: 1,
+                color: Color.fromRGBO(151, 151, 151, 1),
+              ),
             ),
-            Text('Payment Information'),
-            Row(
-              children: [
-                SizedBox(
-                    width: ScreenUtil().setWidth(66),
-                    height: ScreenUtil().setHeight(41),
-                    child: InkWell(
-                        onTap: () {},
-                        child: Image(
-                          image: AssetImage('images/Client/ic_paypal.png'),
-                        ))),
-                SizedBox(
-                    width: ScreenUtil().setWidth(66),
-                    height: ScreenUtil().setHeight(41),
-                    child: InkWell(
-                        onTap: () {},
-                        child: Image(
-                          image: AssetImage('images/Client/ic_visa.png'),
-                        ))),
-                SizedBox(
-                    width: ScreenUtil().setWidth(66),
-                    height: ScreenUtil().setHeight(41),
-                    child: InkWell(
-                        onTap: () {},
-                        child: Image(
-                          image: AssetImage('images/Client/ic_master.png'),
-                        )))
-              ],
+            Text(
+              'Payment Information',
+              style: appThemeTextStyle(17,
+                  fontWeight: FontWeight.w700, textColor: Colors.black),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Row(
+                children: [
+                  SizedBox(
+                      width: ScreenUtil().setWidth(66),
+                      height: ScreenUtil().setHeight(41),
+                      child: InkWell(
+                          onTap: () {
+                            pressedOnPayment();
+                          },
+                          child: Image(
+                            image: AssetImage('images/Client/ic_paypal.png'),
+                          ))),
+                  Padding(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    child: SizedBox(
+                        width: ScreenUtil().setWidth(66),
+                        height: ScreenUtil().setHeight(41),
+                        child: InkWell(
+                            onTap: () {
+                              pressedOnPayment();
+                            },
+                            child: Image(
+                              image: AssetImage('images/Client/ic_visa.png'),
+                            ))),
+                  ),
+                  SizedBox(
+                      width: ScreenUtil().setWidth(66),
+                      height: ScreenUtil().setHeight(41),
+                      child: InkWell(
+                          onTap: () {
+                            pressedOnPayment();
+                          },
+                          child: Image(
+                            image: AssetImage('images/Client/ic_master.png'),
+                          )))
+                ],
+              ),
             )
           ],
         ),
@@ -117,11 +137,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Widget txtTitleView(String title) {
-    return Text(
-      title,
-      style: appThemeTextStyle(14,
-          fontWeight: FontWeight.w600,
-          textColor: Color.fromRGBO(104, 104, 104, 1)),
+    return Padding(
+      padding: EdgeInsets.only(bottom: 5),
+      child: Text(
+        title,
+        style: appThemeTextStyle(14,
+            fontWeight: FontWeight.w600,
+            textColor: Color.fromRGBO(104, 104, 104, 1)),
+      ),
     );
   }
 
@@ -132,6 +155,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
         userInfo['userName'],
         style: appThemeTextStyle(15,
             fontWeight: FontWeight.w700, textColor: Colors.black),
+      ),
+    );
+  }
+
+  pressedOnPayment() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) => PaypalPayment(
+          onFinish: (number) async {
+            // payment done
+            print('order id: ' + number);
+          },
+        ),
       ),
     );
   }

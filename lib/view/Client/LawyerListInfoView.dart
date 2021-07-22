@@ -15,10 +15,7 @@ import 'package:my_lawyer/utils/NetworkImage.dart';
 import 'package:my_lawyer/view/Client/LawyerDetailScreen.dart';
 
 typedef getUpdatedLawyerDetail = Function(
-    int index, LawyerDataModel lawyerDataModel);
-
-// typedef getUpdatedLawyerDetail = Function(
-//     int index, bool isSelected, bool isLike);
+    int index, LawyerDataModel lawyerDataModel, bool isFav);
 
 class LawyerListInfoView extends StatefulWidget {
   LawyerDataModel lawyerDataModel;
@@ -117,6 +114,7 @@ class _LawyerListInfoViewState extends State<LawyerListInfoView> {
             style: appThemeTextStyle(16,
                 fontWeight: FontWeight.w700, textColor: Colors.black),
           ),
+          caseTypeView(widget.lawyerDataModel.caseType),
           Text(
             about,
             style: TextStyle(),
@@ -124,6 +122,26 @@ class _LawyerListInfoViewState extends State<LawyerListInfoView> {
         ],
       ),
     ));
+  }
+
+  Widget caseTypeView(String caseType) {
+    return Padding(
+      padding: EdgeInsets.only(top: 5, bottom: 5),
+      child: Container(
+          decoration: BoxDecoration(
+              color: Color.fromRGBO(211, 255, 211, 1),
+              borderRadius: BorderRadius.circular(5)),
+          child: Padding(
+            padding: EdgeInsets.all(4),
+            child: Text(
+              caseType,
+              textAlign: TextAlign.center,
+              style: appThemeTextStyle(13,
+                  fontWeight: FontWeight.w600,
+                  textColor: Color.fromRGBO(2, 165, 64, 1)),
+            ),
+          )),
+    );
   }
 
   Widget favoriteBtn(bool isFav, int index) {
@@ -261,15 +279,17 @@ class _LawyerListInfoViewState extends State<LawyerListInfoView> {
     var updatedLawyerInfo = widget.lawyerDataModel;
     updatedLawyerInfo.isFav = !updatedLawyerInfo.isFav;
 
-    widget.callBack(widget.index, updatedLawyerInfo);
+    widget.callBack(widget.index, updatedLawyerInfo, true);
 
     if (updatedLawyerInfo.isFav) {
       favouriteLawyerBloc.favLawyerProfile({
         'lawyerId': updatedLawyerInfo.lawyerId.toString(),
+        'caseId': updatedLawyerInfo.caseId.toString()
       });
     } else {
       unFavouriteLawyerBloc.unFavLawyerProfile({
         'lawyerId': updatedLawyerInfo.lawyerId.toString(),
+        'caseId': updatedLawyerInfo.caseId.toString()
       });
     }
   }
@@ -281,7 +301,7 @@ class _LawyerListInfoViewState extends State<LawyerListInfoView> {
         ? updatedLawyerInfo.likeCount + 1
         : updatedLawyerInfo.likeCount - 1;
 
-    widget.callBack(widget.index, updatedLawyerInfo);
+    widget.callBack(widget.index, updatedLawyerInfo, false);
 
     if (updatedLawyerInfo.isLike) {
       likeLawyerBloc.likeLawyerProfile({

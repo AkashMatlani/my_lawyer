@@ -25,9 +25,18 @@ class LawyerDetailBloc {
   getLawyerDetail(Map<String, dynamic> params) async {
     lawyerDetailSink.add(APIResponse.loading('Loading...'));
     try {
-      LawyerDetailModel response =
-          await lawyerDetailRepository.getLawyerDetail(params);
-      lawyerDetailSink.add(APIResponse.done(response));
+      var response = await lawyerDetailRepository.getLawyerDetail(params);
+
+      if ((response as Map<String, dynamic>).containsKey('statusCode')) {
+        lawyerDetailSink.add(APIResponse.error(response['error']));
+      } else {
+        var modelResponse = LawyerDetailModel.fromJson(response);
+        lawyerDetailSink.add(APIResponse.done(modelResponse));
+      }
+
+      // LawyerDetailModel response =
+      //     await lawyerDetailRepository.getLawyerDetail(params);
+      // lawyerDetailSink.add(APIResponse.done(response));
     } catch (error) {
       lawyerDetailSink.add(APIResponse.error(error.toString()));
     }

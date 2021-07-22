@@ -27,6 +27,7 @@ class LawyerDataModel {
   bool isFav;
   int likeCount;
   String email;
+  String caseType;
 
   LawyerDataModel(
       {this.caseId,
@@ -38,21 +39,22 @@ class LawyerDataModel {
       this.isLike,
       this.isFav,
       this.likeCount,
-      this.email});
+      this.email,
+      this.caseType});
 
   factory LawyerDataModel.fromJson(Map<String, dynamic> data) {
     return LawyerDataModel(
-      caseId: data['caseId'],
-      lawyerId: data['lawyerId'],
-      lawyerName: data['lawyerName'],
-      userProfile: data['lawyerProfile'],
-      about: (data['about'] == null) ? '' : data['about'],
-      bidAmount: data['bidAmount'],
-      isLike: data['isLike'],
-      isFav: data['isFav'],
-      likeCount: data['likeCount'],
-      email: data['email']
-    );
+        caseId: data['caseId'],
+        lawyerId: data['lawyerId'],
+        lawyerName: data['lawyerName'],
+        userProfile: data['lawyerProfile'],
+        about: (data['about'] == null) ? '' : data['about'],
+        bidAmount: data['bidAmount'],
+        isLike: data['isLike'],
+        isFav: data['isFav'],
+        likeCount: data['likeCount'],
+        email: data['email'],
+        caseType: data['caseType']);
   }
 }
 

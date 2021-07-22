@@ -435,8 +435,11 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<void> googleSignIn() async {
     googleSignInClass.googleSignIn().then((currentUser) {
-      LoadingView().showLoaderWithTitle(true, context);
-      signInUser(SignInType.Google, currentUser.email);
+
+      if (currentUser != null) {
+        LoadingView().showLoaderWithTitle(true, context);
+        signInUser(SignInType.Google, currentUser.email);
+      }
     });
   }
 

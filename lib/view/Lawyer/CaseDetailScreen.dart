@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:instant/instant.dart';
+import 'package:intl/intl.dart';
 import 'package:my_lawyer/bloc/Lawyer/CaseDetailBloc.dart';
 import 'package:my_lawyer/bloc/Lawyer/SendProposalBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
@@ -24,11 +26,13 @@ import 'package:my_lawyer/view/Lawyer/CaseInfoView.dart';
 import 'package:my_lawyer/view/Lawyer/PDFViewer.dart';
 import 'package:my_lawyer/view/Lawyer/ZoomImageScreen.dart';
 import 'package:path/path.dart' as path;
+import 'package:intl/intl.dart';
 
 class CaseDetailScreen extends StatefulWidget {
   int caseId;
+  bool isFromMyCase;
 
-  CaseDetailScreen(this.caseId);
+  CaseDetailScreen({this.caseId, this.isFromMyCase = false});
 
   @override
   _CaseDetailScreenState createState() => _CaseDetailScreenState();
@@ -47,6 +51,9 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
   DateTime selectedEndDateToShowBid = DateTime.now();
   TimeOfDay selectedStartTimeToShowBid = TimeOfDay(hour: 00, minute: 00);
   TimeOfDay selectedEndTimeToShowBid = TimeOfDay(hour: 00, minute: 00);
+
+  String estStartDateTime;
+  String estEndDateTime;
 
   SendProposalBloc sendProposalBloc;
   CaseDetailBloc caseDetailBloc;
@@ -112,13 +119,15 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
           clientProfileAndName(),
           txtCaseDescription(),
           txtDescriptionView(),
-          for (dynamic attachInfo in caseDetailModel.attachment)
-            attachmentView(attachInfo),
-          Container(height: 1, color: Color.fromRGBO(151, 151, 151, 0.2)),
-          txtFieldAmount(),
-          bidStartDateAndTime(),
-          bidEndDateAndTime(),
-          sendProposalAndCancelBtn()
+          if (caseDetailModel.attachment.length > 0)
+            for (dynamic attachInfo in caseDetailModel.attachment)
+              attachmentView(attachInfo),
+          if (!widget.isFromMyCase)
+            Container(height: 1, color: Color.fromRGBO(151, 151, 151, 0.2)),
+          if (!widget.isFromMyCase) txtFieldAmount(),
+          if (!widget.isFromMyCase) bidStartDateAndTime(),
+          if (!widget.isFromMyCase) bidEndDateAndTime(),
+          if (!widget.isFromMyCase) sendProposalAndCancelBtn()
         ],
       ),
     );
@@ -184,9 +193,12 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
   }
 
   Widget txtDescriptionView() {
-    return Text(
-      caseDetailModel.description,
-      style: appThemeTextStyle(14, textColor: Colors.black, height: 2),
+    return Padding(
+      padding: EdgeInsets.only(bottom: 5),
+      child: Text(
+        caseDetailModel.description,
+        style: appThemeTextStyle(14, textColor: Colors.black, height: 2),
+      ),
     );
   }
 
@@ -228,27 +240,29 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                   borderRadius: BorderRadius.circular(6)),
               child: SvgPicture.asset('images/Lawyer/ic_pdf.svg'),
             ),
-            Padding(
-              padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-              child: Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 10, top: 10, right: 10),
+                    child: Text(
                       getFileNameFromURL(attachURL),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: appThemeTextStyle(12, textColor: Colors.black),
+                      style: appThemeTextStyle(14, textColor: Colors.black),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 5, bottom: 5),
-                      child: Text(
-                        '',
-                        style: appThemeTextStyle(12,
-                            textColor: Color.fromRGBO(0, 0, 0, 0.4)),
-                      ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 5, bottom: 5),
+                    child: Text(
+                      '',
+                      style: appThemeTextStyle(12,
+                          textColor: Color.fromRGBO(0, 0, 0, 0.4)),
                     ),
-                    Row(
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 10),
+                    child: Row(
                       children: [
                         InkWell(
                             onTap: () {
@@ -291,10 +305,11 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                             ))
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            )
+            ),
+            // )
           ],
         ),
       ),
@@ -573,8 +588,29 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
   }
 
   _pressedOnSendProposal() {
+    String startDate = '$strStartDateToShowBid $strStartTimeToShowBid';
+    DateFormat format = DateFormat('yyyy/MM/dd HH:mm');
+    DateTime estStartDate = dateTimeToZone(
+        zone: "EST", datetime: format.parse(startDate)); //DateTime in EST zone
+    var startDateTimestamp = estStartDate.microsecondsSinceEpoch;
+
+    estStartDateTime = DateFormat('yyyy/MM/dd HH:mm').format(estStartDate);
+
+    String endDate = '$strEndDateToShowBid $strEndTimeToShowBid';
+    DateFormat format1 = DateFormat('yyyy/MM/dd HH:mm');
+    DateTime estEndDate = dateTimeToZone(
+        zone: "EST", datetime: format.parse(endDate)); //DateTime in EST zone
+    var endDateTimestamp = estEndDate.microsecondsSinceEpoch;
+    estEndDateTime = DateFormat('yyyy/MM/dd HH:mm').format(estEndDate);
+
+    print('Start Timestamp - $startDateTimestamp');
+    print('End Timestamp - $endDateTimestamp');
+
     if (txtAmountController.text.isEmpty) {
       AlertView().showAlert(Messages.CBlankAmount, context);
+      return;
+    } else if (double.parse(txtAmountController.text) < 50) {
+      AlertView().showAlert(Messages.CMininmumBidAmount, context);
       return;
     } else if (strStartDateToShowBid == null) {
       AlertView().showAlert(Messages.CBlankStartDate, context);
@@ -587,6 +623,9 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
       return;
     } else if (strEndTimeToShowBid == null) {
       AlertView().showAlert(Messages.CBlankEndTime, context);
+      return;
+    } else if (startDateTimestamp > endDateTimestamp) {
+      AlertView().showAlert(Messages.CEndDateGraterThanStartDate, context);
       return;
     }
 

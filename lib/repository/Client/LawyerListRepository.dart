@@ -2,7 +2,6 @@ import 'package:my_lawyer/models/LawyerListModel.dart';
 import 'package:my_lawyer/networking/APIRequest.dart';
 
 class LawyerListRepository {
-
   APIRequestHelper helper = APIRequestHelper();
 
   Future<LawyerListModel> getLawyerList(Map<String, dynamic> params) async {

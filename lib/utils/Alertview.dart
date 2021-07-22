@@ -34,20 +34,25 @@ class AlertView {
       Function onPressedAction2,
       {String title = "My Lawyer"}) {
     AlertDialog alertDialog = AlertDialog(
-      title: Text(title),
-      content: Text(message),
+      title: Text(title,
+          style: appThemeTextStyle(18,
+              textColor: AppColor.ColorRed, fontWeight: FontWeight.w700)),
+      content: Text(message,
+          style: appThemeTextStyle(16, textColor: AppColor.ColorRed)),
       actions: [
         TextButton(
             onPressed: onPressedAction1,
             child: Text(
               action1,
-              style: appThemeTextStyle(16),
+              style: appThemeTextStyle(16,
+                  textColor: AppColor.ColorRed, fontWeight: FontWeight.w700),
             )),
         TextButton(
             onPressed: onPressedAction2,
             child: Text(
               action2,
-              style: appThemeTextStyle(16),
+              style: appThemeTextStyle(16,
+                  textColor: AppColor.ColorRed, fontWeight: FontWeight.w700),
             ))
       ],
     );

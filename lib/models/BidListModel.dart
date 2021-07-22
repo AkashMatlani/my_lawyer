@@ -22,38 +22,40 @@ class BidListModel {
 
 class BidDataModel {
   int caseId;
-  int lawyerId;
-  String lawyerName;
+  int userId;
+  String userName;
   String userProfile;
   String about;
   String bidAmount;
   bool isLike;
   bool isFav;
   int likeCount;
+  String caseType;
 
   BidDataModel(
       {this.caseId,
-      this.lawyerId,
-      this.lawyerName,
+      this.userId,
+      this.userName,
       this.userProfile,
       this.about,
       this.bidAmount,
       this.isLike,
       this.isFav,
-      this.likeCount});
+      this.likeCount,
+      this.caseType});
 
   factory BidDataModel.fromJson(Map<String, dynamic> data) {
     return BidDataModel(
-      caseId: data['caseId'],
-      lawyerId: data['lawyerId'],
-      lawyerName: data['userName'],
-      userProfile: data['userProfile'] ,
-      about: data['about'],
-      bidAmount: data['bidAmount'],
-      isLike: data['isLike'],
-      isFav: data['isFav'],
-      likeCount: data['likeCount'],
-    );
+        caseId: data['caseId'],
+        userId: data['userId'],
+        userName: data['userName'],
+        userProfile: data['userProfile'],
+        about: data['about'],
+        bidAmount: (data['bidAmount'] != null || data['bidAmount'] != "") ? r'$'+data['bidAmount'] : '',
+        isLike: data['isLike'],
+        isFav: data['isFav'],
+        likeCount: data['likeCount'],
+        caseType: data['caseType']);
   }
 }
 

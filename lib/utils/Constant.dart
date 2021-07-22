@@ -32,7 +32,6 @@ class UserPrefernces {
   static const UserInfo = 'UserInfo';
   static const DoneSetup = 'DoneSetup';
   static const FCMToken = 'FCMToken';
-
 }
 
 class LawyerListType {
@@ -54,9 +53,10 @@ class SideMenuOption {
   static const SearchCases = 'Search Cases';
   static const EditProfile = 'Edit Profile';
   static const ChangePassword = 'Change Password';
+  static const MyCases = 'My Cases';
+  static const MyBid = 'My Bid';
 }
 
 class AppImage {
-
   static const CProfileImg = 'images/Client/ic_profile.jpeg';
 }

@@ -14,6 +14,7 @@ import 'package:my_lawyer/repository/Client/AcceptProposalRepository.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/CommonWidgets.dart';
+import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/utils/NetworkImage.dart';
 import 'package:my_lawyer/view/Client/PaymentScreen.dart';
@@ -44,12 +45,6 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
 
     acceptBidProposalBloc = AcceptBidProposalBloc();
     lawyerDetailBloc = LawyerDetailBloc();
-  }
-
-  @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
     getLawyerDetail();
   }
 
@@ -87,8 +82,14 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
                     }
 
                   case Status.Error:
-                    AlertView()
-                        .showAlertView(context, snapshot.data.message, () {});
+                    return Center(
+                      child: Text(
+                        snapshot.data.message,
+                        style: appThemeTextStyle(16,
+                            textColor: AppColor.ColorBlack),
+                      ),
+                    );
+                    break;
                 }
               } else {
                 return showLoaderInList();
@@ -290,6 +291,7 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
       'caseId': widget.caseId.toString(),
       'lawyerId': widget.lawyerId.toString()
     };
+    LoadingView().showLoaderWithTitle(true, context);
     acceptBidProposalBloc.acceptBidProposal(params);
 
     acceptBidProposalBloc.acceptBidStream.listen((snspshot) {
@@ -301,16 +303,9 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
           LoadingView().showLoaderWithTitle(false, context);
 
           if (snspshot.data['meta']['status'] == 1) {
-            AlertView().showAlertView(
-                context,
-                snspshot.data['meta']['message'],
-                () => {
-                      Navigator.of(context).pop(),
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => PaymentScreen()))
-                    });
+            AlertView().showToast(context, snspshot.data['meta']['message']);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => PaymentScreen()));
           } else {
             AlertView().showAlertView(context, snspshot.data['meta']['message'],
                 () => {Navigator.of(context).pop()});

@@ -29,6 +29,13 @@ class APITag {
   static const registeredDeviceToken = 'registerDeviceToken';
   static const adList = 'adList';
   static const removeDeviceToken = 'removeDeviceToken';
+  static const myCases = 'myCases';
+  static const myBidding = 'myBids';
+}
+
+class CStatusCode {
+  static const Status200 = 200;
+  static const Status500 = 500;
 }
 
 class APIRequestHelper {
@@ -58,14 +65,18 @@ class APIRequestHelper {
         response = await http.get(Uri.parse(baseURL + apiTag));
       }
 
-      print('Response - ${jsonDecode(response.body.toString())}');
-      // final response = await http.get(Uri.parse(baseURL + apiTag), headers: (getToken() != null) ? headerAuth : {}));
-      responseJson = getResponse(response);
+      if (response.statusCode == CStatusCode.Status200) {
+        responseJson = jsonDecode(response.body.toString());
+        return responseJson;
+      } else {
+        return {
+          'error': response.reasonPhrase,
+          'statusCode': response.statusCode
+        };
+      }
     } on SocketException {
       throw Exception('Something is wrong');
     }
-
-    return responseJson;
   }
 
   Future<dynamic> post(String apiTag, Map<String, dynamic> parameters) async {
@@ -73,23 +84,25 @@ class APIRequestHelper {
     var token = prefs.getString('UserToken');
 
     print('API $apiTag - $parameters');
-    // var headerAuth = header;
-    // headerAuth['Authorization'] = '$token';
     var headerAuth = {'Authorization': token};
 
     var responseJson;
+
     try {
       final response = await http.post(Uri.parse(baseURL + apiTag),
-          body: parameters,
-          headers: (token != null)
-              ? headerAuth
-              : header); //, headers: (token != null) ? headerAuth : header
-      responseJson = jsonDecode(response.body.toString());
+          body: parameters, headers: (token != null) ? headerAuth : header);
+      if (response.statusCode == CStatusCode.Status200) {
+        responseJson = jsonDecode(response.body.toString());
+        return responseJson;
+      } else {
+        return {
+          'error': response.reasonPhrase,
+          'statusCode': response.statusCode
+        };
+      }
     } on SocketException {
       throw Exception('Something is wrong');
     }
-
-    return responseJson;
   }
 
   Future<dynamic> postMultiFormData(
@@ -99,9 +112,6 @@ class APIRequestHelper {
       String fileParamName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
-
-// var headerAuth = header;
-    // headerAuth['Authorization'] = '$token';
     var headerAuth = {'Authorization': token};
 
     var responseJson;
@@ -126,9 +136,6 @@ class APIRequestHelper {
 
           request.files.addAll(multiPartFiles);
         }
-      } else {
-        var multiPart = await http.MultipartFile.fromPath(fileParamName, '');
-        request.files.add(multiPart);
       }
 
       if (parameters != null) {
@@ -139,7 +146,17 @@ class APIRequestHelper {
       var response = await request.send();
 
       final responseToString = await response.stream.bytesToString();
-      responseJson = jsonDecode(responseToString);
+      // responseJson = jsonDecode(responseToString);
+
+      if (response.statusCode == CStatusCode.Status200) {
+        responseJson = jsonDecode(responseToString);
+        return responseJson;
+      } else {
+        return {
+          'error': response.reasonPhrase,
+          'statusCode': response.statusCode
+        };
+      }
     } on SocketException {
       throw Exception('Something is wrong');
     }

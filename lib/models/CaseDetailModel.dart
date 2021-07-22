@@ -23,6 +23,6 @@ class CaseDetailModel {
         clientProfile: data['clientProfile'],
         caseType: data['caseTypeName'],
         description: data['description'],
-        attachment: data['attachment']);
+        attachment: ((data['attachment'] as List<dynamic>).first == null) || (data['attachment'] as List<dynamic>).first == '' ? [] : data['attachment']);
   }
 }

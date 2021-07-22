@@ -59,6 +59,7 @@ class MyApp extends StatelessWidget {
     return ScreenUtilInit(
         designSize: Size(375, 812),
         builder: () => MaterialApp(
+          // navigatorKey: MyApp.materialKey,
               title: 'Flutter Demo',
               home: (token == null)
                   ? UserSelectionScreen(isDoneSetup)

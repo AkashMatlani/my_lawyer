@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/main.dart';
+import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 import 'package:my_lawyer/utils/CommonStuff.dart';
 import 'package:my_lawyer/utils/Constant.dart';
@@ -14,9 +15,11 @@ import 'package:my_lawyer/view/Client/ChangePwdScreen.dart';
 import 'package:my_lawyer/view/Client/Create%20Case/CreateCaseScreen.dart';
 import 'package:my_lawyer/view/Client/EditProfileScreen.dart';
 import 'package:my_lawyer/view/Client/LawyerListScreen.dart';
+import 'package:my_lawyer/view/Client/MyCasesScreen.dart';
 import 'package:my_lawyer/view/Client/ViewBidScreen.dart';
 import 'package:my_lawyer/view/LRF/SigninScreen.dart';
 import 'package:my_lawyer/view/LRF/UserSelectionScreen.dart';
+import 'package:my_lawyer/view/Lawyer/MyBidScreen.dart';
 import 'package:my_lawyer/view/Lawyer/SearchCaseScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,6 +55,10 @@ class _SideBarViewState extends State<SideBarView> {
           'name': SideMenuOption.CreateNewCase
         },
         {
+          'img': 'images/Sidebar/ic_create_case.png',
+          'name': SideMenuOption.MyCases
+        },
+        {
           'img': 'images/Sidebar/ic_edit_profile.png',
           'name': SideMenuOption.EditProfile
         },
@@ -79,6 +86,10 @@ class _SideBarViewState extends State<SideBarView> {
           'name': SideMenuOption.CreateNewCase
         },
         {
+          'img': 'images/Sidebar/ic_create_case.png',
+          'name': SideMenuOption.MyCases
+        },
+        {
           'img': 'images/Sidebar/ic_change_pwd.png',
           'name': SideMenuOption.EditProfile
         },
@@ -88,6 +99,10 @@ class _SideBarViewState extends State<SideBarView> {
         {
           'img': 'images/Sidebar/ic_create_case.png',
           'name': SideMenuOption.SearchCases
+        },
+        {
+          'img': 'images/Sidebar/ic_create_case.png',
+          'name': SideMenuOption.MyBid
         },
         {
           'img': 'images/Sidebar/ic_edit_profile.png',
@@ -103,6 +118,10 @@ class _SideBarViewState extends State<SideBarView> {
         {
           'img': 'images/Sidebar/ic_create_case.png',
           'name': SideMenuOption.SearchCases
+        },
+        {
+          'img': 'images/Sidebar/ic_create_case.png',
+          'name': SideMenuOption.MyBid
         },
         {
           'img': 'images/Sidebar/ic_edit_profile.png',
@@ -140,7 +159,6 @@ class _SideBarViewState extends State<SideBarView> {
               borderRadius:
                   BorderRadius.only(bottomRight: Radius.circular(54))),
         ),
-
         ListView(
           shrinkWrap: true,
           children: [
@@ -188,8 +206,10 @@ class _SideBarViewState extends State<SideBarView> {
                       break;
 
                     case SideMenuOption.ViewBids:
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => ViewBidScreen()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ViewBidScreen()));
                       break;
 
                     case SideMenuOption.EditProfile:
@@ -197,6 +217,20 @@ class _SideBarViewState extends State<SideBarView> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => EditProfileScreen()));
+                      break;
+
+                    case SideMenuOption.MyCases:
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MyCasesScreen()));
+                      break;
+
+                    case SideMenuOption.MyBid:
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MyBidsScreen()));
                       break;
 
                     case SideMenuOption.ChangePassword:
@@ -217,7 +251,6 @@ class _SideBarViewState extends State<SideBarView> {
               ),
           ],
         ),
-
         Spacer(),
         logout()
       ]),
@@ -260,11 +293,11 @@ class _SideBarViewState extends State<SideBarView> {
                     borderRadius:
                         BorderRadius.circular(ScreenUtil().setHeight(72) / 2),
                     child: (userInfo == null)
-                        ? Image(
-                            image: AssetImage(AppImage.CProfileImg))
+                        ? Image(image: AssetImage(AppImage.CProfileImg))
                         : (userInfo['userProfile'] != '')
-                            ? ImageNetwork()
-                                .loadNetworkImage(userInfo['userProfile'], ScreenUtil().setHeight(72))
+                            ? ImageNetwork().loadNetworkImage(
+                                userInfo['userProfile'],
+                                ScreenUtil().setHeight(72))
                             : Image(
                                 image: AssetImage(
                                     'images/Client/ic_profile.jpeg'))))));
@@ -313,11 +346,16 @@ class _SideBarViewState extends State<SideBarView> {
           ],
         ),
         onTap: () {
-          logOut();
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => UserSelectionScreen(true)));
+          AlertView().showAlertViewWithTwoButton(
+              context, 'Are you sure you want to logout?', 'Yes', 'No', () {
+            logOut();
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => UserSelectionScreen(true)));
+          }, () {
+                Navigator.pop(context);
+          });
         },
       ),
     );

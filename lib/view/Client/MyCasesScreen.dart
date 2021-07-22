@@ -5,9 +5,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_lawyer/bloc/Client/BidListBloc.dart';
 import 'package:my_lawyer/bloc/Client/FavouriteLawyerBloc.dart';
 import 'package:my_lawyer/bloc/Client/LikeLawyerBloc.dart';
+import 'package:my_lawyer/bloc/Client/MyCaseBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/BidListModel.dart';
+import 'package:my_lawyer/models/CaseTypeListModel.dart';
 import 'package:my_lawyer/models/LawyerListModel.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
@@ -22,40 +24,26 @@ import 'package:my_lawyer/view/Lawyer/CaseInfoView.dart';
 import 'package:my_lawyer/view/Sidebar/SideBarView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ViewBidScreen extends StatefulWidget {
+class MyCasesScreen extends StatefulWidget {
   @override
-  _ViewBidScreenState createState() => _ViewBidScreenState();
+  _MyCasesScreenState createState() => _MyCasesScreenState();
 }
 
-class _ViewBidScreenState extends State<ViewBidScreen> {
+class _MyCasesScreenState extends State<MyCasesScreen> {
   int userType = 0;
 
   int currentPage = 1;
   int totalCount = 0;
-  List<LawyerDataModel> bidList = [];
+  List<CaseDataModel> caseList = [];
   bool isUpdateList = false;
 
+  MyCaseBloc myCaseBloc = MyCaseBloc();
   ScrollController scrollController = ScrollController();
-
-  BidListBloc bidListBloc;
-  LikeLawyerBloc likeLawyerBloc = LikeLawyerBloc();
-  FavouriteLawyerBloc favouriteLawyerBloc = FavouriteLawyerBloc();
 
   @override
   initState() {
-    SharedPreferences.getInstance().then((prefs) {
-      var userInfoStr = prefs.getString(UserPrefernces.UserInfo);
-
-      setState(() {
-        var userInfo = json.decode(userInfoStr);
-        userType = userInfo['userType'];
-      });
-    });
-
-    bidListBloc = BidListBloc();
-    super.initState();
-
     pullToRefresh();
+    super.initState();
 
     scrollController.addListener(() {
       if (scrollController.offset ==
@@ -69,7 +57,7 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('View Bids',
+        title: Text('My Cases',
             style: appThemeTextStyle(20,
                 fontWeight: FontWeight.w600, textColor: Colors.black)),
         leading: Builder(
@@ -87,8 +75,8 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
     return RefreshIndicator(
         backgroundColor: AppColor.ColorRed,
         color: Colors.white,
-        child: StreamBuilder<APIResponse<LawyerListModel>>(
-            stream: bidListBloc.bidListStream,
+        child: StreamBuilder<APIResponse<CaseTypeListModel>>(
+            stream: myCaseBloc.caseListStream,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 switch (snapshot.data.status) {
@@ -99,8 +87,8 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
                           child: LoadingView().loader(),
                         );
                       } else {
-                        if (bidList.length > 0) {
-                          return bidListView();
+                        if (caseList.length > 0) {
+                          return myCasesView();
                         }
                       }
                     }
@@ -109,22 +97,22 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
                   case Status.Done:
                     {
                       if (currentPage == 1) {
-                        bidList.clear();
+                        caseList.clear();
                       }
 
                       if (!isUpdateList) {
-                        if (bidList.length <= totalCount) {
+                        if (caseList.length <= totalCount) {
                           currentPage = currentPage + 1;
                         }
 
                         if (snapshot.data.data.data.length > 0) {
-                          bidList = bidList + snapshot.data.data.data;
+                          caseList = caseList + snapshot.data.data.data;
                           totalCount = snapshot.data.data.meta.count;
                         }
                       }
 
-                      if (bidList.length > 0) {
-                        return bidListView();
+                      if (caseList.length > 0) {
+                        return myCasesView();
                       } else {
                         return widgetNotAvailableData('Bid list not found.');
                       }
@@ -144,43 +132,35 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
         });
   }
 
-  Widget bidListView() {
+  Widget myCasesView() {
     return Container(
-      padding: EdgeInsets.only(
-          top: ScreenUtil().setHeight(10),
-          left: ScreenUtil().setWidth(10),
-          right: ScreenUtil().setWidth(10),
-          bottom: ScreenUtil().setHeight(10)),
-      child: ListView.builder(
-          physics: AlwaysScrollableScrollPhysics(),
-          controller: scrollController,
-          itemCount: bidList.length,
-          itemBuilder: (context, index) {
-            return LawyerListInfoView(bidList[index], index, false,
-                (index, bidInfo, isFav) {
-              setState(() {
-                isUpdateList = true;
-                bidList[index] = bidInfo;
-                print('Length - ${bidList.length}');
-              });
-            }); //CaseInfoView(UserType.Lawyer, bidDetail: bidList[index]);
-          }),
-    );
+        padding: EdgeInsets.only(
+            top: ScreenUtil().setHeight(10),
+            left: ScreenUtil().setWidth(10),
+            right: ScreenUtil().setWidth(10),
+            bottom: ScreenUtil().setHeight(10)),
+        child: ListView.builder(
+            physics: AlwaysScrollableScrollPhysics(),
+            controller: scrollController,
+            itemCount: caseList.length,
+            itemBuilder: (context, index) {
+              return CaseInfoView(userType, caseInfo: caseList[index], status: CaseStatus.MyCase);
+            }));
   }
 
   pullToRefresh() {
     isUpdateList = false;
     currentPage = 1;
     totalCount = 0;
-    bidListBloc
-        .getBidList({'currentPage': currentPage.toString(), 'limit': '5'});
+    myCaseBloc
+        .getMyCasesList({'currentPage': currentPage.toString(), 'limit': '5'});
   }
 
   loadMore() {
-    if (bidList.length <= totalCount) {
+    if (caseList.length <= totalCount) {
       isUpdateList = false;
-      bidListBloc
-          .getBidList({'currentPage': currentPage.toString(), 'limit': '5'});
+      myCaseBloc.getMyCasesList(
+          {'currentPage': currentPage.toString(), 'limit': '5'});
     }
   }
 }

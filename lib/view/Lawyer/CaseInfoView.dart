@@ -13,12 +13,19 @@ import 'package:my_lawyer/utils/NetworkImage.dart';
 import 'package:my_lawyer/view/Client/LawyerDetailScreen.dart';
 import 'package:my_lawyer/view/Lawyer/CaseDetailScreen.dart';
 
+enum CaseStatus { MyCase, MyBid, Other }
+
 class CaseInfoView extends StatefulWidget {
   int userType;
   CaseDataModel caseInfo;
   BidDataModel bidDetail;
+  CaseStatus status;
 
-  CaseInfoView(int lawyer, {this.userType, this.caseInfo, this.bidDetail});
+  CaseInfoView(int lawyer,
+      {this.userType,
+      this.caseInfo,
+      this.bidDetail,
+      this.status = CaseStatus.Other});
 
   @override
   _CaseInfoViewState createState() => _CaseInfoViewState();
@@ -94,7 +101,7 @@ class _CaseInfoViewState extends State<CaseInfoView> {
         children: [
           Text(
             (widget.caseInfo == null)
-                ? widget.bidDetail.lawyerName
+                ? widget.bidDetail.userName
                 : widget.caseInfo.userName,
             style: appThemeTextStyle(16,
                 fontWeight: FontWeight.w700, textColor: Colors.black),
@@ -109,7 +116,7 @@ class _CaseInfoViewState extends State<CaseInfoView> {
                   padding: EdgeInsets.all(4),
                   child: Text(
                     (widget.caseInfo == null)
-                        ? ''
+                        ? widget.bidDetail.caseType
                         : widget.caseInfo.caseType,
                     textAlign: TextAlign.center,
                     style: appThemeTextStyle(13,
@@ -118,22 +125,23 @@ class _CaseInfoViewState extends State<CaseInfoView> {
                   ),
                 )),
           ),
-          Row(children: [
-            Text(
-              'Amount:',
-              style: appThemeTextStyle(14,
-                  textColor: Color.fromRGBO(98, 106, 142, 1)),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 5),
-              child: Text(
-                (widget.caseInfo == null)
-                    ? widget.bidDetail.bidAmount
-                    : widget.caseInfo.amount,
-                style: appThemeTextStyle(14, textColor: Colors.black),
+          if (widget.status != CaseStatus.MyCase)
+            Row(children: [
+              Text(
+                'Amount:',
+                style: appThemeTextStyle(14,
+                    textColor: Color.fromRGBO(98, 106, 142, 1)),
               ),
-            )
-          ])
+              Padding(
+                padding: EdgeInsets.only(left: 5),
+                child: Text(
+                  (widget.caseInfo == null)
+                      ? widget.bidDetail.bidAmount
+                      : widget.caseInfo.amount,
+                  style: appThemeTextStyle(14, textColor: Colors.black),
+                ),
+              )
+            ])
         ],
       ),
     );
@@ -157,19 +165,32 @@ class _CaseInfoViewState extends State<CaseInfoView> {
   }
 
   _pressedOnViewDetail() {
-    if (widget.userType == UserType.User)
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => LawyerDetailScreen(
-                  widget.bidDetail.caseId,
-                  widget.bidDetail.lawyerId,
-                  widget.bidDetail.lawyerName,
-                  false)));
-    else {
-      final caseDetailScreen = CaseDetailScreen((widget.caseInfo != null)
-          ? widget.caseInfo.caseId
-          : widget.bidDetail.caseId);
+    if (widget.status == CaseStatus.Other) {
+      if (widget.userType == UserType.User)
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => LawyerDetailScreen(
+                    widget.bidDetail.caseId,
+                    widget.bidDetail.userId,
+                    widget.bidDetail.userName,
+                    false)));
+      else {
+        final caseDetailScreen = CaseDetailScreen(
+            caseId: (widget.caseInfo != null)
+                ? widget.caseInfo.caseId
+                : widget.bidDetail.caseId);
+
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => caseDetailScreen));
+      }
+    } else {
+      final caseDetailScreen = CaseDetailScreen(
+        caseId: (widget.caseInfo != null)
+            ? widget.caseInfo.caseId
+            : widget.bidDetail.caseId,
+        isFromMyCase: true,
+      );
 
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => caseDetailScreen));

@@ -27,8 +27,12 @@ class Messages {
   static const CBlankHearingDate = 'Please select hearing date.';
   static const CBlankAttachment = 'Please upload attachment.';
   static const CAcceptTermsCondition = 'Please accept terms & condition.';
+  static const CBlankCustomDesc = 'Please enter custom case description.';
+  static const CEndDateGraterThanStartDate = 'Please select end date greater than start date.';
 
   static const CBlankAmount = 'Please enter amount.';
+  static const CMininmumBidAmount = r'Please enter minimum $50 amount.';
+
   static const CBlankStartDate = 'Please select start date to show your bid.';
   static const CBlankStartTime = 'Please select start time to show your bid.';
   static const CBlankEndDate = 'Please select end date to show your bid.';

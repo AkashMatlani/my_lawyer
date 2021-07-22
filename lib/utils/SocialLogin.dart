@@ -19,9 +19,7 @@ class GoogleSignInClass {
     try {
       final GoogleSignInAccount account = await _googleSignIn.signIn();
 
-      if (account != null) {
-        return account;
-      }
+      return account;
     } catch (error) {
       print(error);
     }

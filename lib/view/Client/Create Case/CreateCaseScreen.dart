@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -192,6 +193,7 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                   color: Colors.white),
               child: DropdownButtonFormField<String>(
                 decoration: InputDecoration(
+                  alignLabelWithHint: true,
                   enabledBorder: InputBorder.none,
                   contentPadding: const EdgeInsets.only(
                       left: 10, right: 0, bottom: 0, top: 0),
@@ -456,17 +458,22 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: 10),
-                      child: Text(
-                        '${userInfo['userName']} Case pdf, JPEG, PNG…',
-                        style: appThemeTextStyle(14),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text(
+                          '${userInfo['userName']}case pdf, JPEG, PNG…',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: appThemeTextStyle(14),
+                        ),
                       ),
                     ),
                     Padding(
                       padding: EdgeInsets.only(right: 10),
-                      child:
-                          SvgPicture.asset('images/Client/ic_attachment.svg', width: 15, height: 15,),
+                      child: SvgPicture.asset(
+                        'images/Client/ic_attachment.svg',
+                      ),
                     )
                   ],
                 ),
@@ -479,12 +486,14 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
                         BorderRadius.circular(ScreenUtil().setHeight(46) / 2),
                     border: Border.all(color: AppColor.ColorBorder),
                     color: Colors.white),
-                child: IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    _pressedOnAddFile();
-                  },
-                ),
+                child: Align(
+                    alignment: Alignment.center,
+                    child: InkWell(
+                      onTap: () {
+                        _pressedOnAddFile();
+                      },
+                      child: Icon(Icons.add),
+                    )),
               ),
             ],
           )
@@ -625,8 +634,6 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
       AlertView().showAlert(Messages.CBlankCaseTime, context);
     } else if (caseHiringDate == null) {
       AlertView().showAlert(Messages.CBlankHearingDate, context);
-    } else if (selectedFilesList.length == 0) {
-      AlertView().showAlert(Messages.CBlankAttachment, context);
     } else if (!isSelectedTermsCondition) {
       AlertView().showAlert(Messages.CAcceptTermsCondition, context);
     } else {
@@ -639,7 +646,7 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
       final criminalData = await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => CaseListScreen('Criminal Cases', 0),
+            builder: (context) => CaseListScreen('Criminal Cases', 0, selectedCaseList),
             fullscreenDialog: true),
       );
 
@@ -650,7 +657,7 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
       final civilData = await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => CaseListScreen('Civil Cases', 1),
+            builder: (context) => CaseListScreen('Civil Cases', 1, selectedCaseList),
             fullscreenDialog: true),
       );
 
@@ -738,7 +745,8 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
       'stateId': selectedState.id.toString(),
       'countyId': selectedCounty.countyId.toString(),
       'caseTypeId': caseType.toString(),
-      'caseType': (caseType == CaseType.Custom) ? customCase : caseList.toString(),
+      'caseType':
+          (caseType == CaseType.Custom) ? customCase : caseList.toString(),
       'casePortion': txtCasePortionController.text,
       'registrationNote': txtRegistrationNoteController.text,
       'caseDateTime': '$date $caseTime',

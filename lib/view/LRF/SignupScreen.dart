@@ -251,7 +251,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               height: ScreenUtil().setHeight(40),
             ),
             Text(
-              'Login with Google',
+              'SignUp with Google',
               style: appThemeTextStyle(14,
                   fontWeight: FontWeight.w600,
                   textColor: Color.fromRGBO(12, 16, 36, 1)),
@@ -367,7 +367,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               'about': userInfo.about
             });
 
-
             registeredDeviceToken();
 
             if (widget.userType == UserType.User) {
@@ -399,13 +398,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> pressedOngoogleSignIn() async {
     googleSignInClass.googleSignIn().then((currentUser) {
-      LoadingView().showLoaderWithTitle(true, context);
-
-      signUpUser({
-        'userName': currentUser.displayName,
-        'email': currentUser.email,
-        'signInType': SignInType.Google.toString()
-      });
+      if (currentUser != null) {
+        LoadingView().showLoaderWithTitle(true, context);
+        signUpUser({
+          'userName': currentUser.displayName,
+          'email': currentUser.email,
+          'signInType': SignInType.Google.toString()
+        });
+      }
     });
   }
 

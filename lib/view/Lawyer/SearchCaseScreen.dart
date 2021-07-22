@@ -47,9 +47,10 @@ class _SearchCasesScreenState extends State<SearchCasesScreen> {
 
     SystemChannels.textInput.invokeMethod('TextInput.hide');
 
-    super.initState();
     caseListBloc = CaseListBloc();
     pullToRefresh();
+
+    super.initState();
 
     scrollController.addListener(() {
       if (scrollController.offset ==

@@ -17,9 +17,10 @@ import 'package:my_lawyer/utils/LoadingView.dart';
 class CaseListScreen extends StatefulWidget {
   String appBarTitle;
   int caseType;
+  var selectedCase;
 
   //0- Criminal, 1- Civil
-  CaseListScreen(this.appBarTitle, this.caseType);
+  CaseListScreen(this.appBarTitle, this.caseType, this.selectedCase);
 
   @override
   _CaseListScreenState createState() => _CaseListScreenState();
@@ -30,13 +31,12 @@ class _CaseListScreenState extends State<CaseListScreen> {
   CivilBloc civilBloc;
   CriminalBloc criminalBloc;
 
-  var selectedCase = [];
+  // var selectedCase = [];
   var isSelectedAll = false;
 
   @override
   void initState() {
     // TODO: implement initState
-    super.initState();
     caseList = [];
     civilBloc = CivilBloc();
     criminalBloc = CriminalBloc();
@@ -45,6 +45,8 @@ class _CaseListScreenState extends State<CaseListScreen> {
       criminalBloc.getCriminalList();
     else
       civilBloc.getCivilList();
+
+    super.initState();
   }
 
   @override
@@ -158,13 +160,13 @@ class _CaseListScreenState extends State<CaseListScreen> {
                       unselectedWidgetColor: Color.fromRGBO(213, 213, 213, 1)),
                   child: Checkbox(
                       activeColor: AppColor.ColorRed,
-                      value: selectedCase.contains(caseInfo),
+                      value: widget.selectedCase.contains(caseInfo),
                       onChanged: (bool isSelected) {
                         setState(() {
                           if (isSelected)
-                            selectedCase.add(caseInfo);
+                            widget.selectedCase.add(caseInfo);
                           else
-                            selectedCase.remove(caseInfo);
+                            widget.selectedCase.remove(caseInfo);
                         });
                       })),
               Text(
@@ -193,19 +195,19 @@ class _CaseListScreenState extends State<CaseListScreen> {
   }
 
   _pressedOnSubmit() {
-    if (selectedCase.length == 0) {
+    if (widget.selectedCase.length == 0) {
       AlertView().showAlert(Messages.CBlankCase, context);
       return;
     }
 
-    Navigator.pop(context, selectedCase);
+    Navigator.pop(context, widget.selectedCase);
   }
 
   _pressedOnSelectAll() {
     isSelectedAll = !isSelectedAll;
-    selectedCase = [];
+    widget.selectedCase = [];
     setState(() {
-      if (isSelectedAll) selectedCase = caseList;
+      if (isSelectedAll) widget.selectedCase = caseList;
     });
   }
 }

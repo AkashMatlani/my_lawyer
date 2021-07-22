@@ -50,10 +50,11 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
   @override
   void initState() {
     // TODO: implement initState
-    super.initState();
 
     getAdList();
     pullToRefresh();
+
+    super.initState();
 
     scrollController.addListener(() {
       if (scrollController.offset ==
@@ -91,7 +92,7 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
         children: [
           sliderSegementView(),
           if (adList.length > 0) advertisementView(),
-          pageIndicatorView(),
+          if (adList.length > 1) pageIndicatorView(),
           Expanded(child: lawyerListStreamBuilder())
         ],
       ),
@@ -188,7 +189,7 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
         currentPageNotifier: currentPageNotifier,
         itemCount: adList.length,
         dotColor: AppColor.ColorDarkGray,
-        selectedDotColor: AppColor.ColorYellow,
+        selectedDotColor: AppColor.ColorRed,
         dotSpacing: 3,
         size: ScreenUtil().setWidth(10),
       ),
@@ -266,10 +267,17 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
           itemCount: lawyerList.length,
           itemBuilder: (context, index) {
             return LawyerListInfoView(lawyerList[index], index, true,
-                (index, lawyerInfo) {
+                (index, lawyerInfo, isFav) {
               setState(() {
                 isUpdatedList = true;
-                lawyerList[index] = lawyerInfo;
+
+                if (isFav) {
+                  if (!lawyerInfo.isFav) {
+                    if (lawyerList.length > 0) lawyerList.removeAt(index);
+                  } else {
+                    lawyerList[index] = lawyerInfo;
+                  }
+                }
               });
             }); //lawyerInfoView(lawyerList[index], index);
           }),
@@ -277,7 +285,6 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
   }
 
   pullToRefresh() {
-    isUpdatedList = false;
     currentPage = 1;
     totalCount = 0;
     getLawyerListByType();
@@ -285,12 +292,13 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
 
   loadMore() {
     if (lawyerList.length <= totalCount) {
-      isUpdatedList = false;
       getLawyerListByType();
     }
   }
 
   getLawyerListByType() {
+    isUpdatedList = false;
+
     Map<String, dynamic> params = {
       'type': widget.selectedSegmentOption.toString(),
       'currentPage': currentPage.toString(),
