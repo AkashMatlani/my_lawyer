@@ -9,6 +9,7 @@ import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/LawyerDetailModel.dart';
 import 'package:my_lawyer/models/LawyerListModel.dart';
+import 'package:my_lawyer/networking/APIRequest.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/repository/Client/AcceptProposalRepository.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
@@ -82,13 +83,7 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
                     }
 
                   case Status.Error:
-                    return Center(
-                      child: Text(
-                        snapshot.data.message,
-                        style: appThemeTextStyle(16,
-                            textColor: AppColor.ColorBlack),
-                      ),
-                    );
+                    return Center();
                     break;
                 }
               } else {
@@ -301,21 +296,16 @@ class _LawyerDetailScreenState extends State<LawyerDetailScreen> {
 
         case Status.Done:
           LoadingView().showLoaderWithTitle(false, context);
+          AlertView().showToast(context, snspshot.data['meta']['message']);
 
           if (snspshot.data['meta']['status'] == 1) {
-            AlertView().showToast(context, snspshot.data['meta']['message']);
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => PaymentScreen()));
-          } else {
-            AlertView().showAlertView(context, snspshot.data['meta']['message'],
-                () => {Navigator.of(context).pop()});
           }
           break;
 
         case Status.Error:
           LoadingView().showLoaderWithTitle(false, context);
-          AlertView().showAlertView(
-              context, snspshot.message, () => {Navigator.of(context).pop()});
           break;
       }
     });

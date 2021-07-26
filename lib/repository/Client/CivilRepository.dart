@@ -5,8 +5,13 @@ class CivilRepository {
 
   APIRequestHelper helper = APIRequestHelper();
 
-  Future<CaseListModel> getCivilList() async {
+  Future<dynamic> getCivilList() async {
     var response = await helper.get(APITag.civilList);
-    return CaseListModel.fromJson(response);
+    return response;
   }
+
+  // Future<CaseListModel> getCivilList() async {
+  //   var response = await helper.get(APITag.civilList);
+  //   return CaseListModel.fromJson(response);
+  // }
 }

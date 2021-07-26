@@ -5,8 +5,13 @@ import 'package:my_lawyer/networking/APIRequest.dart';
 class MyBidRepository {
   APIRequestHelper helper = APIRequestHelper();
 
-  Future<BidListModel> getMyBidList(Map<String, dynamic> params) async {
+  Future<dynamic> getMyBidList(Map<String, dynamic> params) async {
     var response = await helper.post(APITag.myBidding, params);
-    return BidListModel.fromJson(response);
+    return response;
   }
+
+// Future<BidListModel> getMyBidList(Map<String, dynamic> params) async {
+//   var response = await helper.post(APITag.myBidding, params);
+//   return BidListModel.fromJson(response);
+// }
 }

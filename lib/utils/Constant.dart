@@ -55,8 +55,19 @@ class SideMenuOption {
   static const ChangePassword = 'Change Password';
   static const MyCases = 'My Cases';
   static const MyBid = 'My Bid';
+  static const PayPalID = 'My PayPal ID';
+}
+
+class NotificationType {
+  static const Like = '1';
+  static const Favourite = '2';
+  static const SendProposal = '3';
+  static const AcceptProposal = '4';
 }
 
 class AppImage {
   static const CProfileImg = 'images/Client/ic_profile.jpeg';
 }
+
+const StatusCode = 'statusCode';
+const CMessage = 'message';

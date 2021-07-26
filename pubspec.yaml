@@ -49,7 +49,7 @@ dependencies:
   ext_storage: ^1.0.3
   webview_flutter: ^2.0.10
   html: ^0.15.0
-  instant: ^0.4.1
+  connectivity_plus: ^1.0.6
 
 dev_dependencies:
   flutter_test:
@@ -68,56 +68,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - images/LRF/ic_logo_title.svg
-    - images/LRF/ic_client_tutorial2.svg
-    - images/LRF/ic_client_tutorial3.svg
-    - images/LRF/ic_client_tutorial1.svg
-    - images/LRF/ic_logo.svg
-    - images/LRF/ic_login_logo.png
-    - images/LRF/ic_google.png
-    - images/LRF/ic_email.svg
-    - images/LRF/ic_pwd.svg
-    - images/LRF/ic_user.svg
-    - images/LRF/ic_lawyer_tutorial1.svg
-    - images/LRF/ic_lawyer_tutorial2.svg
-    - images/LRF/ic_lawyer_tutorial3.svg
-    - images/LRF/ic_back.svg
-    - images/Sidebar/ic_dotted_oval.svg
-    - images/Sidebar/ic_save.svg
-    - images/Sidebar/ic_create_case.svg
-    - images/Sidebar/ic_view_bid.svg
-    - images/Sidebar/ic_close.svg
-    - images/Sidebar/ic_oval.png
-    - images/Sidebar/ic_hire_lawyer.svg
-    - images/Sidebar/ic_logout.svg
-    - images/Client/ic_profile.jpeg
-    - images/Sidebar/ic_burger.svg
-    - images/Client/ic_attachment.svg
-    - images/Client/ic_calendar.svg
-    - images/Client/ic_clock.svg
-    - images/Sidebar/ic_create_case.png
-    - images/Sidebar/ic_view_bid.png
-    - images/Sidebar/ic_saved_case.png
-    - images/Sidebar/ic_hire_lawyer.png
-    - images/Sidebar/ic_change_pwd.png
-    - images/Sidebar/ic_edit_profile.png
-    - images/Client/ic_select_circle.png
-    - images/Client/ic_unselect_circle.png
-    - images/Client/ic_like.svg
-    - images/Client/ic_fav.svg
-    - images/Client/ic_like.png
-    - images/Client/temp_ad4.jpeg
-    - images/Client/temp_ad1.jpeg
-    - images/Client/temp_ad2.jpeg
-    - images/Client/temp_ad3.jpeg
-    - images/Lawyer/ic_pdf.svg
-    - images/Lawyer/ic_mail.svg
-    - images/Client/ic_fav.png
-    - images/Client/ic_fav_selected.png
-    - images/Client/ic_paypal.png
-    - images/Client/ic_visa.png
-    - images/Client/ic_master.png
-
+    - images/LRF/
+    - images/Sidebar/
+    - images/Client/
+    - images/Lawyer/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

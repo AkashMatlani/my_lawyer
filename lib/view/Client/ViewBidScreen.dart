@@ -9,6 +9,7 @@ import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/BidListModel.dart';
 import 'package:my_lawyer/models/LawyerListModel.dart';
+import 'package:my_lawyer/networking/APIRequest.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
@@ -132,8 +133,7 @@ class _ViewBidScreenState extends State<ViewBidScreen> {
                     }
 
                   case Status.Error:
-                    AlertView()
-                        .showAlertView(context, snapshot.data.message, () {});
+                    return bidList.length > 0 ? bidListView() : Center();
                 }
               } else {
                 return showLoaderInList();

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
 
+Future _dialog;
+
 class LoadingView extends StatelessWidget {
   final String loadingMessage;
 
@@ -59,12 +61,17 @@ class LoadingView extends StatelessWidget {
   showLoaderWithTitle(bool isShowLoader, BuildContext context,
       {String message = 'Processing...'}) {
     if (isShowLoader) {
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (_) => LoadingView(loadingMessage: message));
+      if (_dialog == null) {
+        _dialog = showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (_) => LoadingView(loadingMessage: message));
+      }
     } else {
-      Navigator.of(context).pop();
+      if (_dialog != null) {
+        _dialog = null;
+        Navigator.of(context).pop();
+      }
     }
   }
 

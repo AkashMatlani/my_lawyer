@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_lawyer/bloc/Lawyer/CaseListBloc.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/CaseTypeListModel.dart';
+import 'package:my_lawyer/networking/APIRequest.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
@@ -187,8 +188,7 @@ class _SearchCasesScreenState extends State<SearchCasesScreen> {
                   break;
 
                 case Status.Error:
-                  AlertView()
-                      .showAlertView(context, snapshot.data.message, () {});
+                  return (caseList.length > 0) ? searchCaseList() : Center();
               }
             } else {
               return showLoaderInList();

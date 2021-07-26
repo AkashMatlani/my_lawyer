@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/repository/Client/AcceptProposalRepository.dart';
+import 'package:my_lawyer/utils/Constant.dart';
 
 class AcceptBidProposalBloc {
   AcceptProposalRepository acceptProposalRepository;
@@ -22,9 +23,14 @@ class AcceptBidProposalBloc {
     try {
       dynamic response =
           await acceptProposalRepository.acceptBidProposal(params);
-      acceptBidSink.add(APIResponse.done(response));
+
+      if ((response as Map<String, dynamic>).containsKey(StatusCode)) {
+        acceptBidSink.add(APIResponse.error(response));
+      } else {
+        acceptBidSink.add(APIResponse.done(response));
+      }
     } catch (error) {
-      acceptBidSink.add(APIResponse.error(error.toString()));
+      acceptBidSink.add(APIResponse.error({'message': error.toString()}));
     }
   }
 

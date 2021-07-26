@@ -108,8 +108,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           fit: BoxFit.fill,
                         )
                       : (userInfo['userProfile'] != "")
-                          ? ImageNetwork()
-                              .loadNetworkImage(userInfo['userProfile'], ScreenUtil().setHeight(100))
+                          ? ImageNetwork().loadNetworkImage(
+                              userInfo['userProfile'],
+                              ScreenUtil().setHeight(100))
                           : Image(
                               image:
                                   AssetImage('images/Client/ic_profile.jpeg'))),
@@ -236,17 +237,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   MaterialPageRoute(builder: (context) => SearchCasesScreen()));
             }
           } else {
-            AlertView().showAlertView(
-                context,
-                (snapshot.data.meta as UserMetaModel).message,
-                () => {Navigator.of(context).pop()});
+            AlertView().showToast(
+                context, (snapshot.data.meta as UserMetaModel).message);
           }
           break;
 
         case Status.Error:
           LoadingView().showLoaderWithTitle(false, context);
-          AlertView().showAlertView(
-              context, snapshot.message, () => {Navigator.of(context).pop()});
           break;
       }
     });

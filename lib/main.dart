@@ -17,6 +17,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -30,11 +32,6 @@ Future<void> main() async {
 
   StateRepository().getStateList();
   CountyRepository().getCountryList();
-
-  // if (isDoneSetup == null) {
-  //   isDoneSetup = false;
-  //   CountyRepository().countyList();
-  // }
 
   var userType = 0;
   if (token != null) {
@@ -59,17 +56,18 @@ class MyApp extends StatelessWidget {
     return ScreenUtilInit(
         designSize: Size(375, 812),
         builder: () => MaterialApp(
-          // navigatorKey: MyApp.materialKey,
-              title: 'Flutter Demo',
-              home: (token == null)
-                  ? UserSelectionScreen(isDoneSetup)
-                  : (userType == UserType.Lawyer)
-                      ? SearchCasesScreen()
-                      : LawyerListScreen(LawyerListType.Hire),
-              debugShowCheckedModeBanner: false,
-              theme: ThemeData(
-                  primaryColor: Colors.white,
-                  iconTheme: IconThemeData(color: Colors.black)),
-            ));
+                navigatorKey: navigatorKey,
+                title: 'Flutter Demo',
+                home: (token == null)
+                    ? UserSelectionScreen(isDoneSetup)
+                    : (userType == UserType.Lawyer)
+                        ? SearchCasesScreen()
+                        : LawyerListScreen(LawyerListType.Hire),
+                debugShowCheckedModeBanner: false,
+                theme: ThemeData(
+                    primaryColor: Colors.white,
+                    iconTheme: IconThemeData(color: Colors.black)),
+              ),
+            );
   }
 }

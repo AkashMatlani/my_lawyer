@@ -10,20 +10,17 @@ import 'package:my_lawyer/utils/Constant.dart';
 import 'package:my_lawyer/utils/LoadingView.dart';
 import 'package:my_lawyer/utils/StringExtension.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
+class MyPayPalIdScreen extends StatefulWidget {
   @override
-  _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
+  _MyPayPalIdScreenState createState() => _MyPayPalIdScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _MyPayPalIdScreenState extends State<MyPayPalIdScreen> {
   var txtEmailController = TextEditingController();
-
-  ForgotPwdBloc forgotPwdBloc;
 
   @override
   initState() {
     super.initState();
-    forgotPwdBloc = ForgotPwdBloc();
   }
 
   @override
@@ -31,7 +28,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Forgot Password',
+          'My PayPal ID',
           style: appThemeTextStyle(20,
               fontWeight: FontWeight.w600, textColor: Colors.black),
         ),
@@ -58,8 +55,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: SizedBox(
         height: ScreenUtil().setHeight(52),
         child: appThemeTextField(
-            'Email ID', TextInputType.emailAddress, txtEmailController,
-            prefixIcon: 'images/LRF/ic_email.svg'),
+          'PayPal ID',
+          TextInputType.emailAddress,
+          txtEmailController,
+        ),
       ),
     );
   }
@@ -76,36 +75,34 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   _pressedOnSubmit() {
     if (txtEmailController.text.isEmpty) {
-      AlertView().showAlert(Messages.CBlankEmail, context);
+      AlertView().showAlert(Messages.CBlankPayPalID, context);
     } else if (txtEmailController.text.isValidEmail() == false) {
-      AlertView().showAlert(Messages.CInvalidEmail, context);
-    } else {
-      forgotPwd();
-    }
+      AlertView().showAlert(Messages.CInvalidPayPalID, context);
+    } else {}
   }
 
-  forgotPwd() {
-    LoadingView().showLoaderWithTitle(true, context);
-    forgotPwdBloc.forgotPwd(txtEmailController.text);
-
-    forgotPwdBloc.forgotPwdStream.listen((snapshot) {
-      switch (snapshot.status) {
-        case Status.Loading:
-          return LoadingView(loadingMessage: snapshot.message);
-
-        case Status.Done:
-          LoadingView().showLoaderWithTitle(false, context);
-          AlertView().showToast(context, snapshot.data['meta']['message']);
-
-          if (snapshot.data['meta']['status'] == 1) {
-            Navigator.of(context).pop();
-          }
-          break;
-
-        case Status.Error:
-          LoadingView().showLoaderWithTitle(false, context);
-          break;
-      }
-    });
-  }
+// forgotPwd() {
+//   LoadingView().showLoaderWithTitle(true, context);
+//   forgotPwdBloc.forgotPwd(txtEmailController.text);
+//
+//   forgotPwdBloc.forgotPwdStream.listen((snapshot) {
+//     switch (snapshot.status) {
+//       case Status.Loading:
+//         return LoadingView(loadingMessage: snapshot.message);
+//
+//       case Status.Done:
+//         LoadingView().showLoaderWithTitle(false, context);
+//         AlertView().showToast(context, snapshot.data['meta']['message']);
+//
+//         if (snapshot.data['meta']['status'] == 1) {
+//           Navigator.of(context).pop();
+//         }
+//         break;
+//
+//       case Status.Error:
+//         LoadingView().showLoaderWithTitle(false, context);
+//         break;
+//     }
+//   });
+// }
 }

@@ -356,17 +356,13 @@ class _SignInScreenState extends State<SignInScreen> {
               }
             });
           } else {
-            AlertView().showAlertView(
-                context,
-                (snapshot.data.meta as UserMetaModel).message,
-                () => {Navigator.of(context).pop()});
+            AlertView().showToast(
+                context, (snapshot.data.meta as UserMetaModel).message);
           }
           break;
 
         case Status.Error:
           LoadingView().showLoaderWithTitle(false, context);
-          AlertView().showAlertView(
-              context, snapshot.message, () => {Navigator.of(context).pop()});
           break;
       }
     });
@@ -413,17 +409,13 @@ class _SignInScreenState extends State<SignInScreen> {
               _navigateToClientHomeScreen();
             }
           } else {
-            AlertView().showAlertView(
-                context,
-                (snapshot.data.meta as UserMetaModel).message,
-                () => {Navigator.of(context).pop()});
+            AlertView().showToast(
+                context, (snapshot.data.meta as UserMetaModel).message);
           }
           break;
 
         case Status.Error:
           LoadingView().showLoaderWithTitle(false, context);
-          AlertView().showAlertView(
-              context, snapshot.message, () => {Navigator.of(context).pop()});
           break;
       }
     });
@@ -435,7 +427,6 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<void> googleSignIn() async {
     googleSignInClass.googleSignIn().then((currentUser) {
-
       if (currentUser != null) {
         LoadingView().showLoaderWithTitle(true, context);
         signInUser(SignInType.Google, currentUser.email);

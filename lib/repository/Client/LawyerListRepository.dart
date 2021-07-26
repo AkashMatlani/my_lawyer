@@ -4,8 +4,13 @@ import 'package:my_lawyer/networking/APIRequest.dart';
 class LawyerListRepository {
   APIRequestHelper helper = APIRequestHelper();
 
-  Future<LawyerListModel> getLawyerList(Map<String, dynamic> params) async {
+  Future<dynamic> getLawyerList(Map<String, dynamic> params) async {
     var response = await helper.post(APITag.lawyerList, params);
-    return LawyerListModel.fromJson(response);
+    return response;
   }
+
+  // Future<LawyerListModel> getLawyerList(Map<String, dynamic> params) async {
+  //   var response = await helper.post(APITag.lawyerList, params);
+  //   return LawyerListModel.fromJson(response);
+  // }
 }

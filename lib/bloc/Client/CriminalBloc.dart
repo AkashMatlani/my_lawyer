@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:my_lawyer/models/CaseListModel.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/repository/Client/CriminalRepository.dart';
+import 'package:my_lawyer/utils/Constant.dart';
 
 class CriminalBloc {
-
   CriminalRepository criminalRepository;
   StreamController criminalController;
 
@@ -22,10 +22,16 @@ class CriminalBloc {
   getCriminalList() async {
     criminalSink.add(APIResponse.loading('Loading...'));
     try {
-      CaseListModel caseList = await criminalRepository.getCriminalList();
-      criminalSink.add(APIResponse.done(caseList));
-    } catch (error){
-      criminalSink.add(APIResponse.error(error.toString()));
+      var response = await criminalRepository.getCriminalList();
+
+      if ((response as Map<String, dynamic>).containsKey(StatusCode)) {
+        criminalSink.add(APIResponse.error(response));
+      } else {
+        CaseListModel modelResponse = CaseListModel.fromJson(response);
+        criminalSink.add(APIResponse.done(modelResponse));
+      }
+    } catch (error) {
+      criminalSink.add(APIResponse.error({CMessage:error.toString()}));
     }
   }
 

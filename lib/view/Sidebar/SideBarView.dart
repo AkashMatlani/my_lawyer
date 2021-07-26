@@ -20,6 +20,7 @@ import 'package:my_lawyer/view/Client/ViewBidScreen.dart';
 import 'package:my_lawyer/view/LRF/SigninScreen.dart';
 import 'package:my_lawyer/view/LRF/UserSelectionScreen.dart';
 import 'package:my_lawyer/view/Lawyer/MyBidScreen.dart';
+import 'package:my_lawyer/view/Lawyer/MyPayPalIDScreen.dart';
 import 'package:my_lawyer/view/Lawyer/SearchCaseScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -109,6 +110,10 @@ class _SideBarViewState extends State<SideBarView> {
           'name': SideMenuOption.EditProfile
         },
         {
+          'img': 'images/Sidebar/ic_sidemenu_paypal.png',
+          'name': SideMenuOption.PayPalID
+        },
+        {
           'img': 'images/Sidebar/ic_change_pwd.png',
           'name': SideMenuOption.ChangePassword
         }
@@ -126,6 +131,10 @@ class _SideBarViewState extends State<SideBarView> {
         {
           'img': 'images/Sidebar/ic_edit_profile.png',
           'name': SideMenuOption.EditProfile
+        },
+        {
+          'img': 'images/Sidebar/ic_sidemenu_paypal.png',
+          'name': SideMenuOption.PayPalID
         },
       ];
 
@@ -246,6 +255,13 @@ class _SideBarViewState extends State<SideBarView> {
                           MaterialPageRoute(
                               builder: (context) => SearchCasesScreen()));
                       break;
+
+                    case SideMenuOption.PayPalID:
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MyPayPalIdScreen()));
+                      break;
                   }
                 },
               ),
@@ -354,7 +370,7 @@ class _SideBarViewState extends State<SideBarView> {
                 MaterialPageRoute(
                     builder: (context) => UserSelectionScreen(true)));
           }, () {
-                Navigator.pop(context);
+            Navigator.pop(context);
           });
         },
       ),

@@ -37,6 +37,9 @@ class Messages {
   static const CBlankStartTime = 'Please select start time to show your bid.';
   static const CBlankEndDate = 'Please select end date to show your bid.';
   static const CBlankEndTime = 'Please select end time to show your bid.';
+  static const CBlankPayPalID = 'Please enter PayPal ID.';
+  static const CInvalidPayPalID = 'Please enter valid PayPal ID';
 
   static const CSentProposal = 'Sent proposal successfully.';
+  static const CInternetLost = 'No internet connection. Make sure that Wi-Fi or Mobile data is turned on, then try again.';
 }

@@ -12,11 +12,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 logOut() {
   removeDeviceToken();
 
-  SharedPreferences.getInstance().then((preference) {
-    preference.remove(UserPrefernces.UserInfo);
-    preference.remove(UserPrefernces.UserToken);
-  });
-
   GoogleSignIn _googleSignIn = GoogleSignIn();
   _googleSignIn.isSignedIn().then((isSignedIn) {
     if (isSignedIn) _googleSignIn.signOut();
@@ -62,7 +57,8 @@ removeDeviceToken() async {
 
   if (response['meta']['status'] == 1) {
     SharedPreferences.getInstance().then((preference) {
-      preference.remove(UserPrefernces.FCMToken);
+      preference.remove(UserPrefernces.UserInfo);
+      preference.remove(UserPrefernces.UserToken);
     });
   }
 }

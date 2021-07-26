@@ -6,8 +6,13 @@ class BidListRepository {
 
   APIRequestHelper helper = APIRequestHelper();
 
-  Future<LawyerListModel> getBidList(Map<String, dynamic> params) async {
+  Future<dynamic> getBidList(Map<String, dynamic> params) async {
     var response = await helper.post(APITag.viewBids, params);
-    return LawyerListModel.fromJson(response);
+    return response;
   }
+
+  // Future<LawyerListModel> getBidList(Map<String, dynamic> params) async {
+  //   var response = await helper.post(APITag.viewBids, params);
+  //   return LawyerListModel.fromJson(response);
+  // }
 }

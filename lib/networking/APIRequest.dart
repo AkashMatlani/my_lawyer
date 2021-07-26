@@ -2,7 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:my_lawyer/utils/Alertview.dart';
+import 'package:my_lawyer/utils/AppMessages.dart';
+import 'package:my_lawyer/utils/Constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
+import '../main.dart';
 
 class APITag {
   static const signUp = 'signup';
@@ -36,6 +42,7 @@ class APITag {
 class CStatusCode {
   static const Status200 = 200;
   static const Status500 = 500;
+  static const Status1005 = 1005;
 }
 
 class APIRequestHelper {
@@ -47,11 +54,16 @@ class APIRequestHelper {
   };
 
   Future<dynamic> get(String apiTag) async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      AlertView()
+          .showToast(navigatorKey.currentContext, Messages.CInternetLost);
+      return {StatusCode: CStatusCode.Status1005};
+    }
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
 
-    // var headerAuth = header;
-    // headerAuth['Authorization'] = '$token';
     var headerAuth = {'Authorization': token};
 
     print('============ Token: $token');
@@ -69,9 +81,12 @@ class APIRequestHelper {
         responseJson = jsonDecode(response.body.toString());
         return responseJson;
       } else {
+        AlertView()
+            .showToast(navigatorKey.currentContext, response.reasonPhrase);
+
         return {
-          'error': response.reasonPhrase,
-          'statusCode': response.statusCode
+          CMessage: response.reasonPhrase,
+          StatusCode: response.statusCode
         };
       }
     } on SocketException {
@@ -80,6 +95,13 @@ class APIRequestHelper {
   }
 
   Future<dynamic> post(String apiTag, Map<String, dynamic> parameters) async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      AlertView()
+          .showToast(navigatorKey.currentContext, Messages.CInternetLost);
+      return {StatusCode: CStatusCode.Status1005};
+    }
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
 
@@ -95,9 +117,12 @@ class APIRequestHelper {
         responseJson = jsonDecode(response.body.toString());
         return responseJson;
       } else {
+        AlertView()
+            .showToast(navigatorKey.currentContext, response.reasonPhrase);
+
         return {
-          'error': response.reasonPhrase,
-          'statusCode': response.statusCode
+          CMessage: response.reasonPhrase,
+          StatusCode: response.statusCode
         };
       }
     } on SocketException {
@@ -110,6 +135,13 @@ class APIRequestHelper {
       Map<String, dynamic> parameters,
       List<dynamic> files,
       String fileParamName) async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      AlertView()
+          .showToast(navigatorKey.currentContext, Messages.CInternetLost);
+      return {StatusCode: CStatusCode.Status1005};
+    }
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('UserToken');
     var headerAuth = {'Authorization': token};
@@ -152,9 +184,12 @@ class APIRequestHelper {
         responseJson = jsonDecode(responseToString);
         return responseJson;
       } else {
+        AlertView()
+            .showToast(navigatorKey.currentContext, response.reasonPhrase);
+
         return {
-          'error': response.reasonPhrase,
-          'statusCode': response.statusCode
+          CMessage: response.reasonPhrase,
+          StatusCode: response.statusCode
         };
       }
     } on SocketException {

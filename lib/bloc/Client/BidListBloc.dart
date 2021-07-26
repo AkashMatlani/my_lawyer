@@ -22,10 +22,16 @@ class BidListBloc {
   getBidList(Map<String, dynamic> params) async {
     bidListSink.add(APIResponse.loading('Loading...'));
     try {
-      LawyerListModel bidList = await bidListRepository.getBidList(params);
-      bidListSink.add(APIResponse.done(bidList));
+      var response = await bidListRepository.getBidList(params);
+
+      if ((response as Map<String, dynamic>).containsKey('statusCode')) {
+        bidListSink.add(APIResponse.error(response));
+      } else {
+        LawyerListModel modelResponse = LawyerListModel.fromJson(response);
+        bidListSink.add(APIResponse.done(modelResponse));
+      }
     } catch (error) {
-      bidListSink.add(APIResponse.error(error.toString()));
+      bidListSink.add(APIResponse.error({'message':error.toString()}));
     }
   }
 

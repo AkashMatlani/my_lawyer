@@ -4,6 +4,7 @@ import 'package:my_lawyer/models/LawyerListModel.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/repository/Client/AcceptProposalRepository.dart';
 import 'package:my_lawyer/repository/Client/LawyerDetailRepository.dart';
+import 'package:my_lawyer/utils/Constant.dart';
 
 class LawyerDetailBloc {
   Map<String, dynamic> params;
@@ -27,18 +28,14 @@ class LawyerDetailBloc {
     try {
       var response = await lawyerDetailRepository.getLawyerDetail(params);
 
-      if ((response as Map<String, dynamic>).containsKey('statusCode')) {
-        lawyerDetailSink.add(APIResponse.error(response['error']));
+      if ((response as Map<String, dynamic>).containsKey(StatusCode)) {
+        lawyerDetailSink.add(APIResponse.error(response));
       } else {
-        var modelResponse = LawyerDetailModel.fromJson(response);
+        LawyerDetailModel modelResponse = LawyerDetailModel.fromJson(response);
         lawyerDetailSink.add(APIResponse.done(modelResponse));
       }
-
-      // LawyerDetailModel response =
-      //     await lawyerDetailRepository.getLawyerDetail(params);
-      // lawyerDetailSink.add(APIResponse.done(response));
     } catch (error) {
-      lawyerDetailSink.add(APIResponse.error(error.toString()));
+      lawyerDetailSink.add(APIResponse.error({'message':error.toString()}));
     }
   }
 

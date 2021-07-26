@@ -52,8 +52,8 @@ class BidDataModel {
         userProfile: data['userProfile'],
         about: data['about'],
         bidAmount: (data['bidAmount'] != null || data['bidAmount'] != "") ? r'$'+data['bidAmount'] : '',
-        isLike: data['isLike'],
-        isFav: data['isFav'],
+        isLike: (data['isLike'] == null) ? false : data['isLike'],
+        isFav: (data['isFav'] == null) ? false : data['isFav'],
         likeCount: data['likeCount'],
         caseType: data['caseType']);
   }

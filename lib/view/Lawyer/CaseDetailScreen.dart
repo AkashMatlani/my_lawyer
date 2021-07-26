@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:instant/instant.dart';
 import 'package:intl/intl.dart';
 import 'package:my_lawyer/bloc/Lawyer/CaseDetailBloc.dart';
 import 'package:my_lawyer/bloc/Lawyer/SendProposalBloc.dart';
@@ -11,6 +10,7 @@ import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/CaseDetailModel.dart';
 import 'package:my_lawyer/models/CaseTypeListModel.dart';
+import 'package:my_lawyer/networking/APIRequest.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
@@ -102,8 +102,7 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
                     }
 
                   case Status.Error:
-                    AlertView()
-                        .showAlertView(context, snapshot.data.message, () {});
+                    return Center();
                 }
               } else {
                 return showLoaderInList();
@@ -137,7 +136,8 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
     return Row(children: [
       ClipRRect(
           borderRadius: BorderRadius.circular(ScreenUtil().setHeight(80) / 2),
-          child: (caseDetailModel.clientProfile == '')
+          child: (caseDetailModel.clientProfile == '' ||
+                  caseDetailModel.clientProfile == null)
               ? Image(
                   image: AssetImage('images/Client/ic_profile.jpeg'),
                   fit: BoxFit.fill,
@@ -590,18 +590,11 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
   _pressedOnSendProposal() {
     String startDate = '$strStartDateToShowBid $strStartTimeToShowBid';
     DateFormat format = DateFormat('yyyy/MM/dd HH:mm');
-    DateTime estStartDate = dateTimeToZone(
-        zone: "EST", datetime: format.parse(startDate)); //DateTime in EST zone
-    var startDateTimestamp = estStartDate.microsecondsSinceEpoch;
-
-    estStartDateTime = DateFormat('yyyy/MM/dd HH:mm').format(estStartDate);
+    var startDateTimestamp = format.parse(startDate).microsecondsSinceEpoch;
 
     String endDate = '$strEndDateToShowBid $strEndTimeToShowBid';
     DateFormat format1 = DateFormat('yyyy/MM/dd HH:mm');
-    DateTime estEndDate = dateTimeToZone(
-        zone: "EST", datetime: format.parse(endDate)); //DateTime in EST zone
-    var endDateTimestamp = estEndDate.microsecondsSinceEpoch;
-    estEndDateTime = DateFormat('yyyy/MM/dd HH:mm').format(estEndDate);
+    var endDateTimestamp = format.parse(endDate).microsecondsSinceEpoch;
 
     print('Start Timestamp - $startDateTimestamp');
     print('End Timestamp - $endDateTimestamp');
@@ -654,20 +647,16 @@ class _CaseDetailScreenState extends State<CaseDetailScreen> {
 
         case Status.Done:
           LoadingView().showLoaderWithTitle(false, context);
-
           if (snapshot.data['meta']['status'] == 1) {
             AlertView().showToast(context, Messages.CSentProposal);
             Navigator.pop(context);
           } else {
-            AlertView().showAlertView(context, snapshot.data['meta']['message'],
-                () => {Navigator.of(context).pop()});
+            AlertView().showToast(context, snapshot.data['meta']['message']);
           }
           break;
 
         case Status.Error:
           LoadingView().showLoaderWithTitle(false, context);
-          AlertView().showAlertView(
-              context, snapshot.message, () => {Navigator.of(context).pop()});
           break;
       }
     });

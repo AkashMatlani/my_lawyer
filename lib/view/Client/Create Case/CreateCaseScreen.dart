@@ -646,7 +646,8 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
       final criminalData = await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => CaseListScreen('Criminal Cases', 0, selectedCaseList),
+            builder: (context) =>
+                CaseListScreen('Criminal Cases', 0, selectedCaseList),
             fullscreenDialog: true),
       );
 
@@ -657,7 +658,8 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
       final civilData = await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => CaseListScreen('Civil Cases', 1, selectedCaseList),
+            builder: (context) =>
+                CaseListScreen('Civil Cases', 1, selectedCaseList),
             fullscreenDialog: true),
       );
 
@@ -766,28 +768,19 @@ class _CreateCaseScreenState extends State<CreateCaseScreen> {
 
         case Status.Done:
           LoadingView().showLoaderWithTitle(false, context);
+          AlertView().showToast(context, snapshot.data['meta']['message']);
 
           if (snapshot.data['meta']['status'] == 1) {
-            AlertView().showAlertView(
+            Navigator.push(
                 context,
-                snapshot.data['meta']['message'],
-                () => {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  LawyerListScreen(LawyerListType.Hire)))
-                    });
-          } else {
-            AlertView().showAlertView(context, snapshot.data['meta']['message'],
-                () => {Navigator.of(context).pop()});
+                MaterialPageRoute(
+                    builder: (context) =>
+                        LawyerListScreen(LawyerListType.Hire)));
           }
           break;
 
         case Status.Error:
           LoadingView().showLoaderWithTitle(false, context);
-          AlertView().showAlertView(
-              context, snapshot.message, () => {Navigator.of(context).pop()});
           break;
       }
     });

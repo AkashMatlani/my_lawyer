@@ -7,6 +7,7 @@ import 'package:my_lawyer/bloc/Client/CriminalBloc.dart';
 import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/CaseListModel.dart';
+import 'package:my_lawyer/networking/APIRequest.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
@@ -90,6 +91,9 @@ class _CaseListScreenState extends State<CaseListScreen> {
                       return caseListView();
 
                     case Status.Error:
+                      return Center(
+
+                      );
                       break;
                   }
                 } else {

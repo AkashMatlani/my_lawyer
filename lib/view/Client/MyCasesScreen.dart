@@ -11,6 +11,7 @@ import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/BidListModel.dart';
 import 'package:my_lawyer/models/CaseTypeListModel.dart';
 import 'package:my_lawyer/models/LawyerListModel.dart';
+import 'package:my_lawyer/networking/APIRequest.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
@@ -120,8 +121,7 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
                     }
 
                   case Status.Error:
-                    AlertView()
-                        .showAlertView(context, snapshot.data.message, () {});
+                    return (caseList.length > 0) ? myCasesView() : Center();
                 }
               } else {
                 return showLoaderInList();
@@ -144,7 +144,8 @@ class _MyCasesScreenState extends State<MyCasesScreen> {
             controller: scrollController,
             itemCount: caseList.length,
             itemBuilder: (context, index) {
-              return CaseInfoView(userType, caseInfo: caseList[index], status: CaseStatus.MyCase);
+              return CaseInfoView(userType,
+                  caseInfo: caseList[index], status: CaseStatus.MyCase);
             }));
   }
 

@@ -16,7 +16,7 @@ class UnLikeLawyerBloc {
 
   UnLikeLawyerBloc() {
     likeLawyerRepository = LikeLawyerRepository();
-    UnLikeLawyerController = StreamController<APIResponse<dynamic>>.broadcast();
+    UnLikeLawyerController = StreamController<APIResponse<dynamic>>();
   }
 
   unLikeLawyerProfile(Map<String, dynamic> params) async {
@@ -26,7 +26,7 @@ class UnLikeLawyerBloc {
       dynamic response = await likeLawyerRepository.unLikeLawyer(params);
       unLikeSink.add(APIResponse.done(response));
     } catch (error) {
-      unLikeSink.add(APIResponse.error(error.toString()));
+      unLikeSink.add(APIResponse.error({'message':error.toString()}));
     }
   }
 

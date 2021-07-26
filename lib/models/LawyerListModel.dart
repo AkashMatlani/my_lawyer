@@ -50,8 +50,8 @@ class LawyerDataModel {
         userProfile: data['lawyerProfile'],
         about: (data['about'] == null) ? '' : data['about'],
         bidAmount: data['bidAmount'],
-        isLike: data['isLike'],
-        isFav: data['isFav'],
+        isLike: (data['isLike'] == null) ? false : data['isLike'],
+        isFav: (data['isFav'] == null) ? false : data['isFav'],
         likeCount: data['likeCount'],
         email: data['email'],
         caseType: data['caseType']);

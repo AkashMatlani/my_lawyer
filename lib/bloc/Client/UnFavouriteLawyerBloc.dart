@@ -16,7 +16,7 @@ class UnFavouriteLawyerBloc {
 
   UnFavouriteLawyerBloc() {
     favouriteLawyerRepository = FavouriteLawyerRepository();
-    favLawyerController = StreamController<APIResponse<dynamic>>.broadcast();
+    favLawyerController = StreamController<APIResponse<dynamic>>();
   }
 
   unFavLawyerProfile(Map<String, dynamic> params) async {
@@ -26,7 +26,7 @@ class UnFavouriteLawyerBloc {
       dynamic response = await favouriteLawyerRepository.unFavLawyer(params);
       unFavSink.add(APIResponse.done(response));
     } catch (error) {
-      unFavSink.add(APIResponse.error(error.toString()));
+      unFavSink.add(APIResponse.error({'message':error.toString()}));
     }
   }
 

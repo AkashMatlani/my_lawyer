@@ -4,21 +4,21 @@ import 'package:my_lawyer/utils/AppColors.dart';
 
 class AlertView {
   showAlertView(BuildContext context, String message, Function onPressed,
-      {String title = "My Lawyer", String action = "Okay"}) {
+      {String title = "My Lawyer", String action = "Okay", Color textColor = AppColor.ColorRed}) {
     AlertDialog alertDialog = AlertDialog(
       title: Text(title,
           style: appThemeTextStyle(18,
-              textColor: AppColor.ColorRed, fontWeight: FontWeight.w700)),
+              textColor: textColor, fontWeight: FontWeight.w700)),
       content: Text(
         message,
-        style: appThemeTextStyle(16, textColor: AppColor.ColorRed),
+        style: appThemeTextStyle(16, textColor: textColor),
       ),
       actions: [
         TextButton(
             onPressed: onPressed,
             child: Text(action,
                 style: appThemeTextStyle(16,
-                    textColor: AppColor.ColorRed, fontWeight: FontWeight.w700)))
+                    textColor: textColor, fontWeight: FontWeight.w700)))
       ],
     );
 

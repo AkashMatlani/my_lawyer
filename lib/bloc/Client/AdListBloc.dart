@@ -22,10 +22,16 @@ class AdListBloc {
   getAdList() async {
     adListSink.add(APIResponse.loading('Loading...'));
     try {
-      AdListModel adList = await adListRepository.getAdList();
-      adListSink.add(APIResponse.done(adList));
+      var response = await adListRepository.getAdList();
+
+      if ((response as Map<String, dynamic>).containsKey('statusCode')) {
+        adListSink.add(APIResponse.error(response));
+      } else {
+        AdListModel modelResponse = AdListModel.fromJson(response);
+        adListSink.add(APIResponse.done(modelResponse));
+      }
     } catch (error) {
-      adListSink.add(APIResponse.error(error.toString()));
+      adListSink.add(APIResponse.error({'message': error.toString()}));
     }
   }
 

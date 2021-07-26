@@ -6,6 +6,7 @@ import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/repository/Client/AcceptProposalRepository.dart';
 import 'package:my_lawyer/repository/Client/LawyerDetailRepository.dart';
 import 'package:my_lawyer/repository/Lawyer/CaseDetailRepository.dart';
+import 'package:my_lawyer/utils/Constant.dart';
 
 class CaseDetailBloc {
   CaseDetailRepository caseDetailRepository;
@@ -25,11 +26,16 @@ class CaseDetailBloc {
   getCaseDetail(int caseId) async {
     caseDetailSink.add(APIResponse.loading('Loading...'));
     try {
-      CaseDetailModel response =
-          await caseDetailRepository.getCaseDetail(caseId);
-      caseDetailSink.add(APIResponse.done(response));
+      var response = await caseDetailRepository.getCaseDetail(caseId);
+
+      if ((response as Map<String, dynamic>).containsKey(StatusCode)) {
+        caseDetailSink.add(APIResponse.error(response));
+      } else {
+        CaseDetailModel modelResponse = CaseDetailModel.fromJson(response['data']);
+        caseDetailSink.add(APIResponse.done(modelResponse));
+      }
     } catch (error) {
-      caseDetailSink.add(APIResponse.error(error.toString()));
+      caseDetailSink.add(APIResponse.error({'message':error.toString()}));
     }
   }
 

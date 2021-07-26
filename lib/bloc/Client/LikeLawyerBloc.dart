@@ -16,7 +16,7 @@ class LikeLawyerBloc {
 
   LikeLawyerBloc() {
     likeLawyerRepository = LikeLawyerRepository();
-    likeLawyerController = StreamController<APIResponse<dynamic>>.broadcast();
+    likeLawyerController = StreamController<APIResponse<dynamic>>();
   }
 
   likeLawyerProfile(Map<String, dynamic> params) async {
@@ -26,7 +26,7 @@ class LikeLawyerBloc {
       dynamic response = await likeLawyerRepository.likeLawyer(params);
       forgotPwdSink.add(APIResponse.done(response));
     } catch (error) {
-      forgotPwdSink.add(APIResponse.error(error.toString()));
+      forgotPwdSink.add(APIResponse.error({'message':error.toString()}));
     }
   }
 

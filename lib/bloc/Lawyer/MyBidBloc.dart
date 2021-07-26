@@ -5,6 +5,7 @@ import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/repository/Client/MyCaseRepository.dart';
 import 'package:my_lawyer/repository/Lawyer/CaseListRepository.dart';
 import 'package:my_lawyer/repository/Lawyer/MyBidRepository.dart';
+import 'package:my_lawyer/utils/Constant.dart';
 
 class MyBidBloc {
   MyBidRepository myBidRepository;
@@ -24,10 +25,16 @@ class MyBidBloc {
   getMyBidList(Map<String, dynamic> params) async {
     caseListSink.add(APIResponse.loading('Loading...'));
     try {
-      BidListModel caseList = await myBidRepository.getMyBidList(params);
-      caseListSink.add(APIResponse.done(caseList));
+      var response = await myBidRepository.getMyBidList(params);
+
+      if ((response as Map<String, dynamic>).containsKey(StatusCode)) {
+        caseListSink.add(APIResponse.error(response));
+      } else {
+        BidListModel modelResponse = BidListModel.fromJson(response);
+        caseListSink.add(APIResponse.done(modelResponse));
+      }
     } catch (error) {
-      caseListSink.add(APIResponse.error(error.toString()));
+      caseListSink.add(APIResponse.error({'message':error.toString()}));
     }
   }
 

@@ -10,6 +10,7 @@ import 'package:my_lawyer/generic_class/GenericButton.dart';
 import 'package:my_lawyer/generic_class/GenericTextfield.dart';
 import 'package:my_lawyer/models/AdModel.dart';
 import 'package:my_lawyer/models/LawyerListModel.dart';
+import 'package:my_lawyer/networking/APIRequest.dart';
 import 'package:my_lawyer/networking/APIResponse.dart';
 import 'package:my_lawyer/utils/Alertview.dart';
 import 'package:my_lawyer/utils/AppColors.dart';
@@ -246,8 +247,7 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
                     }
 
                   case Status.Error:
-                    AlertView()
-                        .showAlertView(context, snapshot.data.message, () {});
+                    return (lawyerList.length > 0) ?  lawyerListing() : Center();
                 }
               } else {
                 return showLoaderInList();
@@ -324,6 +324,8 @@ class _LawyerListScreenState extends State<LawyerListScreen> {
           break;
 
         case Status.Error:
+          return Center();
+
           break;
       }
     });

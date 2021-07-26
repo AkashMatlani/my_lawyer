@@ -16,7 +16,7 @@ class FavouriteLawyerBloc {
 
   FavouriteLawyerBloc() {
     favouriteLawyerRepository = FavouriteLawyerRepository();
-    favLawyerController = StreamController<APIResponse<dynamic>>.broadcast();
+    favLawyerController = StreamController<APIResponse<dynamic>>();
   }
 
   favLawyerProfile(Map<String, dynamic> params) async {
@@ -26,7 +26,7 @@ class FavouriteLawyerBloc {
       dynamic response = await favouriteLawyerRepository.favLawyer(params);
       forgotPwdSink.add(APIResponse.done(response));
     } catch (error) {
-      forgotPwdSink.add(APIResponse.error(error.toString()));
+      forgotPwdSink.add(APIResponse.error({'message':error.toString()}));
     }
   }
 
